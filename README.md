@@ -1,8 +1,7 @@
 # Deckwatch Kenya
 
 AI-powered public safety and incident intelligence platform for Kenya —
-a map-first, dark-themed dashboard inspired by OpenWatch Nigeria and modern
-live-event visualizations.
+a map-first and modern live-event visualizations.
 
 Deckwatch aggregates incidents (crime, road accidents, floods, fires,
 protests, missing persons, terror alerts, disease outbreaks, infrastructure
@@ -11,9 +10,8 @@ of Kenya, with per-incident verification scoring, AI-style summaries, county
 risk dashboards, a timeline playback mode, and an Intel Feed drawer.
 
 **Current status:** this is a working frontend prototype running on
-deterministic seeded mock data — there is no live backend, real news
-ingestion, or deployed AI pipeline yet. See the `/why` and `/api-docs` pages
-in the app for more on where this is headed.
+deterministic seeded mock data - real news ingestion, or deployed AI pipeline yet. 
+See the `/why` and `/api-docs` pagesin the app for more on where this is headed.
 
 ## Tech stack
 
