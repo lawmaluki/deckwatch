@@ -1,0 +1,61 @@
+import type { Category } from "@/lib/types";
+
+export interface Hotspot {
+  name: string;
+  county: string;
+  lat: number;
+  lng: number;
+  bias: Category[];
+}
+
+// Curated real-world places used to make mock incidents read as plausible.
+export const HOTSPOTS: Hotspot[] = [
+  { name: "Ngong Road", county: "Nairobi", lat: -1.2996, lng: 36.7833, bias: ["crime", "traffic_accident"] },
+  { name: "Eastleigh", county: "Nairobi", lat: -1.2739, lng: 36.8442, bias: ["crime", "fire"] },
+  { name: "Thika Road", county: "Nairobi", lat: -1.2189, lng: 36.8878, bias: ["traffic_accident"] },
+  { name: "Mombasa Road", county: "Nairobi", lat: -1.3316, lng: 36.8446, bias: ["traffic_accident", "crime"] },
+  { name: "Central Business District", county: "Nairobi", lat: -1.2841, lng: 36.8233, bias: ["crime", "unrest"] },
+  { name: "Kibra", county: "Nairobi", lat: -1.3133, lng: 36.7820, bias: ["unrest", "fire", "crime"] },
+  { name: "Kayole", county: "Nairobi", lat: -1.2740, lng: 36.9020, bias: ["crime"] },
+  { name: "Uhuru Park", county: "Nairobi", lat: -1.2905, lng: 36.8172, bias: ["unrest", "election_violence"] },
+  { name: "Likoni Ferry Crossing", county: "Mombasa", lat: -4.0857, lng: 39.6606, bias: ["traffic_accident", "crime"] },
+  { name: "Nyali", county: "Mombasa", lat: -4.0247, lng: 39.7139, bias: ["crime"] },
+  { name: "Old Town", county: "Mombasa", lat: -4.0635, lng: 39.6706, bias: ["fire", "crime"] },
+  { name: "Kisauni", county: "Mombasa", lat: -4.0043, lng: 39.6906, bias: ["fire", "infrastructure"] },
+  { name: "Kondele", county: "Kisumu", lat: -0.0989, lng: 34.7617, bias: ["unrest", "election_violence"] },
+  { name: "Nyalenda", county: "Kisumu", lat: -0.1177, lng: 34.7710, bias: ["flood", "public_health"] },
+  { name: "Kisumu CBD", county: "Kisumu", lat: -0.0917, lng: 34.7680, bias: ["unrest", "crime"] },
+  { name: "Nakuru Town East", county: "Nakuru", lat: -0.3072, lng: 36.0800, bias: ["crime", "traffic_accident"] },
+  { name: "Naivasha", county: "Nakuru", lat: -0.7167, lng: 36.4333, bias: ["traffic_accident", "wildlife"] },
+  { name: "Eldoret CBD", county: "Uasin Gishu", lat: 0.5143, lng: 35.2698, bias: ["crime", "unrest"] },
+  { name: "Kitengela", county: "Kajiado", lat: -1.4756, lng: 36.9578, bias: ["traffic_accident", "wildlife"] },
+  { name: "Amboseli Corridor", county: "Kajiado", lat: -2.6527, lng: 37.2606, bias: ["wildlife"] },
+  { name: "Malindi Town", county: "Kilifi", lat: -3.2192, lng: 40.1169, bias: ["fire", "crime"] },
+  { name: "Kilifi Creek", county: "Kilifi", lat: -3.6305, lng: 39.8499, bias: ["flood"] },
+  { name: "Garissa Town", county: "Garissa", lat: -0.4569, lng: 39.6583, bias: ["terror_alert", "flood"] },
+  { name: "Tana River Delta", county: "Tana River", lat: -2.0167, lng: 40.1167, bias: ["flood", "wildlife"] },
+  { name: "Mandera Town", county: "Mandera", lat: 3.9366, lng: 41.8670, bias: ["terror_alert"] },
+  { name: "Wajir Town", county: "Wajir", lat: 1.7471, lng: 40.0629, bias: ["terror_alert", "public_health"] },
+  { name: "Lamu Old Town", county: "Lamu", lat: -2.2717, lng: 40.9020, bias: ["terror_alert", "fire"] },
+  { name: "Kitale Town", county: "Trans Nzoia", lat: 1.0157, lng: 35.0062, bias: ["traffic_accident"] },
+  { name: "Kericho Town", county: "Kericho", lat: -0.3689, lng: 35.2861, bias: ["unrest", "traffic_accident"] },
+  { name: "Kakamega Forest Edge", county: "Kakamega", lat: 0.2827, lng: 34.7519, bias: ["wildlife", "fire"] },
+  { name: "Bungoma Town", county: "Bungoma", lat: 0.5635, lng: 34.5606, bias: ["crime", "traffic_accident"] },
+  { name: "Machakos Town", county: "Machakos", lat: -1.5177, lng: 37.2634, bias: ["traffic_accident", "infrastructure"] },
+  { name: "Athi River", county: "Machakos", lat: -1.4562, lng: 36.9776, bias: ["infrastructure", "traffic_accident"] },
+  { name: "Meru Town", county: "Meru", lat: 0.0470, lng: 37.6497, bias: ["traffic_accident", "public_health"] },
+  { name: "Embu Town", county: "Embu", lat: -0.5310, lng: 37.4575, bias: ["flood", "infrastructure"] },
+  { name: "Nyeri Town", county: "Nyeri", lat: -0.4201, lng: 36.9476, bias: ["traffic_accident"] },
+  { name: "Thika Town", county: "Kiambu", lat: -1.0396, lng: 37.0900, bias: ["fire", "traffic_accident"] },
+  { name: "Ruiru", county: "Kiambu", lat: -1.1499, lng: 36.9580, bias: ["crime", "infrastructure"] },
+  { name: "Homa Bay Town", county: "Homa Bay", lat: -0.5273, lng: 34.4571, bias: ["flood", "public_health"] },
+  { name: "Migori Town", county: "Migori", lat: -1.0634, lng: 34.4731, bias: ["crime", "election_violence"] },
+  { name: "Busia Border Post", county: "Busia", lat: 0.4608, lng: 34.1116, bias: ["crime", "infrastructure"] },
+  { name: "Isiolo Town", county: "Isiolo", lat: 0.3546, lng: 37.5822, bias: ["terror_alert", "wildlife"] },
+  { name: "Marsabit Town", county: "Marsabit", lat: 2.3284, lng: 37.9899, bias: ["wildlife", "flood"] },
+  { name: "Voi Town", county: "Taita Taveta", lat: -3.3961, lng: 38.5561, bias: ["wildlife", "traffic_accident"] },
+  { name: "Kwale Town", county: "Kwale", lat: -4.1747, lng: 39.4521, bias: ["fire", "crime"] },
+  { name: "Nandi Hills", county: "Nandi", lat: 0.1075, lng: 35.1758, bias: ["unrest", "traffic_accident"] },
+  { name: "West Pokot Highlands", county: "West Pokot", lat: 1.6167, lng: 35.3833, bias: ["unrest", "wildlife"] },
+  { name: "Turkana Central", county: "Turkana", lat: 3.1167, lng: 35.6, bias: ["flood", "public_health"] },
+];

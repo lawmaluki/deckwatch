@@ -1,0 +1,59 @@
+import type { CountyInfo } from "@/lib/types";
+
+export const COUNTIES: CountyInfo[] = [
+  { name: "Baringo", slug: "baringo", code: 30, center: [0.6425, 35.8804] },
+  { name: "Bomet", slug: "bomet", code: 36, center: [-0.6986, 35.2906] },
+  { name: "Bungoma", slug: "bungoma", code: 39, center: [0.7191, 34.6567] },
+  { name: "Busia", slug: "busia", code: 40, center: [0.4476, 34.2403] },
+  { name: "Elgeyo-Marakwet", slug: "elgeyo-marakwet", code: 28, center: [0.7599, 35.556] },
+  { name: "Embu", slug: "embu", code: 14, center: [-0.6554, 37.6351] },
+  { name: "Garissa", slug: "garissa", code: 7, center: [-0.0997, 39.6699] },
+  { name: "Homa Bay", slug: "homa-bay", code: 43, center: [-0.5939, 34.5633] },
+  { name: "Isiolo", slug: "isiolo", code: 11, center: [0.7368, 38.2448] },
+  { name: "Kajiado", slug: "kajiado", code: 34, center: [-1.9927, 36.936] },
+  { name: "Kakamega", slug: "kakamega", code: 37, center: [0.4401, 34.7403] },
+  { name: "Kericho", slug: "kericho", code: 35, center: [-0.3252, 35.3013] },
+  { name: "Kiambu", slug: "kiambu", code: 22, center: [-1.0583, 36.9329] },
+  { name: "Kilifi", slug: "kilifi", code: 3, center: [-3.4989, 39.8005] },
+  { name: "Kirinyaga", slug: "kirinyaga", code: 20, center: [-0.6156, 37.3149] },
+  { name: "Kisii", slug: "kisii", code: 45, center: [-0.7105, 34.7828] },
+  { name: "Kisumu", slug: "kisumu", code: 42, center: [-0.1561, 34.9372] },
+  { name: "Kitui", slug: "kitui", code: 15, center: [-1.6295, 38.1741] },
+  { name: "Kwale", slug: "kwale", code: 2, center: [-3.9705, 39.314] },
+  { name: "Laikipia", slug: "laikipia", code: 31, center: [0.2655, 36.8124] },
+  { name: "Lamu", slug: "lamu", code: 5, center: [-2.2322, 40.59] },
+  { name: "Machakos", slug: "machakos", code: 16, center: [-1.2392, 37.4671] },
+  { name: "Makueni", slug: "makueni", code: 17, center: [-2.1325, 37.8351] },
+  { name: "Mandera", slug: "mandera", code: 9, center: [3.5096, 41.0156] },
+  { name: "Marsabit", slug: "marsabit", code: 10, center: [2.738, 37.7047] },
+  { name: "Meru", slug: "meru", code: 12, center: [0.0822, 37.8606] },
+  { name: "Migori", slug: "migori", code: 44, center: [-0.8944, 34.4386] },
+  { name: "Mombasa", slug: "mombasa", code: 1, center: [-4.0269, 39.6556] },
+  { name: "Murang'a", slug: "muranga", code: 21, center: [-0.8142, 37.0433] },
+  { name: "Nairobi", slug: "nairobi", code: 47, center: [-1.2905, 36.8771] },
+  { name: "Nakuru", slug: "nakuru", code: 32, center: [-0.4123, 36.024] },
+  { name: "Nandi", slug: "nandi", code: 29, center: [0.1691, 35.0738] },
+  { name: "Narok", slug: "narok", code: 33, center: [-1.1068, 35.6748] },
+  { name: "Nyamira", slug: "nyamira", code: 46, center: [-0.6229, 34.9489] },
+  { name: "Nyandarua", slug: "nyandarua", code: 18, center: [-0.4294, 36.5258] },
+  { name: "Nyeri", slug: "nyeri", code: 19, center: [-0.395, 36.9201] },
+  { name: "Samburu", slug: "samburu", code: 25, center: [1.3285, 36.9833] },
+  { name: "Siaya", slug: "siaya", code: 41, center: [0.1039, 34.355] },
+  { name: "Taita Taveta", slug: "taita-taveta", code: 6, center: [-3.2221, 38.4193] },
+  { name: "Tana River", slug: "tana-river", code: 4, center: [-1.2752, 39.5761] },
+  { name: "Tharaka-Nithi", slug: "tharaka-nithi", code: 13, center: [-0.1974, 37.9484] },
+  { name: "Trans Nzoia", slug: "trans-nzoia", code: 26, center: [1.0278, 34.9909] },
+  { name: "Turkana", slug: "turkana", code: 23, center: [2.6542, 35.8588] },
+  { name: "Uasin Gishu", slug: "uasin-gishu", code: 27, center: [0.5113, 35.3039] },
+  { name: "Vihiga", slug: "vihiga", code: 38, center: [0.0806, 34.7313] },
+  { name: "Wajir", slug: "wajir", code: 8, center: [1.8435, 39.7772] },
+  { name: "West Pokot", slug: "west-pokot", code: 24, center: [1.7583, 35.2988] },
+];
+
+export const COUNTY_BY_SLUG: Record<string, CountyInfo> = Object.fromEntries(
+  COUNTIES.map((c) => [c.slug, c])
+);
+
+export const COUNTY_BY_NAME: Record<string, CountyInfo> = Object.fromEntries(
+  COUNTIES.map((c) => [c.name, c])
+);
