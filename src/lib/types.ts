@@ -24,6 +24,8 @@ export type SourceType = "news" | "police" | "citizen" | "government" | "social"
 export interface Source {
   name: string;
   type: SourceType;
+  /** Outlet or agency homepage; absent for anonymous citizen reports. */
+  url?: string;
 }
 
 export interface Incident {

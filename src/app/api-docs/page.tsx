@@ -35,7 +35,7 @@ const ENDPOINTS: EndpointDoc[] = [
       "verificationScore": 78,
       "verificationStatus": "likely_true",
       "sources": [
-        { "name": "Kenya Red Cross", "type": "government" },
+        { "name": "Kenya Red Cross", "type": "government", "url": "https://www.redcross.or.ke" },
         { "name": "Citizen report", "type": "citizen" }
       ],
       "reportCount": 6,

@@ -68,6 +68,29 @@ const CITIZEN_SOURCES = [
   "Verified citizen upload",
 ];
 
+// Homepages of the real outlets/agencies the seeded sources are named after.
+// Sample incidents have no real article to link to, so sources link to the
+// organisation itself; anonymous citizen sources intentionally have no URL.
+const SOURCE_URLS: Record<string, string> = {
+  "Citizen TV": "https://www.citizen.digital",
+  "NTV Kenya": "https://ntvkenya.co.ke",
+  "KTN News": "https://www.standardmedia.co.ke/ktnnews",
+  "The Standard": "https://www.standardmedia.co.ke",
+  "Daily Nation": "https://nation.africa",
+  "The Star": "https://www.the-star.co.ke",
+  "Kenya News Agency": "https://www.kenyanews.go.ke",
+  "Radio Citizen": "https://www.citizen.digital",
+  "Kenya Police Service": "https://www.nationalpolice.go.ke",
+  "National Disaster Operation Centre": "https://www.interior.go.ke",
+  "Kenya Red Cross": "https://www.redcross.or.ke",
+  "Ministry of Health": "https://www.health.go.ke",
+};
+
+function makeSource(name: string, type: Source["type"]): Source {
+  const url = SOURCE_URLS[name];
+  return url ? { name, type, url } : { name, type };
+}
+
 const STREET_NOUNS = [
   "near the market",
   "along the highway",
@@ -208,16 +231,16 @@ function buildSources(
   const sources: Source[] = [];
   const newsCount = randInt(0, severity === "low" ? 1 : 2);
   pickN(NEWS_SOURCES, newsCount).forEach((n) =>
-    sources.push({ name: n, type: "news" })
+    sources.push(makeSource(n, "news"))
   );
 
   const govChance =
     severity === "critical" ? 0.85 : severity === "high" ? 0.55 : 0.25;
   if (rand() < govChance) {
-    sources.push({ name: pick(GOV_SOURCES), type: "government" });
+    sources.push(makeSource(pick(GOV_SOURCES), "government"));
   }
   if (category === "crime" && rand() < 0.5) {
-    sources.push({ name: "Kenya Police Service", type: "police" });
+    sources.push(makeSource("Kenya Police Service", "police"));
   }
 
   const citizenCount = randInt(1, 4);

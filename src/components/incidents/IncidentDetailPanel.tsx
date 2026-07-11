@@ -1,7 +1,16 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { X, MapPin, Clock, Users, ImageOff, Sparkles, ShieldAlert } from "lucide-react";
+import {
+  X,
+  MapPin,
+  Clock,
+  Users,
+  ImageOff,
+  Sparkles,
+  ShieldAlert,
+  ExternalLink,
+} from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import { useIncidents } from "@/hooks/useIncidents";
 import { CATEGORIES } from "@/lib/data/categories";
@@ -97,7 +106,19 @@ export function IncidentDetailPanel() {
                   key={`${source.name}-${idx}`}
                   className="flex items-center justify-between rounded-lg bg-surface px-2.5 py-1.5 text-xs"
                 >
-                  <span className="text-foreground/90">{source.name}</span>
+                  {source.url ? (
+                    <a
+                      href={source.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-foreground/90 hover:text-brand hover:underline"
+                    >
+                      {source.name}
+                      <ExternalLink className="h-3 w-3 opacity-60" />
+                    </a>
+                  ) : (
+                    <span className="text-foreground/90">{source.name}</span>
+                  )}
                   <span className="rounded-full bg-surface-raised px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted">
                     {SOURCE_TYPE_LABEL[source.type] ?? source.type}
                   </span>
