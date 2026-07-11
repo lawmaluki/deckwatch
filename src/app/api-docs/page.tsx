@@ -3,7 +3,7 @@ import { AlertTriangle, KeyRound } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "API — Deckwatch Kenya",
-  description: "Planned public API for Deckwatch Kenya incident data.",
+  description: "Public API for Deckwatch Kenya incident data.",
 };
 
 interface EndpointDoc {
@@ -104,21 +104,22 @@ export default function ApiDocsPage() {
         </h1>
         <p className="mb-6 text-sm leading-relaxed text-muted sm:text-base">
           The shapes below mirror the incident and county data model already
-          powering this site. They describe the planned public API for pulling
+          powering this site. They describe the public API for pulling
           Deckwatch data into your own tools.
         </p>
 
         <div className="mb-8 flex gap-3 rounded-2xl border border-medium/30 bg-medium/10 p-4">
           <AlertTriangle className="h-5 w-5 shrink-0 text-medium" />
           <p className="text-sm leading-relaxed text-foreground/90">
-            <span className="font-semibold">Not live yet.</span> This site currently
-            runs on seeded sample data with no deployed backend. The endpoints
-            below are the planned API surface, documented ahead of the FastAPI +
+            <span className="font-semibold">Live in this deployment — sample data.</span>{" "}
+            These endpoints are served by this site and can be called as
+            documented. They currently return the same seeded sample dataset
+            that powers the map; real ingestion arrives with the FastAPI +
             PostgreSQL/PostGIS backend described on the{" "}
             <a href="/why" className="text-brand hover:underline">
               Why Deckwatch
             </a>{" "}
-            page. Nothing here can be called yet.
+            page.
           </p>
         </div>
 
