@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { COUNTIES } from "@/lib/data/counties";
-import { MOCK_INCIDENTS } from "@/lib/data/mock-incidents";
+import { getIncidents } from "@/lib/incidents-source";
 import { summarizeByCounty, riskLabel, withinHours } from "@/lib/stats";
 
-export default function CountiesIndexPage() {
-  const summaries = summarizeByCounty(MOCK_INCIDENTS);
+export default async function CountiesIndexPage() {
+  const incidents = await getIncidents();
+  const summaries = summarizeByCounty(incidents);
   const summaryByName = new Map(summaries.map((s) => [s.county, s]));
 
   const rows = COUNTIES.map((c) => {
@@ -24,7 +25,7 @@ export default function CountiesIndexPage() {
           <h1 className="text-xl font-semibold text-foreground">Counties</h1>
           <p className="text-sm text-muted">
             All 47 counties ranked by current risk score. Active incidents in the last 24 hours: {" "}
-            {MOCK_INCIDENTS.filter((i) => withinHours(i, 24)).length}.
+            {incidents.filter((i) => withinHours(i, 24)).length}.
           </p>
         </div>
 

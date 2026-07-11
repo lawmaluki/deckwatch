@@ -4,7 +4,8 @@ import { useEffect } from "react";
 import { Play, Pause, History, X } from "lucide-react";
 import clsx from "clsx";
 import { useAppStore, type TimelineRange } from "@/store/useAppStore";
-import { DATA_REFERENCE_TIME } from "@/lib/data/mock-incidents";
+import { getReferenceTime } from "@/lib/incidents-source";
+import { MS_PER_HOUR } from "@/lib/constants";
 
 const RANGE_OPTIONS: { label: string; value: TimelineRange }[] = [
   { label: "24 hours", value: 24 },
@@ -56,9 +57,10 @@ export function TimelineControl() {
 
   if (!timelineMode) return null;
 
-  const windowStart = new Date(DATA_REFERENCE_TIME.getTime() - range * 60 * 60 * 1000);
+  const referenceTime = getReferenceTime();
+  const windowStart = new Date(referenceTime.getTime() - range * MS_PER_HOUR);
   const currentTime = new Date(
-    windowStart.getTime() + cursor * (DATA_REFERENCE_TIME.getTime() - windowStart.getTime())
+    windowStart.getTime() + cursor * (referenceTime.getTime() - windowStart.getTime())
   );
 
   return (

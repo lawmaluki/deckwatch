@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useAppStore } from "@/store/useAppStore";
-import { MOCK_INCIDENTS, DATA_REFERENCE_TIME } from "@/lib/data/mock-incidents";
+import { useIncidents } from "@/hooks/useIncidents";
 import { parseSearchQuery } from "@/lib/search";
 import { filterIncidents } from "@/lib/incident-filter";
 import { MS_PER_HOUR } from "@/lib/constants";
@@ -18,6 +18,7 @@ export function useFilteredIncidents(opts?: { ignoreCategoryFilter?: boolean }):
   const timelineMode = useAppStore((s) => s.timelineMode);
   const timelineRange = useAppStore((s) => s.timelineRange);
   const timelineCursor = useAppStore((s) => s.timelineCursor);
+  const { incidents, referenceTime } = useIncidents();
 
   return useMemo(() => {
     const parsed = searchQuery.trim() ? parseSearchQuery(searchQuery) : null;
@@ -32,14 +33,14 @@ export function useFilteredIncidents(opts?: { ignoreCategoryFilter?: boolean }):
       !!parsed && (!!parsed.county || parsed.categories.length > 0 || !!parsed.hours);
     const timeWindow = timelineMode
       ? {
-          start: DATA_REFERENCE_TIME.getTime() - timelineRange * MS_PER_HOUR,
+          start: referenceTime.getTime() - timelineRange * MS_PER_HOUR,
           end:
-            DATA_REFERENCE_TIME.getTime() -
+            referenceTime.getTime() -
             timelineRange * MS_PER_HOUR * (1 - timelineCursor),
         }
       : null;
 
-    return filterIncidents(MOCK_INCIDENTS, {
+    return filterIncidents(incidents, {
       categories,
       severities: activeSeverities,
       verification: activeVerification,
@@ -58,5 +59,7 @@ export function useFilteredIncidents(opts?: { ignoreCategoryFilter?: boolean }):
     timelineMode,
     timelineRange,
     timelineCursor,
+    incidents,
+    referenceTime,
   ]);
 }

@@ -1,5 +1,5 @@
 import type { Category, Incident, Severity } from "@/lib/types";
-import { DATA_REFERENCE_TIME } from "@/lib/data/mock-incidents";
+import { getReferenceTime } from "@/lib/incidents-source";
 import { SEVERITY_CONFIG } from "@/lib/data/categories";
 import { MS_PER_DAY, MS_PER_HOUR } from "@/lib/constants";
 
@@ -12,7 +12,7 @@ const SEVERITY_WEIGHT: Record<Severity, number> = {
 
 export function hoursAgo(incident: Incident): number {
   return (
-    (DATA_REFERENCE_TIME.getTime() - new Date(incident.reportedAt).getTime()) /
+    (getReferenceTime().getTime() - new Date(incident.reportedAt).getTime()) /
     MS_PER_HOUR
   );
 }
@@ -96,7 +96,7 @@ export function dailyTrend(
 ): { date: string; count: number }[] {
   const buckets = new Map<string, number>();
   for (let d = days - 1; d >= 0; d--) {
-    const date = new Date(DATA_REFERENCE_TIME.getTime() - d * MS_PER_DAY);
+    const date = new Date(getReferenceTime().getTime() - d * MS_PER_DAY);
     const key = date.toISOString().slice(0, 10);
     buckets.set(key, 0);
   }

@@ -1,5 +1,5 @@
 import { AlertTriangle, Flame, MapPinned, TrendingUp } from "lucide-react";
-import { MOCK_INCIDENTS, DATA_REFERENCE_TIME } from "@/lib/data/mock-incidents";
+import { getIncidents, getReferenceTime } from "@/lib/incidents-source";
 import { withinHours, summarizeByCounty, categoryBreakdown, dailyTrend, riskLabel } from "@/lib/stats";
 import { CATEGORIES } from "@/lib/data/categories";
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -10,15 +10,16 @@ import { MiniHeatmap } from "@/components/map/MiniHeatmap";
 import { IncidentListItem } from "@/components/incidents/IncidentListItem";
 import { formatDateTime } from "@/lib/format";
 
-export default function NationalDashboardPage() {
-  const last24h = MOCK_INCIDENTS.filter((i) => withinHours(i, 24));
+export default async function NationalDashboardPage() {
+  const incidents = await getIncidents();
+  const last24h = incidents.filter((i) => withinHours(i, 24));
   const critical24h = last24h.filter((i) => i.severity === "critical");
-  const countySummaries = summarizeByCounty(MOCK_INCIDENTS);
+  const countySummaries = summarizeByCounty(incidents);
   const topRisk = [...countySummaries].sort((a, b) => b.riskScore - a.riskScore)[0];
-  const breakdown = categoryBreakdown(last24h.length ? last24h : MOCK_INCIDENTS);
-  const trend = dailyTrend(MOCK_INCIDENTS, 14);
+  const breakdown = categoryBreakdown(last24h.length ? last24h : incidents);
+  const trend = dailyTrend(incidents, 14);
   const trendingCategory = breakdown[0];
-  const recent = MOCK_INCIDENTS.slice(0, 8);
+  const recent = incidents.slice(0, 8);
 
   return (
     <div className="h-full overflow-y-auto px-4 py-5 sm:px-8">
@@ -26,7 +27,7 @@ export default function NationalDashboardPage() {
         <div className="mb-6">
           <h1 className="text-xl font-semibold text-foreground">National Dashboard</h1>
           <p className="text-sm text-muted">
-            Kenya-wide incident intelligence · data as of {formatDateTime(DATA_REFERENCE_TIME.toISOString())}
+            Kenya-wide incident intelligence · data as of {formatDateTime(getReferenceTime().toISOString())}
           </p>
         </div>
 
@@ -80,7 +81,7 @@ export default function NationalDashboardPage() {
             <div className="rounded-2xl border border-border bg-surface p-4">
               <h2 className="mb-3 text-sm font-semibold text-foreground">National heat map</h2>
               <div className="h-56">
-                <MiniHeatmap incidents={MOCK_INCIDENTS} />
+                <MiniHeatmap incidents={incidents} />
               </div>
             </div>
             <div className="rounded-2xl border border-border bg-surface p-4">

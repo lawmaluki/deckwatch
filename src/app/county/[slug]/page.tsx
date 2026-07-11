@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, AlertTriangle, Clock } from "lucide-react";
 import { COUNTIES, COUNTY_BY_SLUG } from "@/lib/data/counties";
-import { MOCK_INCIDENTS } from "@/lib/data/mock-incidents";
+import { getIncidents } from "@/lib/incidents-source";
 import { withinHours, categoryBreakdown, dailyTrend, countyRiskScore } from "@/lib/stats";
 import { RiskGauge } from "@/components/dashboard/RiskGauge";
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -26,7 +26,8 @@ export default async function CountyDashboardPage({
   const county = COUNTY_BY_SLUG[slug];
   if (!county) notFound();
 
-  const incidents = MOCK_INCIDENTS.filter((i) => i.county === county.name);
+  const allIncidents = await getIncidents();
+  const incidents = allIncidents.filter((i) => i.county === county.name);
   const last24h = incidents.filter((i) => withinHours(i, 24));
   const riskScore = countyRiskScore(incidents);
   const breakdown = categoryBreakdown(incidents);

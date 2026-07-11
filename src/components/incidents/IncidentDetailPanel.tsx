@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X, MapPin, Clock, Users, ImageOff, Sparkles, ShieldAlert } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
-import { MOCK_INCIDENTS } from "@/lib/data/mock-incidents";
+import { useIncidents } from "@/hooks/useIncidents";
 import { CATEGORIES } from "@/lib/data/categories";
 import { CategoryBadge } from "@/components/incidents/CategoryBadge";
 import { SeverityBadge } from "@/components/incidents/SeverityBadge";
@@ -23,8 +23,9 @@ const SOURCE_TYPE_LABEL: Record<string, string> = {
 export function IncidentDetailPanel() {
   const selectedId = useAppStore((s) => s.selectedIncidentId);
   const selectIncident = useAppStore((s) => s.selectIncident);
-  const incident = MOCK_INCIDENTS.find((i) => i.id === selectedId) ?? null;
-  const similar = incident ? findSimilarIncidents(incident, MOCK_INCIDENTS) : [];
+  const { incidents } = useIncidents();
+  const incident = incidents.find((i) => i.id === selectedId) ?? null;
+  const similar = incident ? findSimilarIncidents(incident, incidents) : [];
 
   return (
     <AnimatePresence>

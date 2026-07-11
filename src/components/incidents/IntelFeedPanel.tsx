@@ -7,7 +7,7 @@ import { ChevronDown, Radio, X } from "lucide-react";
 import clsx from "clsx";
 import { useUiStore } from "@/store/useUiStore";
 import { useAppStore } from "@/store/useAppStore";
-import { MOCK_INCIDENTS } from "@/lib/data/mock-incidents";
+import { useIncidents } from "@/hooks/useIncidents";
 import { COUNTIES } from "@/lib/data/counties";
 import { CATEGORIES, VERIFICATION_CONFIG } from "@/lib/data/categories";
 import { hoursAgo } from "@/lib/stats";
@@ -30,13 +30,14 @@ export function IntelFeedPanel() {
 
   const [rangeHours, setRangeHours] = useState<number | null>(24);
   const [county, setCounty] = useState<string>("all");
+  const { incidents } = useIncidents();
 
   const rangeIncidents = useMemo(
     () =>
       rangeHours === null
-        ? MOCK_INCIDENTS
-        : MOCK_INCIDENTS.filter((i) => hoursAgo(i) <= rangeHours),
-    [rangeHours]
+        ? incidents
+        : incidents.filter((i) => hoursAgo(i) <= rangeHours),
+    [rangeHours, incidents]
   );
 
   const shown = useMemo(

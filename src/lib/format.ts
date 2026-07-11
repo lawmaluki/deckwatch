@@ -1,8 +1,8 @@
-import { DATA_REFERENCE_TIME } from "@/lib/data/mock-incidents";
+import { getReferenceTime } from "@/lib/incidents-source";
 import { MS_PER_MINUTE } from "@/lib/constants";
 
 export function relativeTime(iso: string): string {
-  const diffMs = DATA_REFERENCE_TIME.getTime() - new Date(iso).getTime();
+  const diffMs = getReferenceTime().getTime() - new Date(iso).getTime();
   const minutes = Math.floor(diffMs / MS_PER_MINUTE);
   if (minutes < 1) return "just now";
   if (minutes < 60) return `${minutes}m ago`;

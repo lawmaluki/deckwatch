@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Bell, Map, LayoutDashboard, Building2, ShieldAlert, Radio } from "lucide-react";
 import clsx from "clsx";
 import { useUiStore } from "@/store/useUiStore";
-import { MOCK_INCIDENTS } from "@/lib/data/mock-incidents";
+import { useIncidents } from "@/hooks/useIncidents";
 import { withinHours } from "@/lib/stats";
 import { LiveClock } from "@/components/layout/LiveClock";
 
@@ -19,8 +19,9 @@ export function Header() {
   const pathname = usePathname();
   const setNotificationsOpen = useUiStore((s) => s.setNotificationsOpen);
   const setIntelFeedOpen = useUiStore((s) => s.setIntelFeedOpen);
-  const activeToday = MOCK_INCIDENTS.filter((i) => withinHours(i, 24)).length;
-  const critical = MOCK_INCIDENTS.filter(
+  const { incidents } = useIncidents();
+  const activeToday = incidents.filter((i) => withinHours(i, 24)).length;
+  const critical = incidents.filter(
     (i) => withinHours(i, 24) && i.severity === "critical"
   ).length;
 
