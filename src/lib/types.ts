@@ -52,8 +52,3 @@ export interface CountyInfo {
   code: number;
   center: [number, number];
 }
-
-export interface DateRangePreset {
-  label: string;
-  hours: number;
-}

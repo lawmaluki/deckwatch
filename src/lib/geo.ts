@@ -1,6 +1,11 @@
 import type { Incident } from "@/lib/types";
+import { MS_PER_HOUR } from "@/lib/constants";
 
 const EARTH_RADIUS_KM = 6371;
+/** Incidents within this radius are considered geographically related. */
+const SIMILAR_MAX_DISTANCE_KM = 8;
+/** Incidents this close in time are considered related regardless of category. */
+const SIMILAR_MAX_HOURS_APART = 72;
 
 export function haversineDistanceKm(
   a: [number, number],
@@ -32,14 +37,14 @@ export function findSimilarIncidents(
         [i.lat, i.lng]
       );
       const hoursApart =
-        Math.abs(new Date(i.reportedAt).getTime() - targetTime) /
-        (1000 * 60 * 60);
+        Math.abs(new Date(i.reportedAt).getTime() - targetTime) / MS_PER_HOUR;
       return { incident: i, distanceKm, hoursApart };
     })
     .filter(
       (r) =>
-        r.distanceKm <= 8 &&
-        (r.hoursApart <= 72 || r.incident.category === target.category)
+        r.distanceKm <= SIMILAR_MAX_DISTANCE_KM &&
+        (r.hoursApart <= SIMILAR_MAX_HOURS_APART ||
+          r.incident.category === target.category)
     )
     .sort((a, b) => a.distanceKm - b.distanceKm)
     .slice(0, maxResults)

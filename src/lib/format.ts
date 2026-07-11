@@ -1,8 +1,9 @@
 import { DATA_REFERENCE_TIME } from "@/lib/data/mock-incidents";
+import { MS_PER_MINUTE } from "@/lib/constants";
 
 export function relativeTime(iso: string): string {
   const diffMs = DATA_REFERENCE_TIME.getTime() - new Date(iso).getTime();
-  const minutes = Math.floor(diffMs / 60000);
+  const minutes = Math.floor(diffMs / MS_PER_MINUTE);
   if (minutes < 1) return "just now";
   if (minutes < 60) return `${minutes}m ago`;
   const hours = Math.floor(minutes / 60);
@@ -22,8 +23,4 @@ export function formatDateTime(iso: string): string {
     hour: "2-digit",
     minute: "2-digit",
   });
-}
-
-export function formatNumber(n: number): string {
-  return new Intl.NumberFormat("en-KE").format(n);
 }

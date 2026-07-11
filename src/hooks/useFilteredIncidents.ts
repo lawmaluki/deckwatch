@@ -4,7 +4,8 @@ import { useMemo } from "react";
 import { useAppStore } from "@/store/useAppStore";
 import { MOCK_INCIDENTS, DATA_REFERENCE_TIME } from "@/lib/data/mock-incidents";
 import { parseSearchQuery } from "@/lib/search";
-import { hoursAgo } from "@/lib/stats";
+import { filterIncidents } from "@/lib/incident-filter";
+import { MS_PER_HOUR } from "@/lib/constants";
 import type { Incident } from "@/lib/types";
 
 export function useFilteredIncidents(opts?: { ignoreCategoryFilter?: boolean }): Incident[] {
@@ -25,35 +26,28 @@ export function useFilteredIncidents(opts?: { ignoreCategoryFilter?: boolean }):
       : activeCategories.length
       ? activeCategories
       : parsed?.categories ?? [];
-    const county = countyFilter ?? parsed?.county ?? null;
-    const searchHours = parsed?.hours ?? null;
-    const freeText = parsed?.freeText.toLowerCase() ?? "";
+    // Free text only applies when the query parsed to nothing structured;
+    // otherwise the parsed county/categories/hours already carry the intent.
+    const parsedToStructured =
+      !!parsed && (!!parsed.county || parsed.categories.length > 0 || !!parsed.hours);
+    const timeWindow = timelineMode
+      ? {
+          start: DATA_REFERENCE_TIME.getTime() - timelineRange * MS_PER_HOUR,
+          end:
+            DATA_REFERENCE_TIME.getTime() -
+            timelineRange * MS_PER_HOUR * (1 - timelineCursor),
+        }
+      : null;
 
-    let result = MOCK_INCIDENTS.filter((incident) => {
-      if (categories.length && !categories.includes(incident.category)) return false;
-      if (activeSeverities.length && !activeSeverities.includes(incident.severity)) return false;
-      if (activeVerification.length && !activeVerification.includes(incident.verificationStatus))
-        return false;
-      if (county && incident.county !== county) return false;
-      if (searchHours && hoursAgo(incident) > searchHours) return false;
-      if (freeText && !parsed?.county && !parsed?.categories.length && !parsed?.hours) {
-        const haystack = `${incident.title} ${incident.locationName} ${incident.county}`.toLowerCase();
-        if (!haystack.includes(freeText)) return false;
-      }
-      return true;
+    return filterIncidents(MOCK_INCIDENTS, {
+      categories,
+      severities: activeSeverities,
+      verification: activeVerification,
+      county: countyFilter ?? parsed?.county ?? null,
+      withinHours: parsed?.hours ?? null,
+      freeText: parsed && !parsedToStructured ? parsed.freeText : "",
+      timeWindow,
     });
-
-    if (timelineMode) {
-      const cutoff =
-        DATA_REFERENCE_TIME.getTime() - timelineRange * 60 * 60 * 1000 * (1 - timelineCursor);
-      const windowStart = DATA_REFERENCE_TIME.getTime() - timelineRange * 60 * 60 * 1000;
-      result = result.filter((incident) => {
-        const t = new Date(incident.reportedAt).getTime();
-        return t >= windowStart && t <= cutoff;
-      });
-    }
-
-    return result;
   }, [
     ignoreCategoryFilter,
     activeCategories,
