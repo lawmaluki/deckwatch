@@ -222,12 +222,13 @@ def test_pipeline_inserts_and_merges():
     os.environ["DATABASE_URL"] = TEST_DB
     from app.db import Base, engine
     from app.init_db import main as init_db
-    from app.seed import seed
     from app import repository
 
+    # Empty incidents baseline so the pipeline's insert path is exercised in
+    # isolation (with the seed present, ingested incidents correctly dedupe
+    # against nearby seed incidents instead — that's tested implicitly too).
     Base.metadata.drop_all(engine)
     init_db()
-    seed()
 
     items = sources.parse_feed(SAMPLE_FEED, _FEED)
     from app.db import SessionLocal
