@@ -1,5 +1,7 @@
 # Deckwatch Kenya
 
+[![CI](https://github.com/lawmaluki/deckwatch/actions/workflows/ci.yml/badge.svg)](https://github.com/lawmaluki/deckwatch/actions/workflows/ci.yml)
+
 AI-powered public safety and incident intelligence platform for Kenya —
 a map-first and modern live-event visualizations.
 
