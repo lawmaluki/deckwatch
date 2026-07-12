@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, AlertTriangle, Clock } from "lucide-react";
 import { COUNTIES, COUNTY_BY_SLUG } from "@/lib/data/counties";
-import { getIncidents } from "@/lib/incidents-source";
+import { connection } from "next/server";
+import { getIncidents, USE_API } from "@/lib/incidents-source";
 import { withinHours, categoryBreakdown, dailyTrend, countyRiskScore } from "@/lib/stats";
 import { RiskGauge } from "@/components/dashboard/RiskGauge";
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -22,6 +23,7 @@ export default async function CountyDashboardPage({
 }: {
   params: Promise<{ slug: string }>;
 }) {
+  if (USE_API) await connection();
   const { slug } = await params;
   const county = COUNTY_BY_SLUG[slug];
   if (!county) notFound();

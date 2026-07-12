@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { COUNTIES } from "@/lib/data/counties";
-import { getIncidents } from "@/lib/incidents-source";
+import { connection } from "next/server";
+import { getIncidents, USE_API } from "@/lib/incidents-source";
 import { summarizeByCounty, riskLabel, withinHours } from "@/lib/stats";
 
 export default async function CountiesIndexPage() {
+  if (USE_API) await connection();
   const incidents = await getIncidents();
   const summaries = summarizeByCounty(incidents);
   const summaryByName = new Map(summaries.map((s) => [s.county, s]));

@@ -21,6 +21,7 @@ const ENDPOINTS: EndpointDoc[] = [
       "List incidents. Supports query params: category, severity, county, verification, since (ISO date), limit.",
     example: `{
   "count": 2,
+  "asOf": "2026-07-12T10:30:00.000Z",
   "results": [
     {
       "id": "ow-0001",

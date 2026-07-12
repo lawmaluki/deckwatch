@@ -30,7 +30,8 @@ export interface IncidentFilter {
 
 export function filterIncidents(
   incidents: Incident[],
-  filter: IncidentFilter
+  filter: IncidentFilter,
+  nowMs?: number
 ): Incident[] {
   const freeText = filter.freeText?.trim().toLowerCase() ?? "";
 
@@ -48,7 +49,7 @@ export function filterIncidents(
       return false;
     }
     if (filter.county && incident.county !== filter.county) return false;
-    if (filter.withinHours && hoursAgo(incident) > filter.withinHours) return false;
+    if (filter.withinHours && hoursAgo(incident, nowMs) > filter.withinHours) return false;
     if (freeText) {
       const haystack =
         `${incident.title} ${incident.locationName} ${incident.county}`.toLowerCase();

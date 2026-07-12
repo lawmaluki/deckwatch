@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { getIncidents } from "@/lib/incidents-source";
+import { getLiveIncidents } from "@/lib/incidents-source";
 import { COUNTY_BY_SLUG } from "@/lib/data/counties";
 import { countyRiskScore, categoryBreakdown, withinHours } from "@/lib/stats";
 
@@ -13,13 +13,14 @@ export async function GET(
     return Response.json({ error: "County not found" }, { status: 404 });
   }
 
-  const incidents = (await getIncidents()).filter((i) => i.county === county.name);
+  const nowMs = Date.now();
+  const incidents = getLiveIncidents(nowMs).filter((i) => i.county === county.name);
 
   return Response.json({
     name: county.name,
     slug: county.slug,
-    riskScore: countyRiskScore(incidents),
-    activeLast24h: incidents.filter((i) => withinHours(i, 24)).length,
+    riskScore: countyRiskScore(incidents, nowMs),
+    activeLast24h: incidents.filter((i) => withinHours(i, 24, nowMs)).length,
     topCategory: categoryBreakdown(incidents)[0]?.category ?? null,
   });
 }

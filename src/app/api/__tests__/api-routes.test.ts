@@ -4,7 +4,8 @@ import { GET as getIncidentsRoute } from "@/app/api/incidents/route";
 import { GET as getIncidentByIdRoute } from "@/app/api/incidents/[id]/route";
 import { GET as getCountyRoute } from "@/app/api/counties/[slug]/route";
 import { POST as postReportRoute } from "@/app/api/reports/route";
-import { getIncidentsSnapshot } from "@/lib/incidents-source";
+import { getIncidentsSnapshot, shiftIncidents } from "@/lib/incidents-source";
+import { MS_PER_HOUR } from "@/lib/constants";
 import type { Incident } from "@/lib/types";
 
 function incidentsRequest(query = ""): NextRequest {
@@ -20,13 +21,17 @@ function slugParams(slug: string) {
 }
 
 describe("GET /api/incidents", () => {
-  it("returns the full dataset with no params", async () => {
+  it("returns the full dataset re-anchored to request time", async () => {
     const res = await getIncidentsRoute(incidentsRequest());
     expect(res.status).toBe(200);
     const body = await res.json();
     const snapshot = getIncidentsSnapshot();
     expect(body.count).toBe(snapshot.length);
-    expect(body.results).toEqual(JSON.parse(JSON.stringify(snapshot)));
+    expect(Math.abs(Date.parse(body.asOf) - Date.now())).toBeLessThan(5_000);
+    const expected = JSON.parse(
+      JSON.stringify(shiftIncidents(snapshot, Date.parse(body.asOf)))
+    );
+    expect(body.results).toEqual(expected);
   });
 
   it("filters by category", async () => {
@@ -76,7 +81,7 @@ describe("GET /api/incidents", () => {
   });
 
   it("filters by since and rejects an invalid date", async () => {
-    const since = "2026-07-01T00:00:00Z";
+    const since = new Date(Date.now() - 24 * MS_PER_HOUR).toISOString();
     const ok = await getIncidentsRoute(incidentsRequest(`?since=${since}`));
     const body = await ok.json();
     expect(body.count).toBeGreaterThan(0);

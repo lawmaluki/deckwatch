@@ -10,21 +10,25 @@ const SEVERITY_WEIGHT: Record<Severity, number> = {
   critical: 9,
 };
 
-export function hoursAgo(incident: Incident): number {
-  return (
-    (getReferenceTime().getTime() - new Date(incident.reportedAt).getTime()) /
-    MS_PER_HOUR
-  );
+export function hoursAgo(
+  incident: Incident,
+  nowMs: number = getReferenceTime().getTime()
+): number {
+  return (nowMs - new Date(incident.reportedAt).getTime()) / MS_PER_HOUR;
 }
 
-export function withinHours(incident: Incident, hours: number): boolean {
-  return hoursAgo(incident) <= hours;
+export function withinHours(
+  incident: Incident,
+  hours: number,
+  nowMs?: number
+): boolean {
+  return hoursAgo(incident, nowMs) <= hours;
 }
 
-export function countyRiskScore(incidents: Incident[]): number {
+export function countyRiskScore(incidents: Incident[], nowMs?: number): number {
   if (incidents.length === 0) return 0;
   const raw = incidents.reduce((sum, i) => {
-    const recency = Math.max(0.15, 1 - hoursAgo(i) / (24 * 30));
+    const recency = Math.max(0.15, 1 - hoursAgo(i, nowMs) / (24 * 30));
     return sum + SEVERITY_WEIGHT[i.severity] * recency;
   }, 0);
   // Log-dampened so a handful of incidents doesn't saturate the scale the

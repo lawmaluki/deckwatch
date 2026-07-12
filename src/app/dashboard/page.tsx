@@ -1,5 +1,6 @@
 import { AlertTriangle, Flame, MapPinned, TrendingUp } from "lucide-react";
-import { getIncidents, getReferenceTime } from "@/lib/incidents-source";
+import { connection } from "next/server";
+import { getIncidents, getReferenceTime, USE_API } from "@/lib/incidents-source";
 import { withinHours, summarizeByCounty, categoryBreakdown, dailyTrend, riskLabel } from "@/lib/stats";
 import { CATEGORIES } from "@/lib/data/categories";
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -11,6 +12,9 @@ import { IncidentListItem } from "@/components/incidents/IncidentListItem";
 import { formatDateTime } from "@/lib/format";
 
 export default async function NationalDashboardPage() {
+  // Live data must be re-anchored per request; mock builds inline USE_API to
+  // false and stay fully static.
+  if (USE_API) await connection();
   const incidents = await getIncidents();
   const last24h = incidents.filter((i) => withinHours(i, 24));
   const critical24h = last24h.filter((i) => i.severity === "critical");

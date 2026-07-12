@@ -34,7 +34,8 @@ export interface IncidentQuery {
 }
 
 export function parseIncidentQuery(
-  params: URLSearchParams
+  params: URLSearchParams,
+  nowMs: number = getReferenceTime().getTime()
 ): ValidationResult<IncidentQuery> {
   const filter: IncidentFilter = {};
 
@@ -79,7 +80,7 @@ export function parseIncidentQuery(
     if (Number.isNaN(parsed.getTime())) {
       return { ok: false, error: `Invalid since date "${since}". Expected an ISO date.` };
     }
-    filter.timeWindow = { start: parsed.getTime(), end: getReferenceTime().getTime() };
+    filter.timeWindow = { start: parsed.getTime(), end: nowMs };
   }
 
   let limit: number | null = null;

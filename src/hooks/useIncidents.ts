@@ -1,24 +1,55 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getIncidentsSnapshot, getReferenceTime } from "@/lib/incidents-source";
+import { useSyncExternalStore } from "react";
+import {
+  getDataSnapshot,
+  replaceClientSnapshot,
+  USE_API,
+} from "@/lib/incidents-source";
 import type { Incident } from "@/lib/types";
 
-// Must stay a literal process.env expression so Next inlines it at build time.
-const USE_API = process.env.NEXT_PUBLIC_DATA_SOURCE === "api";
+const POLL_INTERVAL_MS = 60_000;
 
-// Module-scoped so the components sharing this hook trigger one request, not
-// one each.
-let apiFetch: Promise<Incident[]> | null = null;
+// Module-scoped poller shared by every component using this hook: one
+// interval and one in-flight request total, not one per consumer.
+const listeners = new Set<() => void>();
+let timer: ReturnType<typeof setInterval> | null = null;
+let inFlight = false;
 
-function fetchIncidentsOnce(): Promise<Incident[]> {
-  apiFetch ??= fetch("/api/incidents")
-    .then((res) => {
-      if (!res.ok) throw new Error(`GET /api/incidents responded ${res.status}`);
-      return res.json();
-    })
-    .then((body: { results: Incident[] }) => body.results);
-  return apiFetch;
+async function refresh(): Promise<void> {
+  if (inFlight) return;
+  inFlight = true;
+  try {
+    const res = await fetch("/api/incidents");
+    if (!res.ok) return; // keep last good snapshot
+    const body = (await res.json()) as { asOf: string; results: Incident[] };
+    // Incidents and clock advance atomically so duration math stays coherent.
+    replaceClientSnapshot({
+      incidents: body.results,
+      referenceTime: new Date(body.asOf),
+    });
+    listeners.forEach((l) => l());
+  } catch {
+    // Network failure: keep last good snapshot. Error surfacing comes with
+    // real data.
+  } finally {
+    inFlight = false;
+  }
+}
+
+function subscribe(listener: () => void): () => void {
+  listeners.add(listener);
+  if (USE_API && timer === null) {
+    void refresh();
+    timer = setInterval(refresh, POLL_INTERVAL_MS);
+  }
+  return () => {
+    listeners.delete(listener);
+    if (listeners.size === 0 && timer !== null) {
+      clearInterval(timer);
+      timer = null;
+    }
+  };
 }
 
 export interface IncidentsResult {
@@ -26,29 +57,11 @@ export interface IncidentsResult {
   referenceTime: Date;
 }
 
-// Client adapter over the incidents-source seam. Both modes initialize from
-// the deterministic mock snapshot so server and client renders match. With
-// NEXT_PUBLIC_DATA_SOURCE=api the data is re-read from /api/incidents on
-// mount — today that serves the identical dataset, so this proves the API
-// contract end-to-end without changing what renders. Polling and
-// loading/error state arrive with live data (Phase 3).
+// Client adapter over the incidents-source seam. Mock mode returns the fixed
+// deterministic snapshot with no fetching. In api mode the snapshot is
+// re-read from /api/incidents on mount and then every POLL_INTERVAL_MS; the
+// initial client snapshot is time-shift-invariant with the server render, so
+// hydration is safe with no flash.
 export function useIncidents(): IncidentsResult {
-  const [incidents, setIncidents] = useState<Incident[]>(getIncidentsSnapshot);
-
-  useEffect(() => {
-    if (!USE_API) return;
-    let cancelled = false;
-    fetchIncidentsOnce()
-      .then((data) => {
-        if (!cancelled) setIncidents(data);
-      })
-      .catch(() => {
-        // Keep the snapshot as fallback; surfacing errors is a live-data concern.
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  return { incidents, referenceTime: getReferenceTime() };
+  return useSyncExternalStore(subscribe, getDataSnapshot, getDataSnapshot);
 }
