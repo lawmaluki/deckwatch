@@ -31,6 +31,37 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the live map.
 
+## Data source
+
+The client reads incident data one of two ways, selected by the
+`NEXT_PUBLIC_DATA_SOURCE` environment variable:
+
+- **unset / `mock`** (default) — a synchronous read of the seeded, deterministic
+  dataset anchored to a fixed reference time. Fully static, ideal for local dev.
+- **`api`** — the client fetches from this app's own `/api/incidents` route on
+  load and re-polls every 60s. The dataset is re-anchored to real time on each
+  request (`asOf` in the response), so relative times and 24h counts stay live.
+  See `.env.example`.
+
+The `/api/*` route handlers exist and serve seeded data in **both** modes; the
+flag only changes how the browser reads them. See `/api-docs` in the app.
+
+## Deployment
+
+This is a standard Next.js 16 App Router app and deploys to Vercel with no
+config file:
+
+1. Push to GitHub (already at `github.com/lawmaluki/deckwatch`).
+2. In Vercel, **Add New → Project** and import the repo. The framework preset,
+   build command (`next build`), and output are detected automatically.
+3. To get the live-feeling demo, add an environment variable
+   `NEXT_PUBLIC_DATA_SOURCE=api` (Project → Settings → Environment Variables),
+   then deploy. Leave it unset for the static seeded view.
+
+`npm run build` must pass locally first (it does). Any host that runs a Node
+Next.js server works too; a static export does **not**, because `api` mode uses
+dynamic route handlers.
+
 ## Project structure
 
 - `src/app/` — routes: live map (`/`), national dashboard, counties index,
