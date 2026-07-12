@@ -65,6 +65,42 @@ TEST_DATABASE_URL=postgresql+psycopg://deckwatch:deckwatch@localhost:5432/deckwa
   .venv/bin/pytest tests/test_api.py
 ```
 
+## Ingestion — real incidents from the news (Phase 5)
+
+`python -m app.ingest` pulls Kenyan news RSS feeds, uses **Claude Haiku 4.5** to
+decide which items are real public-safety incidents and extract structured
+fields (category, severity, county, location, summary, recommended actions),
+geocodes them against a hotspot gazetteer, dedupes against existing incidents
+(multiple outlets covering one event merge and raise its verification score),
+and writes them into the same `incidents` table the API serves. Ingested
+incidents then appear on the map automatically.
+
+```bash
+# needs the DB running (docker compose up) and an Anthropic API key
+export ANTHROPIC_API_KEY=sk-ant-...
+export DATABASE_URL=postgresql+psycopg://deckwatch:deckwatch@localhost:5432/deckwatch
+.venv/bin/python -m app.ingest
+# → ingest complete: fetched=90, relevant=46, classified=31, inserted=27, merged=4, skipped=0
+```
+
+Pipeline stages live in `app/ingest/` (`sources` → `prefilter` → `classifier` →
+`geocode` → `dedup`/`verification` → `pipeline`). A cheap keyword pre-filter
+drops obviously-irrelevant items before the paid LLM call. New incidents are
+stored re-anchored to the seed's reference time, so the API's time-shift renders
+them as "N hours ago" consistently with the seed.
+
+Run it on a schedule with cron (every 15 minutes):
+
+```cron
+*/15 * * * * cd /path/to/deckwatch/backend && ANTHROPIC_API_KEY=sk-ant-... \
+  DATABASE_URL=postgresql+psycopg://deckwatch:deckwatch@localhost:5432/deckwatch \
+  .venv/bin/python -m app.ingest >> /var/log/deckwatch-ingest.log 2>&1
+```
+
+Feed URLs are in `app/ingest/sources.py` — outlets change RSS paths over time; a
+dead feed is skipped, not fatal. The pure stages and classifier mapping are
+covered DB-free in `tests/test_ingest.py` (the Anthropic client is stubbed).
+
 ## Deploying (not yet done)
 
 Any host that runs a container + managed Postgres with PostGIS works

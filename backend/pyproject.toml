@@ -10,6 +10,8 @@ dependencies = [
     "geoalchemy2>=0.15",
     "psycopg[binary]>=3.2",
     "pydantic-settings>=2.4",
+    "anthropic>=0.40",
+    "feedparser>=6.0",
 ]
 
 [project.optional-dependencies]

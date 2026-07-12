@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Sample Kenya News</title>
+    <link>https://example.co.ke</link>
+    <description>Fixture feed for ingestion tests</description>
+    <item>
+      <title>Two killed in matatu crash on Thika Road</title>
+      <description>A head-on collision involving a matatu and a lorry on Thika Road left two people dead and several injured on Tuesday morning.</description>
+      <link>https://example.co.ke/news/thika-road-crash-1</link>
+      <pubDate>Tue, 07 Jul 2026 06:30:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Flash floods displace families in Tana River</title>
+      <description>Heavy rains caused the Tana River to burst its banks, displacing dozens of families near the delta.</description>
+      <link>https://example.co.ke/news/tana-river-floods-2</link>
+      <pubDate>Tue, 07 Jul 2026 05:10:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Nairobi county launches new tourism campaign</title>
+      <description>The county government unveiled a campaign to attract more visitors to the city's parks and museums.</description>
+      <link>https://example.co.ke/news/nairobi-tourism-3</link>
+      <pubDate>Tue, 07 Jul 2026 04:00:00 GMT</pubDate>
+    </item>
+    <item>
+      <title>Armed robbery reported at Eastleigh shopping centre</title>
+      <description>Police are searching for a gang that robbed a shop in Eastleigh, Nairobi, at gunpoint on Monday night.</description>
+      <link>https://example.co.ke/news/eastleigh-robbery-4</link>
+      <pubDate>Mon, 06 Jul 2026 20:45:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

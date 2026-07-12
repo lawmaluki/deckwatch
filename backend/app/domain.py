@@ -54,6 +54,7 @@ KENYA_LAT_MIN, KENYA_LAT_MAX = -5.0, 5.5
 KENYA_LNG_MIN, KENYA_LNG_MAX = 33.0, 42.5
 
 Incident = Dict[str, Any]
+Source = Dict[str, Any]  # {"name": str, "type": str, "url"?: str}
 
 
 # --- time helpers ------------------------------------------------------------
