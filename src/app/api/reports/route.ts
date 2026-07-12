@@ -1,7 +1,17 @@
 import type { NextRequest } from "next/server";
 import { validateReportBody } from "@/lib/api-validation";
+import { BACKEND_URL, proxyJson } from "@/lib/backend";
 
 export async function POST(request: NextRequest) {
+  if (BACKEND_URL) {
+    const raw = await request.text();
+    return proxyJson("/reports", {
+      method: "POST",
+      body: raw,
+      headers: { "content-type": "application/json" },
+    });
+  }
+
   let body: unknown;
   try {
     body = await request.json();

@@ -2,12 +2,15 @@ import type { NextRequest } from "next/server";
 import { getLiveIncidents } from "@/lib/incidents-source";
 import { filterIncidents } from "@/lib/incident-filter";
 import { parseIncidentQuery } from "@/lib/api-validation";
+import { BACKEND_URL, proxyJson } from "@/lib/backend";
 
 // NOTE: results are full Incident objects — a deliberate superset of the
 // example in /api-docs (aiSummary/recommendedActions included) so clients can
 // render incident detail without a per-incident follow-up fetch. Data is
 // re-anchored to request time (asOf) so the feed always reads as live.
 export async function GET(request: NextRequest) {
+  if (BACKEND_URL) return proxyJson(`/incidents${request.nextUrl.search}`);
+
   const asOf = new Date();
   const parsed = parseIncidentQuery(request.nextUrl.searchParams, asOf.getTime());
   if (!parsed.ok) {

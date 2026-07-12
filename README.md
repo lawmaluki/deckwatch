@@ -45,8 +45,18 @@ The client reads incident data one of two ways, selected by the
   request (`asOf` in the response), so relative times and 24h counts stay live.
   See `.env.example`.
 
-The `/api/*` route handlers exist and serve seeded data in **both** modes; the
-flag only changes how the browser reads them. See `/api-docs` in the app.
+The `/api/*` route handlers serve seeded data directly, **unless** `API_BASE_URL`
+is set — then they proxy (server-side) to the FastAPI + PostgreSQL/PostGIS
+backend in [`backend/`](backend/). So there are three layers:
+
+| Env | Data path |
+|-----|-----------|
+| nothing set | static seeded snapshot (mock) |
+| `NEXT_PUBLIC_DATA_SOURCE=api` | browser polls Next `/api/*` → shifted seed |
+| `+ API_BASE_URL=…` | Next `/api/*` proxy → FastAPI → PostGIS |
+
+See `/api-docs` in the app, and [`backend/README.md`](backend/README.md) to run
+the full stack (`docker compose up`).
 
 ## Deployment
 
