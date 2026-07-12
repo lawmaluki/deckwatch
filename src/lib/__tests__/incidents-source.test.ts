@@ -11,9 +11,11 @@ describe("shiftIncidents", () => {
   it("preserves length, order, and non-time fields", () => {
     expect(shifted).toHaveLength(snapshot.length);
     shifted.forEach((incident, i) => {
-      const { reportedAt: _a, ...rest } = incident;
-      const { reportedAt: _b, ...original } = snapshot[i];
-      expect(rest).toEqual(original);
+      // Normalize the one field that is expected to differ, then compare the rest.
+      expect({ ...incident, reportedAt: "" }).toEqual({
+        ...snapshot[i],
+        reportedAt: "",
+      });
     });
   });
 
