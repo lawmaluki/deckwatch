@@ -20,6 +20,13 @@ else:
 PY
 
 python -m app.init_db
-python -m app.seed
 
-exec uvicorn app.main:app --host 0.0.0.0 --port 8000
+# Seed the sample dataset unless disabled (SEED_ON_START=false for a clean
+# production DB that fills only from ingestion).
+case "$(printf '%s' "${SEED_ON_START:-true}" | tr '[:upper:]' '[:lower:]')" in
+  false|0|no) echo "SEED_ON_START disabled — skipping seed" ;;
+  *) python -m app.seed ;;
+esac
+
+# Railway (and most hosts) inject $PORT; default to 8000 locally.
+exec uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}"

@@ -3,14 +3,16 @@ dedup/merge -> persist. The building blocks (build_incident, merge_fields) are
 pure and unit-tested; run() wires them to the network, the LLM, and the DB."""
 
 import hashlib
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any, Callable, Dict, List, Mapping, Optional
 
 from sqlalchemy.orm import Session
 
 from .. import repository
 from ..domain import REFERENCE_MS, now_ms, parse_iso_ms, to_iso_z
-from . import classifier, dedup, prefilter, sources
+from . import dedup, prefilter, sources
 from .verification import score_verification
+
+Classifier = Callable[[Mapping[str, str]], Optional[dict]]
 
 
 def build_incident(
@@ -75,11 +77,10 @@ def merge_fields(existing: Mapping[str, Any], new_source: Mapping[str, Any]):
 
 
 def run(
-    client: Any,
     session: Session,
+    classify_fn: Classifier,
     items: Optional[List[Dict[str, str]]] = None,
     feeds: Optional[list] = None,
-    model: Optional[str] = None,
 ) -> Dict[str, int]:
     at_ms = now_ms()
     existing = repository.get_all_incidents(session)
@@ -101,7 +102,7 @@ def run(
             continue
         stats["relevant"] += 1
 
-        candidate = classifier.classify(item, client, model)
+        candidate = classify_fn(item)
         if candidate is None:
             stats["skipped"] += 1
             continue
