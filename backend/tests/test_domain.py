@@ -96,6 +96,16 @@ def test_filter_free_text():
         assert "nairobi" in f"{i['title']} {i['locationName']} {i['county']}".lower()
 
 
+def test_filter_live_only():
+    # Seed fixtures have no isLive key at all (repository.py computes it from
+    # the id prefix); filtering must not KeyError on that, and must treat a
+    # missing key as "not live".
+    mixed = [{**INCIDENTS[0], "isLive": True}, INCIDENTS[1]]
+    out = domain.filter_incidents(mixed, {"liveOnly": True}, REF)
+    assert [i["id"] for i in out] == [mixed[0]["id"]]
+    assert domain.filter_incidents(mixed, {"liveOnly": False}, REF) == mixed
+
+
 # --- query validation --------------------------------------------------------
 
 def test_parse_query_happy():
@@ -105,6 +115,15 @@ def test_parse_query_happy():
     assert r["ok"] is True
     assert r["value"]["filter"]["categories"] == ["flood"]
     assert r["value"]["limit"] == 5
+
+
+def test_parse_query_live_param():
+    r = domain.parse_incident_query({"live": "true"}, COUNTY_NAMES, REF)
+    assert r["ok"] is True
+    assert r["value"]["filter"]["liveOnly"] is True
+
+    bad = domain.parse_incident_query({"live": "yes"}, COUNTY_NAMES, REF)
+    assert bad["ok"] is False
 
 
 def test_parse_query_rejects_unknown_category():

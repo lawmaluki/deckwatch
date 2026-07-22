@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { SlidersHorizontal, Flame, RotateCcw } from "lucide-react";
+import { SlidersHorizontal, Flame, Radio, RotateCcw } from "lucide-react";
 import clsx from "clsx";
 import { useAppStore } from "@/store/useAppStore";
 import { SEVERITY_LIST } from "@/lib/data/categories";
@@ -24,6 +24,8 @@ export function FilterPanel() {
   const toggleVerification = useAppStore((s) => s.toggleVerification);
   const showHeatmap = useAppStore((s) => s.showHeatmap);
   const toggleHeatmap = useAppStore((s) => s.toggleHeatmap);
+  const liveOnly = useAppStore((s) => s.liveOnly);
+  const toggleLiveOnly = useAppStore((s) => s.toggleLiveOnly);
   const resetFilters = useAppStore((s) => s.resetFilters);
 
   return (
@@ -112,6 +114,19 @@ export function FilterPanel() {
                 <Flame className="h-3.5 w-3.5" /> Heatmap view
               </span>
               <span>{showHeatmap ? "On" : "Off"}</span>
+            </button>
+
+            <button
+              onClick={toggleLiveOnly}
+              className={clsx(
+                "mb-2 flex w-full items-center justify-between rounded-lg border px-2.5 py-2 text-xs font-medium",
+                liveOnly ? "border-brand/50 bg-brand/10 text-brand" : "border-border text-muted"
+              )}
+            >
+              <span className="flex items-center gap-1.5">
+                <Radio className="h-3.5 w-3.5" /> Live incidents only
+              </span>
+              <span>{liveOnly ? "On" : "Off"}</span>
             </button>
 
             <button

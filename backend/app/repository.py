@@ -31,6 +31,9 @@ def _to_dict(inc: Incident, lat: float, lng: float) -> domain.Incident:
         "recommendedActions": inc.recommended_actions,
         "hasImage": inc.has_image,
         "isCitizenReport": inc.is_citizen_report,
+        # Ingested incidents are id-prefixed "ing-" (see pipeline.build_incident);
+        # computed rather than stored so no migration was needed to add this.
+        "isLive": inc.id.startswith("ing-"),
     }
 
 

@@ -74,6 +74,14 @@ export function parseIncidentQuery(
     filter.county = county;
   }
 
+  const live = params.get("live");
+  if (live !== null) {
+    if (live !== "true" && live !== "false") {
+      return { ok: false, error: `Invalid live "${live}". Expected "true" or "false".` };
+    }
+    filter.liveOnly = live === "true";
+  }
+
   const since = params.get("since");
   if (since !== null) {
     const parsed = new Date(since);

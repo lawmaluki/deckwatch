@@ -18,29 +18,29 @@ const ENDPOINTS: EndpointDoc[] = [
     method: "GET",
     path: "/api/incidents",
     summary:
-      "List incidents. Supports query params: category, severity, county, verification, since (ISO date), limit.",
+      "List incidents. Supports query params: category, severity, county, verification, live (true/false — real ingested incidents vs seed data), since (ISO date), limit.",
     example: `{
   "count": 2,
   "asOf": "2026-07-12T10:30:00.000Z",
   "results": [
     {
-      "id": "ow-0001",
-      "title": "Flash flooding reported Tana River County",
-      "category": "flood",
-      "severity": "high",
-      "county": "Tana River",
-      "locationName": "Tana River Delta, near the river bridge",
-      "lat": -2.0143,
-      "lng": 40.1152,
+      "id": "ing-4f9a2c31",
+      "title": "Six dead, five injured in Nakuru-Eldoret Highway crash",
+      "category": "traffic_accident",
+      "severity": "critical",
+      "county": "Nakuru",
+      "locationName": "Nakuru-Eldoret Highway",
+      "lat": -0.3031,
+      "lng": 36.0800,
       "reportedAt": "2026-07-02T06:10:00Z",
-      "verificationScore": 78,
-      "verificationStatus": "likely_true",
+      "verificationScore": 46,
+      "verificationStatus": "unconfirmed",
       "sources": [
-        { "name": "Kenya Red Cross", "type": "government", "url": "https://www.redcross.or.ke" },
-        { "name": "Citizen report", "type": "citizen" }
+        { "name": "The Standard", "type": "news", "url": "https://www.standardmedia.co.ke" }
       ],
-      "reportCount": 6,
-      "hasImage": false
+      "reportCount": 1,
+      "hasImage": false,
+      "isLive": true
     }
   ]
 }`,

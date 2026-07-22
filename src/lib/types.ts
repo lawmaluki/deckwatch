@@ -46,6 +46,9 @@ export interface Incident {
   recommendedActions: string[];
   hasImage: boolean;
   isCitizenReport: boolean;
+  /** True for incidents written by the real news-ingestion pipeline, as
+   * opposed to the seeded sample dataset. */
+  isLive: boolean;
 }
 
 export interface CountyInfo {

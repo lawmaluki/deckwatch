@@ -31,6 +31,7 @@ const incidents = [
     title: "Market fire spreading",
     verificationStatus: "likely_true",
     reportedAt: hoursBeforeReference(10),
+    isLive: true,
   }),
 ];
 
@@ -79,6 +80,11 @@ describe("filterIncidents", () => {
       "a",
       "c",
     ]);
+  });
+
+  it("filters to live (ingested) incidents only", () => {
+    expect(ids(filterIncidents(incidents, { liveOnly: true }))).toEqual(["c"]);
+    expect(filterIncidents(incidents, { liveOnly: false })).toHaveLength(3);
   });
 
   it("combines criteria with AND semantics", () => {

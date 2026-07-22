@@ -25,6 +25,8 @@ export function IntelFeedPanel() {
   const open = useUiStore((s) => s.intelFeedOpen);
   const setOpen = useUiStore((s) => s.setIntelFeedOpen);
   const selectIncident = useAppStore((s) => s.selectIncident);
+  const liveOnly = useAppStore((s) => s.liveOnly);
+  const toggleLiveOnly = useAppStore((s) => s.toggleLiveOnly);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -40,9 +42,14 @@ export function IntelFeedPanel() {
     [rangeHours, incidents]
   );
 
-  const shown = useMemo(
+  const countyIncidents = useMemo(
     () => (county === "all" ? rangeIncidents : rangeIncidents.filter((i) => i.county === county)),
     [rangeIncidents, county]
+  );
+
+  const shown = useMemo(
+    () => (liveOnly ? countyIncidents.filter((i) => i.isLive) : countyIncidents),
+    [countyIncidents, liveOnly]
   );
 
   function openIncident(id: string) {
@@ -120,6 +127,19 @@ export function IntelFeedPanel() {
                   <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-muted" />
                 </div>
               </div>
+
+              <button
+                onClick={toggleLiveOnly}
+                className={clsx(
+                  "mt-2 flex w-full items-center justify-center gap-1.5 rounded-md border px-2 py-1 text-[10px] font-semibold transition-colors",
+                  liveOnly
+                    ? "border-brand/60 bg-brand/10 text-brand"
+                    : "border-border text-muted hover:text-foreground"
+                )}
+              >
+                <Radio className="h-3 w-3" />
+                {liveOnly ? "SHOWING LIVE ONLY" : "SHOW LIVE ONLY"}
+              </button>
             </div>
 
             <div className="flex-1 overflow-y-auto">
@@ -144,6 +164,11 @@ export function IntelFeedPanel() {
                       >
                         <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: cat.color }} />
                         {cat.label}
+                        {incident.isLive && (
+                          <span className="rounded-full bg-brand/15 px-1.5 py-0.5 text-[9px] text-brand">
+                            LIVE
+                          </span>
+                        )}
                       </span>
                       <span className="shrink-0 text-[10px] text-muted">
                         {relativeTime(incident.reportedAt)}

@@ -37,6 +37,11 @@ export function IncidentListItem({
         <div className="flex items-center gap-1.5">
           <SeverityDot severity={incident.severity} />
           <p className="truncate text-sm font-medium text-foreground">{incident.title}</p>
+          {incident.isLive && (
+            <span className="shrink-0 rounded-full bg-brand/15 px-1.5 py-0.5 text-[9px] font-semibold text-brand">
+              LIVE
+            </span>
+          )}
         </div>
         <p className="mt-0.5 truncate text-xs text-muted">
           {incident.county} County · {relativeTime(incident.reportedAt)}

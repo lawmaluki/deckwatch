@@ -26,6 +26,8 @@ export interface IncidentFilter {
   freeText?: string;
   /** Only incidents whose reportedAt falls inside [start, end] (epoch ms). */
   timeWindow?: { start: number; end: number } | null;
+  /** Only incidents from the real ingestion pipeline (excludes seed data). */
+  liveOnly?: boolean;
 }
 
 export function filterIncidents(
@@ -48,6 +50,7 @@ export function filterIncidents(
     ) {
       return false;
     }
+    if (filter.liveOnly && !incident.isLive) return false;
     if (filter.county && incident.county !== filter.county) return false;
     if (filter.withinHours && hoursAgo(incident, nowMs) > filter.withinHours) return false;
     if (freeText) {

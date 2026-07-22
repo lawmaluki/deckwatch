@@ -39,6 +39,9 @@ interface AppState {
   showHeatmap: boolean;
   toggleHeatmap: () => void;
 
+  liveOnly: boolean;
+  toggleLiveOnly: () => void;
+
   notifications: NotificationSubscription;
   updateNotifications: (partial: Partial<NotificationSubscription>) => void;
 }
@@ -95,6 +98,9 @@ export const useAppStore = create<AppState>()(
 
       showHeatmap: false,
       toggleHeatmap: () => set((s) => ({ showHeatmap: !s.showHeatmap })),
+
+      liveOnly: false,
+      toggleLiveOnly: () => set((s) => ({ liveOnly: !s.liveOnly })),
 
       notifications: {
         counties: [],

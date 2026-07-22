@@ -138,6 +138,7 @@ def filter_incidents(
     within = flt.get("withinHours")
     free_text = (flt.get("freeText") or "").strip().lower()
     time_window = flt.get("timeWindow")
+    live_only = flt.get("liveOnly")
 
     out = []
     for i in incidents:
@@ -146,6 +147,8 @@ def filter_incidents(
         if severities and i["severity"] not in severities:
             continue
         if verification and i["verificationStatus"] not in verification:
+            continue
+        if live_only and not i.get("isLive"):
             continue
         if county and i["county"] != county:
             continue
@@ -203,6 +206,12 @@ def parse_incident_query(
         if county not in valid_counties:
             return {"ok": False, "error": f'Unknown county "{county}".'}
         flt["county"] = county
+
+    live = params.get("live")
+    if live is not None:
+        if live not in ("true", "false"):
+            return {"ok": False, "error": f'Invalid live "{live}". Expected "true" or "false".'}
+        flt["liveOnly"] = live == "true"
 
     since = params.get("since")
     if since is not None:

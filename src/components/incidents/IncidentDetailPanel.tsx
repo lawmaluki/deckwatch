@@ -10,6 +10,7 @@ import {
   Sparkles,
   ShieldAlert,
   ExternalLink,
+  Radio,
 } from "lucide-react";
 import { useAppStore } from "@/store/useAppStore";
 import { useIncidents } from "@/hooks/useIncidents";
@@ -51,6 +52,11 @@ export function IncidentDetailPanel() {
             <div className="flex flex-wrap items-center gap-1.5">
               <CategoryBadge category={incident.category} />
               <SeverityBadge severity={incident.severity} />
+              {incident.isLive && (
+                <span className="flex items-center gap-1 rounded-full bg-brand/15 px-2 py-1 text-[11px] font-medium text-brand">
+                  <Radio className="h-3 w-3" /> LIVE
+                </span>
+              )}
             </div>
             <button
               onClick={() => selectIncident(null)}

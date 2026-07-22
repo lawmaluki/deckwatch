@@ -385,6 +385,7 @@ function generateIncidents(count: number): Incident[] {
       recommendedActions: actions,
       hasImage: rand() < 0.4,
       isCitizenReport: sources.every((s) => s.type === "citizen"),
+      isLive: false,
     });
   }
 

@@ -25,6 +25,7 @@ export function makeIncident(overrides: Partial<Incident> = {}): Incident {
     recommendedActions: ["Stay clear"],
     hasImage: false,
     isCitizenReport: true,
+    isLive: false,
     ...overrides,
   };
 }
