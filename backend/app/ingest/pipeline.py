@@ -35,7 +35,9 @@ def build_incident(
     age_ms = max(0, at_ms - parse_iso_ms(item["published"]))
     reported_ms = REFERENCE_MS - age_ms
 
-    source = {"name": item["source"], "type": item["source_type"], "url": item["homepage"]}
+    # url is the specific article, not the outlet homepage, so "Sources" links
+    # take the reader straight to the piece the incident was drawn from.
+    source = {"name": item["source"], "type": item["source_type"], "url": item["link"]}
     sources_list = [source]
     report_count = 1
     score, status = score_verification(sources_list, report_count, candidate["severity"])

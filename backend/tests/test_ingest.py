@@ -222,6 +222,10 @@ def test_build_incident_anchors_to_reference_frame():
     assert inc["id"].startswith("ing-")
     assert inc["lat"] == pytest.approx(-1.2739, abs=1e-3)  # Eastleigh
     assert inc["isCitizenReport"] is False
+    # Source links to the specific article the incident was drawn from, not
+    # just the outlet's homepage.
+    assert inc["sources"][0]["url"] == ITEM["link"]
+    assert inc["sources"][0]["url"] != ITEM["homepage"]
     # reportedAt stored in the REFERENCE frame, so it's near/below REFERENCE
     from app.domain import parse_iso_ms
 
