@@ -29,6 +29,25 @@ FEEDS: List[Feed] = [
          "https://www.tuko.co.ke"),
     Feed("Kenyans.co.ke", "https://www.kenyans.co.ke/feeds/news", "news",
          "https://www.kenyans.co.ke"),
+    Feed("Citizen Digital", "https://www.citizen.digital/feed.xml", "news",
+         "https://www.citizen.digital"),
+    Feed("Nation Africa", "https://nation.africa/kenya/rss.xml", "news",
+         "https://nation.africa/kenya"),
+    Feed("NTV Kenya", "https://ntvkenya.co.ke/feed/", "news",
+         "https://ntvkenya.co.ke"),
+    Feed("K24", "https://k24.digital/feed", "news",
+         "https://k24.digital"),
+    Feed("KBC", "https://www.kbc.co.ke/feed/", "news",
+         "https://www.kbc.co.ke"),
+    Feed("Nairobi News", "https://nairobinews.co.ke/feed/", "news",
+         "https://nairobinews.co.ke"),
+    Feed("TV47", "https://tv47.co.ke/feed/", "news",
+         "https://tv47.co.ke"),
+    Feed("Business Daily", "https://www.businessdailyafrica.com/bd/rss.xml", "news",
+         "https://www.businessdailyafrica.com/bd"),
+    Feed("People Daily", "https://peopledaily.digital/feed", "news",
+         "https://peopledaily.digital"),
+    # The Star: no working RSS feed as of 2026-08 (Next.js SPA, no discoverable feed URL).
 ]
 
 
