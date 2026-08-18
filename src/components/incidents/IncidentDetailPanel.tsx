@@ -75,7 +75,7 @@ export function IncidentDetailPanel() {
               <MapPin className="h-3.5 w-3.5" />
               {incident.locationName} · {incident.county} County
             </p>
-            <p className="flex items-center gap-1.5">
+            <p suppressHydrationWarning className="flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5" />
               {formatDateTime(incident.reportedAt)} ({relativeTime(incident.reportedAt)})
             </p>

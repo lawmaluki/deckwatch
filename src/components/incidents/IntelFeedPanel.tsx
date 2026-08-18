@@ -170,7 +170,7 @@ export function IntelFeedPanel() {
                           </span>
                         )}
                       </span>
-                      <span className="shrink-0 text-[10px] text-muted">
+                      <span suppressHydrationWarning className="shrink-0 text-[10px] text-muted">
                         {relativeTime(incident.reportedAt)}
                       </span>
                     </div>

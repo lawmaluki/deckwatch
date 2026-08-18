@@ -43,7 +43,7 @@ export function IncidentListItem({
             </span>
           )}
         </div>
-        <p className="mt-0.5 truncate text-xs text-muted">
+        <p suppressHydrationWarning className="mt-0.5 truncate text-xs text-muted">
           {incident.county} County · {relativeTime(incident.reportedAt)}
         </p>
       </div>
