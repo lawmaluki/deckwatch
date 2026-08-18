@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { MOCK_INCIDENTS, DATA_REFERENCE_TIME } from "@/lib/data/mock-incidents";
 import { BACKEND_URL } from "@/lib/backend";
 import type { Incident } from "@/lib/types";
@@ -71,7 +72,15 @@ export function replaceClientSnapshot(next: DataSnapshot): void {
 // to live incidents on success (matching the map's default), falling back
 // to the unfiltered shifted seed if the backend is unreachable rather than
 // rendering an empty page.
-async function fetchBackendIncidents(): Promise<Incident[] | null> {
+//
+// Wrapped in React's cache() so every getIncidents() call within one request
+// shares a single fetch. Without this, Next can invoke a dynamic page's
+// server component more than once per request (e.g. an aborted prerender
+// attempt before the connection()-forced dynamic render), and since the
+// ingest cron is writing continuously, two independent no-store fetches
+// moments apart can return different data — producing a hydration mismatch
+// between what got embedded in the HTML and what the client expects.
+const fetchBackendIncidents = cache(async (): Promise<Incident[] | null> => {
   if (!BACKEND_URL) return null;
   try {
     const res = await fetch(`${BACKEND_URL}/incidents`, { cache: "no-store" });
@@ -82,7 +91,7 @@ async function fetchBackendIncidents(): Promise<Incident[] | null> {
     console.error("getIncidents: backend fetch failed, falling back to seed", err);
     return null;
   }
-}
+});
 
 export async function getIncidents(): Promise<Incident[]> {
   if (IS_SERVER && USE_API) {
