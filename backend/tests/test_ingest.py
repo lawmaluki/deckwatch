@@ -260,6 +260,47 @@ def test_merge_fields_does_not_duplicate_same_source():
     assert report_count == 2
 
 
+# --- run(): dedup must not match against seed/demo data ----------------------
+
+class _FakeSession:
+    def commit(self):
+        pass
+
+
+def test_run_does_not_dedup_real_incident_against_seed(monkeypatch):
+    # A seed incident at the same spot/category as the incoming real item.
+    seed = {
+        "id": "ow-0047",
+        "lat": -1.2739,
+        "lng": 36.8442,
+        "category": "crime",
+        "reportedAt": "2020-01-01T00:00:00.000Z",
+        "sources": [{"name": "The Standard", "type": "news"}],
+        "reportCount": 1,
+        "severity": "high",
+    }
+    monkeypatch.setattr(pipeline.repository, "get_all_incidents", lambda session: [seed])
+    monkeypatch.setattr(pipeline.repository, "next_ordinal", lambda session: 1)
+    inserted = []
+    merged = []
+    monkeypatch.setattr(
+        pipeline.repository, "insert_incident", lambda session, inc: inserted.append(inc)
+    )
+    monkeypatch.setattr(
+        pipeline.repository,
+        "merge_incident",
+        lambda session, *args: merged.append(args),
+    )
+
+    stub_classify = lambda item: classifier.classify(item, StubClient(VALID_PAYLOAD))
+    stats = pipeline.run(_FakeSession(), stub_classify, items=[ITEM])
+
+    assert stats["inserted"] == 1
+    assert stats["merged"] == 0
+    assert not merged
+    assert inserted[0]["id"].startswith("ing-")
+
+
 # --- integration (needs a real database) -------------------------------------
 
 TEST_DB = os.environ.get("TEST_DATABASE_URL")
@@ -273,8 +314,9 @@ def test_pipeline_inserts_and_merges():
     from app import repository
 
     # Empty incidents baseline so the pipeline's insert path is exercised in
-    # isolation (with the seed present, ingested incidents correctly dedupe
-    # against nearby seed incidents instead — that's tested implicitly too).
+    # isolation. Seed data is excluded from dedup entirely (see
+    # test_run_does_not_dedup_real_incident_against_seed), so this doesn't
+    # need seed rows present.
     Base.metadata.drop_all(engine)
     init_db()
 

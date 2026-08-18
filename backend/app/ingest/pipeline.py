@@ -85,7 +85,14 @@ def run(
     feeds: Optional[list] = None,
 ) -> Dict[str, int]:
     at_ms = now_ms()
-    existing = repository.get_all_incidents(session)
+    # Dedup only against other real ingested incidents ("ing-" ids), never
+    # seed/demo data ("ow-" ids) — a fictional incident sharing a hotspot and
+    # category with a real story is not the same real-world event, and merging
+    # them would silently attach a real article as a "source" on a mock incident.
+    existing = [
+        inc for inc in repository.get_all_incidents(session)
+        if inc["id"].startswith("ing-")
+    ]
     ordinal = repository.next_ordinal(session)
     stats = {
         "fetched": 0,
