@@ -113,3 +113,10 @@ def fetch_items(feeds: Optional[List[Feed]] = None) -> List[Dict[str, str]]:
                 }
             )
     return items
+
+
+if __name__ == "__main__":
+    # Feed health check: python -m app.ingest.sources
+    for feed in FEEDS:
+        count = len(fetch_items([feed]))
+        print(feed.name, count)
