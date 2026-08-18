@@ -1,4 +1,5 @@
 import { MOCK_INCIDENTS, DATA_REFERENCE_TIME } from "@/lib/data/mock-incidents";
+import { BACKEND_URL } from "@/lib/backend";
 import type { Incident } from "@/lib/types";
 
 // Single seam for incident data. Everything outside this module (and the
@@ -63,7 +64,31 @@ export function replaceClientSnapshot(next: DataSnapshot): void {
   clientSnapshot = next;
 }
 
+// Server-rendered pages (dashboard, counties, county detail) read through
+// here, not through useIncidents()/getDataSnapshot() — those exist to keep
+// the client map's SSR and hydration snapshots identical, which server
+// pages don't need. So this talks to the real backend directly, and filters
+// to live incidents on success (matching the map's default), falling back
+// to the unfiltered shifted seed if the backend is unreachable rather than
+// rendering an empty page.
+async function fetchBackendIncidents(): Promise<Incident[] | null> {
+  if (!BACKEND_URL) return null;
+  try {
+    const res = await fetch(`${BACKEND_URL}/incidents`, { cache: "no-store" });
+    if (!res.ok) return null;
+    const body = (await res.json()) as { results: Incident[] };
+    return body.results;
+  } catch (err) {
+    console.error("getIncidents: backend fetch failed, falling back to seed", err);
+    return null;
+  }
+}
+
 export async function getIncidents(): Promise<Incident[]> {
+  if (IS_SERVER && USE_API) {
+    const backend = await fetchBackendIncidents();
+    if (backend) return backend.filter((i) => i.isLive);
+  }
   return getDataSnapshot().incidents;
 }
 
