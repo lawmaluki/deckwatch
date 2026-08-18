@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Category, Severity, VerificationStatus } from "@/lib/types";
+import { USE_API } from "@/lib/incidents-source";
 
 export type TimelineRange = 24 | 168 | 720;
 
@@ -99,7 +100,9 @@ export const useAppStore = create<AppState>()(
       showHeatmap: false,
       toggleHeatmap: () => set((s) => ({ showHeatmap: !s.showHeatmap })),
 
-      liveOnly: false,
+      // Hide the seed dataset by default once real data exists to see (api
+      // mode); in local mock mode seed data is all there is, so show it.
+      liveOnly: USE_API,
       toggleLiveOnly: () => set((s) => ({ liveOnly: !s.liveOnly })),
 
       notifications: {
