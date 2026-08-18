@@ -77,15 +77,69 @@ def test_find_duplicate_returns_nearest():
 
 # --- verification ------------------------------------------------------------
 
-def test_verification_single_news_source():
-    # 20 base + 12 news + 1*4 report + 3 (high) = 39 -> unconfirmed
-    assert score_verification([{"type": "news"}], 1, "high") == (39, "unconfirmed")
+def _src(name, type_="news"):
+    return {"name": name, "type": type_}
+
+
+def test_verification_single_newsroom_is_uncorroborated():
+    # 23 base + 14 news, no independence bonus = 37
+    assert score_verification([_src("The Standard")]) == (37, "unconfirmed")
+
+
+def test_verification_same_owner_outlets_count_once():
+    """NTV Kenya and Nairobi News are both Nation Media — one newsroom."""
+    both = [_src("NTV Kenya"), _src("Nairobi News")]
+    assert score_verification(both) == score_verification([_src("NTV Kenya")])
+    # And strictly below two genuinely independent outlets.
+    independent = [_src("NTV Kenya"), _src("The Standard")]
+    assert score_verification(both)[0] < score_verification(independent)[0]
+
+
+def test_verification_two_independent_newsrooms_corroborate():
+    # 23 + 14 + 14 + 12 bonus = 63
+    pair = [_src("The Standard"), _src("Citizen Digital")]
+    assert score_verification(pair) == (63, "likely_true")
+
+
+def test_verification_aggregator_corroborates_weakly():
+    """A Tuko rewrite is worth less than an independent newsroom's own report."""
+    assert score_verification([_src("Tuko News")])[0] < score_verification(
+        [_src("The Standard")]
+    )[0]
+    with_aggregator = [_src("The Standard"), _src("Tuko News")]
+    with_newsroom = [_src("The Standard"), _src("Citizen Digital")]
+    assert score_verification(with_aggregator)[0] < score_verification(with_newsroom)[0]
 
 
 def test_verification_multi_source_verified():
-    sources_list = [{"type": "news"}, {"type": "government"}, {"type": "police"}]
-    # 20 + 12+22+20 + 3*4 + 6 (critical) = 92 -> verified
-    assert score_verification(sources_list, 3, "critical") == (92, "verified")
+    # 23 + 14+24+22 + 12*2 bonus = 107 -> clamped to 99
+    sources_list = [
+        _src("The Standard"),
+        _src("Ministry of Health", "government"),
+        _src("Kenya Police Service", "police"),
+    ]
+    score, status = score_verification(sources_list)
+    assert status == "verified"
+    assert score == 99
+
+
+def test_verification_ignores_severity_and_report_count():
+    """Neither is evidence that the event happened."""
+    one = [_src("The Standard")]
+    # Same sources -> same score, no matter how severe or how many merges.
+    assert score_verification(one) == score_verification(list(one))
+
+
+def test_verification_never_machine_asserts_false_report():
+    """The weakest thing ingestion can build is a lone aggregator."""
+    weakest, status = score_verification([_src("Tuko News")])
+    assert weakest == 30
+    assert status == "unconfirmed"
+
+
+def test_verification_unknown_outlet_is_treated_as_independent():
+    pair = [_src("The Standard"), _src("Some New Outlet")]
+    assert score_verification(pair)[0] > score_verification([_src("The Standard")])[0]
 
 
 # --- RSS parsing -------------------------------------------------------------

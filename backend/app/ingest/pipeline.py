@@ -42,7 +42,7 @@ def build_incident(
     source = {"name": item["source"], "type": item["source_type"], "url": item["link"]}
     sources_list = [source]
     report_count = 1
-    score, status = score_verification(sources_list, report_count, candidate["severity"])
+    score, status = score_verification(sources_list)
 
     incident_id = "ing-" + hashlib.sha1(item["link"].encode()).hexdigest()[:8]
     return {
@@ -74,9 +74,9 @@ def merge_fields(existing: Mapping[str, Any], new_source: Mapping[str, Any]):
     if not any(s["name"] == new_source["name"] for s in sources_list):
         sources_list.append(new_source)
     report_count = existing["reportCount"] + 1
-    score, status = score_verification(
-        sources_list, report_count, existing["severity"]
-    )
+    # reportCount is kept for display ("N reports merged"), but deliberately
+    # does not feed the score — see verification.py.
+    score, status = score_verification(sources_list)
     return sources_list, report_count, score, status
 
 

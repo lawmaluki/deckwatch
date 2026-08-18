@@ -130,10 +130,29 @@ export const SEVERITY_LIST = Object.values(SEVERITY_CONFIG);
 
 export const VERIFICATION_CONFIG: Record<
   VerificationStatus,
-  { label: string; color: string }
+  { label: string; color: string; blurb: string }
 > = {
-  verified: { label: "Verified", color: "#22c55e" },
-  likely_true: { label: "Likely True", color: "#0ea5e9" },
-  unconfirmed: { label: "Unconfirmed", color: "#eab308" },
-  false_report: { label: "False Report", color: "#6b7280" },
+  // `blurb` states the sourcing each band actually reflects. The score behind
+  // these labels counts independent corroboration only (see the backend's
+  // ingest/verification.py), so the blurb is what the badge explains on hover.
+  verified: {
+    label: "Verified",
+    color: "#22c55e",
+    blurb: "Corroborated by independent newsrooms, with official confirmation",
+  },
+  likely_true: {
+    label: "Likely True",
+    color: "#0ea5e9",
+    blurb: "Reported independently by more than one newsroom",
+  },
+  unconfirmed: {
+    label: "Unconfirmed",
+    color: "#eab308",
+    blurb: "Carried by a single newsroom so far",
+  },
+  false_report: {
+    label: "False Report",
+    color: "#6b7280",
+    blurb: "Flagged as contradicted by other reporting",
+  },
 };
