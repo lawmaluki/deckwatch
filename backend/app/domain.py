@@ -81,12 +81,18 @@ def shift_incidents(incidents: List[Incident], to_ms: int) -> List[Incident]:
 
     Data and clock shift by the same delta, keeping every duration-derived
     value identical to the fixed-clock seed (time-shift invariance).
+
+    Real ingested incidents ("ing-" ids) are exempt: they carry the source
+    article's true publish time, and shifting them would rewrite a date the
+    reader can check against the article — the incident would silently re-date
+    itself forward for as long as it sat in the database.
     """
     delta = to_ms - REFERENCE_MS
     shifted = []
     for i in incidents:
         copy = dict(i)
-        copy["reportedAt"] = to_iso_z(parse_iso_ms(i["reportedAt"]) + delta)
+        if not str(i.get("id", "")).startswith("ing-"):
+            copy["reportedAt"] = to_iso_z(parse_iso_ms(i["reportedAt"]) + delta)
         shifted.append(copy)
     return shifted
 

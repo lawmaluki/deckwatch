@@ -215,7 +215,7 @@ def test_classify_malformed_is_none():
 
 # --- build_incident / merge_fields (pure) ------------------------------------
 
-def test_build_incident_anchors_to_reference_frame():
+def test_build_incident_keeps_the_articles_true_publish_date():
     candidate = classifier.classify(ITEM, StubClient(VALID_PAYLOAD))
     at_ms = REFERENCE_MS + 100 * 24 * 3_600_000  # pretend "now" is 100 days after ref
     inc = pipeline.build_incident(candidate, ITEM, at_ms, ordinal=500)
@@ -226,10 +226,38 @@ def test_build_incident_anchors_to_reference_frame():
     # just the outlet's homepage.
     assert inc["sources"][0]["url"] == ITEM["link"]
     assert inc["sources"][0]["url"] != ITEM["homepage"]
-    # reportedAt stored in the REFERENCE frame, so it's near/below REFERENCE
-    from app.domain import parse_iso_ms
+    # The stored date is the article's own, verifiable against the source —
+    # NOT re-anchored into the seed's REFERENCE frame.
+    assert inc["reportedAt"] == ITEM["published"]
 
-    assert parse_iso_ms(inc["reportedAt"]) <= REFERENCE_MS
+
+def test_build_incident_clamps_a_future_dated_article():
+    candidate = classifier.classify(ITEM, StubClient(VALID_PAYLOAD))
+    future_item = {**ITEM, "published": "2030-01-01T00:00:00.000Z"}
+    at_ms = REFERENCE_MS
+    inc = pipeline.build_incident(candidate, future_item, at_ms, ordinal=1)
+    from app.domain import parse_iso_ms as _p
+
+    assert _p(inc["reportedAt"]) == at_ms
+
+
+def test_real_incidents_are_not_time_shifted():
+    """A real incident's date must not drift as the clock moves on."""
+    from app import domain
+
+    real = {"id": "ing-abc123", "reportedAt": "2026-08-01T09:00:00.000Z"}
+    seed = {"id": "ow-0001", "reportedAt": "2026-07-01T09:00:00.000Z"}
+
+    for days_later in (0, 1, 30):
+        delta = days_later * 24 * 3_600_000
+        to = REFERENCE_MS + delta
+        shifted_real, shifted_seed = domain.shift_incidents([real, seed], to)
+        # Real: identical no matter when it's read.
+        assert shifted_real["reportedAt"] == real["reportedAt"]
+        # Seed: still re-anchored by exactly the delta, so the demo looks live.
+        assert domain.parse_iso_ms(shifted_seed["reportedAt"]) == (
+            domain.parse_iso_ms(seed["reportedAt"]) + delta
+        )
 
 
 def test_merge_fields_adds_source_and_raises_score():

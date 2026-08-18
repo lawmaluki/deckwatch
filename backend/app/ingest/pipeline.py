@@ -8,7 +8,7 @@ from typing import Any, Callable, Dict, List, Mapping, Optional
 from sqlalchemy.orm import Session
 
 from .. import repository
-from ..domain import REFERENCE_MS, now_ms, parse_iso_ms, to_iso_z
+from ..domain import now_ms, parse_iso_ms, to_iso_z
 from . import dedup, prefilter, sources
 from .verification import score_verification
 
@@ -22,9 +22,10 @@ def build_incident(
     ordinal: int,
 ) -> Optional[Dict[str, Any]]:
     """Turn a classified candidate + its source item into a full incident dict,
-    or None if it can't be geocoded. reportedAt is stored in the seed's
-    REFERENCE frame (REFERENCE - article age) so the API's time-shift renders it
-    as 'N hours ago' consistently with the seed data."""
+    or None if it can't be geocoded. reportedAt is the article's own publish
+    time: this is a record built from verifiable reporting, so the stored date
+    has to match what the source says. Only seed data lives in the REFERENCE
+    frame and gets time-shifted on read (see domain.shift_incidents)."""
     from .geocode import geocode
 
     coords = geocode(candidate["county"], candidate["location_name"])
@@ -32,8 +33,9 @@ def build_incident(
         return None
     lat, lng = coords
 
-    age_ms = max(0, at_ms - parse_iso_ms(item["published"]))
-    reported_ms = REFERENCE_MS - age_ms
+    # Clamped to the run clock so a feed with a bad future date can't file an
+    # incident dated ahead of the ingest that found it.
+    reported_ms = min(parse_iso_ms(item["published"]), at_ms)
 
     # url is the specific article, not the outlet homepage, so "Sources" links
     # take the reader straight to the piece the incident was drawn from.
