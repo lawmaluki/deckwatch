@@ -53,9 +53,20 @@ function liveSnapshot(nowMs: number): DataSnapshot {
 // coherent with polled data.
 let clientSnapshot: DataSnapshot | null = null;
 
+// Memoized per request: getReferenceTime() (via getDataSnapshot) is a sync
+// default-param dependency of hoursAgo/relativeTime/dailyTrend, so a single
+// server render can call it many times. Without caching, each call reads a
+// fresh Date.now(), and a page like the dashboard — which reads it directly
+// for "data as of" *and* indirectly through dailyTrend()/relativeTime() for
+// every listed incident — could see those calls straddle a minute boundary
+// and render inconsistent text, which Next then flags as a hydration
+// mismatch on top of the JSON, before there's even a client to hydrate
+// against.
+const getRequestNowMs = cache((): number => Date.now());
+
 export function getDataSnapshot(): DataSnapshot {
   if (!USE_API) return MOCK_SNAPSHOT;
-  if (IS_SERVER) return liveSnapshot(Date.now());
+  if (IS_SERVER) return liveSnapshot(getRequestNowMs());
   clientSnapshot ??= liveSnapshot(Date.now());
   return clientSnapshot;
 }
