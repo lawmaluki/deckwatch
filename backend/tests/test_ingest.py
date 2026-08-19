@@ -49,20 +49,57 @@ def test_geocode_unknown_county_is_none():
 
 # --- dedup -------------------------------------------------------------------
 
-def _inc(lat, lng, category, reported):
-    return {"lat": lat, "lng": lng, "category": category, "reportedAt": reported}
+def _inc(lat, lng, category, reported, county="Nairobi"):
+    """A specifically-located incident. The coordinates are deliberately not a
+    county centroid — see test_not_same_event_when_only_the_county_is_known."""
+    return {
+        "lat": lat,
+        "lng": lng,
+        "category": category,
+        "reportedAt": reported,
+        "county": county,
+    }
 
 
-def test_same_event_when_close_and_same_category():
+def test_same_event_when_close_in_place_and_time():
     a = _inc(-1.29, 36.82, "crime", "2026-07-02T09:00:00.000Z")
-    b = _inc(-1.291, 36.821, "crime", "2026-06-20T09:00:00.000Z")  # far in time, same cat
+    b = _inc(-1.291, 36.821, "crime", "2026-07-02T06:00:00.000Z")
     assert dedup.is_same_event(a, b)
+
+
+def test_not_same_event_when_far_apart_in_time():
+    """Same place and category is not one event if the reports are weeks apart.
+
+    The old rule merged on category with no time bound, so one incident kept
+    absorbing every later report at that location, forever.
+    """
+    a = _inc(-1.29, 36.82, "crime", "2026-07-02T09:00:00.000Z")
+    b = _inc(-1.291, 36.821, "crime", "2026-06-20T09:00:00.000Z")
+    assert not dedup.is_same_event(a, b)
 
 
 def test_not_same_event_when_far_apart():
     a = _inc(-1.29, 36.82, "crime", "2026-07-02T09:00:00.000Z")
     b = _inc(-4.05, 39.66, "crime", "2026-07-02T09:00:00.000Z")  # Mombasa, >400km
     assert not dedup.is_same_event(a, b)
+
+
+def test_not_same_event_when_only_the_county_is_known():
+    """A county centroid is the absence of a location, not a location.
+
+    Every vague report in a county lands on that identical point, so distance
+    between two of them is always zero. Merging on that fused unrelated stories
+    into one record — a sewer-plant upgrade ended up carrying articles about a
+    murder trial and a bail hearing.
+    """
+    centroid = geocode.geocode("Nairobi", "Nairobi")
+    a = _inc(centroid[0], centroid[1], "crime", "2026-07-02T09:00:00.000Z")
+    b = _inc(centroid[0], centroid[1], "crime", "2026-07-02T08:00:00.000Z")
+    assert not dedup.is_same_event(a, b)
+    # A precise location in the same county and window still merges.
+    precise = _inc(-1.2739, 36.8442, "crime", "2026-07-02T09:00:00.000Z")
+    other = _inc(-1.2741, 36.8444, "crime", "2026-07-02T08:00:00.000Z")
+    assert dedup.is_same_event(precise, other)
 
 
 def test_find_duplicate_returns_nearest():
@@ -381,6 +418,90 @@ def test_run_does_not_dedup_real_incident_against_seed(monkeypatch):
     assert stats["merged"] == 0
     assert not merged
     assert inserted[0]["id"].startswith("ing-")
+
+
+def test_run_is_idempotent_across_repeated_runs(monkeypatch):
+    """Re-running the same feed window must change nothing.
+
+    The cron re-fetches the same articles hourly. Each rebuilt to the same
+    sha1(link) id, matched its own stored copy at distance zero and merged into
+    itself, so reportCount climbed every hour without bound — 3 -> 86 -> 88 on
+    one incident in a day, off only 5 sources, dragging its score to 99%.
+    """
+    stored = []
+    monkeypatch.setattr(pipeline.repository, "get_all_incidents", lambda s: list(stored))
+    monkeypatch.setattr(pipeline.repository, "next_ordinal", lambda s: len(stored) + 1)
+    monkeypatch.setattr(
+        pipeline.repository, "insert_incident", lambda s, inc: stored.append(inc)
+    )
+    merges = []
+    monkeypatch.setattr(
+        pipeline.repository, "merge_incident", lambda s, *a: merges.append(a)
+    )
+
+    stub = lambda item: classifier.classify(item, StubClient(VALID_PAYLOAD))
+    first = pipeline.run(_FakeSession(), stub, items=[ITEM])
+    assert first["inserted"] == 1
+
+    second = pipeline.run(_FakeSession(), stub, items=[ITEM])
+    assert second["already_ingested"] == 1
+    assert second["inserted"] == 0
+    assert second["merged"] == 0
+    assert not merges, "an already-ingested article must not merge again"
+    assert len(stored) == 1
+
+
+def test_run_skips_an_article_already_merged_as_a_source(monkeypatch):
+    """A merged article is stored as a source URL, not under its own id, so the
+    id check alone would let it merge again on every subsequent run."""
+    already = {
+        "id": "ing-other",
+        "lat": -1.2739,
+        "lng": 36.8442,
+        "county": "Nairobi",
+        "category": "crime",
+        "reportedAt": ITEM["published"],
+        "sources": [{"name": "Sample", "type": "news", "url": ITEM["link"]}],
+        "reportCount": 2,
+        "severity": "high",
+    }
+    monkeypatch.setattr(pipeline.repository, "get_all_incidents", lambda s: [already])
+    monkeypatch.setattr(pipeline.repository, "next_ordinal", lambda s: 5)
+    merged = []
+    monkeypatch.setattr(
+        pipeline.repository, "merge_incident", lambda s, *a: merged.append(a)
+    )
+    monkeypatch.setattr(
+        pipeline.repository,
+        "insert_incident",
+        lambda s, inc: pytest.fail("should not insert an already-known article"),
+    )
+
+    stub = lambda item: classifier.classify(item, StubClient(VALID_PAYLOAD))
+    stats = pipeline.run(_FakeSession(), stub, items=[ITEM])
+    assert stats["already_ingested"] == 1
+    assert not merged
+
+
+def test_merge_fields_keeps_two_articles_from_one_outlet():
+    """Keying on outlet name dropped the second article silently, leaving no
+    record that it had been merged — so it merged again next run."""
+    existing = {
+        "sources": [
+            {"name": "The Standard", "type": "news", "url": "https://x.co.ke/a"}
+        ],
+        "reportCount": 1,
+        "severity": "high",
+    }
+    second = {"name": "The Standard", "type": "news", "url": "https://x.co.ke/b"}
+    sources_list, report_count, _, _ = pipeline.merge_fields(existing, second)
+    assert len(sources_list) == 2
+    assert report_count == 2
+    # The identical article does not get added twice.
+    again, count_again, _, _ = pipeline.merge_fields(
+        {**existing, "sources": sources_list, "reportCount": report_count}, second
+    )
+    assert len(again) == 2
 
 
 # --- integration (needs a real database) -------------------------------------

@@ -28,3 +28,20 @@ def geocode(county: str, location_name: str) -> Optional[Tuple[float, float]]:
 
     # Fall back to the county centroid.
     return _COUNTY_CENTER.get(county)
+
+
+def is_county_centroid(county: str, lat: float, lng: float) -> bool:
+    """True when these coordinates are the county's centroid, i.e. the geocoder
+    found no specific place and fell back.
+
+    This distinction matters for dedup: a centroid is not a location, it is the
+    absence of one. Every vague report in a county lands on the exact same
+    point, so distance between two of them is always zero — which reads as
+    "same place" to anything comparing coordinates.
+    """
+    center = _COUNTY_CENTER.get(county)
+    if center is None:
+        return False
+    # Coordinates round-trip through Postgres/PostGIS, so compare with a
+    # tolerance rather than for exact float equality (~1m at this latitude).
+    return abs(center[0] - lat) < 1e-5 and abs(center[1] - lng) < 1e-5

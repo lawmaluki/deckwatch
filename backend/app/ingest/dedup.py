@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from ..domain import Incident, parse_iso_ms
+from .geocode import is_county_centroid
 
 EARTH_RADIUS_KM = 6371
 SIMILAR_MAX_DISTANCE_KM = 8.0
@@ -34,19 +35,38 @@ def haversine_km(a: tuple, b: tuple) -> float:
 def is_same_event(
     candidate: Incident, existing: Incident
 ) -> bool:
+    """Whether two reports describe one real-world event, and should merge.
+
+    Deliberately stricter than geo.ts's findSimilarIncidents, which this once
+    mirrored. That function answers "show me related things nearby", where a
+    loose match is harmless. This one *fuses records*, so a loose match is
+    destructive: it welds unrelated stories into a single incident and, because
+    each merged outlet raises the verification score, stamps the result as
+    corroborated.
+    """
+    # A county centroid means the geocoder found no specific place. Every vague
+    # report in the county sits on that identical point, so comparing distance
+    # says "same place" for stories that merely happened in the same county.
+    # Without a real location there is no evidence these are one event.
+    if is_county_centroid(
+        candidate["county"], candidate["lat"], candidate["lng"]
+    ) or is_county_centroid(existing["county"], existing["lat"], existing["lng"]):
+        return False
+
     distance = haversine_km(
         (candidate["lat"], candidate["lng"]),
         (existing["lat"], existing["lng"]),
     )
     if distance > SIMILAR_MAX_DISTANCE_KM:
         return False
+
+    # Time proximity is now required. The old "or same category" branch had no
+    # time bound, so two robberies at the same hotspot months apart counted as
+    # one event — and kept absorbing every later one, forever.
     hours_apart = abs(
         parse_iso_ms(candidate["reportedAt"]) - parse_iso_ms(existing["reportedAt"])
     ) / MS_PER_HOUR
-    return (
-        hours_apart <= SIMILAR_MAX_HOURS_APART
-        or candidate["category"] == existing["category"]
-    )
+    return hours_apart <= SIMILAR_MAX_HOURS_APART
 
 
 def find_duplicate(candidate: Incident, existing: list) -> Optional[Incident]:
