@@ -35,6 +35,45 @@ describe("findSimilarIncidents", () => {
     expect(findSimilarIncidents(target, [target])).toEqual([]);
   });
 
+  it("never matches a real incident against seed data", () => {
+    // The client's candidate pool is mostly seed, so an unguarded search puts
+    // fabricated incidents under a real report as if they corroborated it.
+    const realTarget = makeIncident({
+      id: "ing-real",
+      lat: -1.29,
+      lng: 36.82,
+      reportedAt: hoursBeforeReference(1),
+      isLive: true,
+    });
+    const seedNeighbour = makeIncident({
+      lat: -1.291,
+      lng: 36.821,
+      reportedAt: hoursBeforeReference(2),
+      isLive: false,
+    });
+    const realNeighbour = makeIncident({
+      id: "ing-neighbour",
+      lat: -1.292,
+      lng: 36.822,
+      reportedAt: hoursBeforeReference(3),
+      isLive: true,
+    });
+    expect(
+      findSimilarIncidents(realTarget, [realTarget, seedNeighbour, realNeighbour])
+    ).toEqual([realNeighbour]);
+  });
+
+  it("does not surface real incidents under a seed one either", () => {
+    const realNeighbour = makeIncident({
+      id: "ing-neighbour",
+      lat: -1.291,
+      lng: 36.821,
+      reportedAt: hoursBeforeReference(2),
+      isLive: true,
+    });
+    expect(findSimilarIncidents(target, [target, realNeighbour])).toEqual([]);
+  });
+
   it("excludes incidents farther than 8 km", () => {
     const far = makeIncident({ lat: -4.0, lng: 39.6, reportedAt: hoursBeforeReference(1) });
     expect(findSimilarIncidents(target, [target, far])).toEqual([]);

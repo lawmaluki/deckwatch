@@ -30,7 +30,13 @@ export function findSimilarIncidents(
 ): Incident[] {
   const targetTime = new Date(target.reportedAt).getTime();
   return all
-    .filter((i) => i.id !== target.id)
+    // Real and seed incidents never match each other. The client polls
+    // /api/incidents unfiltered, so the candidate pool is mostly seed data
+    // (360 fabricated incidents blanketing all 47 counties vs a couple of
+    // dozen real ones) — without this, a real report's "similar nearby" is
+    // almost always fiction, implying a corroborating pattern that does not
+    // exist. Mirrors the backend's dedup rule in ingest/pipeline.py.
+    .filter((i) => i.id !== target.id && i.isLive === target.isLive)
     .map((i) => {
       const distanceKm = haversineDistanceKm(
         [target.lat, target.lng],
