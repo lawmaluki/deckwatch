@@ -22,6 +22,9 @@ def list_incidents(request: Request, session: Session = Depends(get_session)):
 
     incidents = domain.shift_incidents(repository.get_all_incidents(session), as_of)
     results = domain.filter_incidents(incidents, parsed["value"]["filter"], as_of)
+    # Newest first, and before the limit is applied so ?limit=N returns the N
+    # most recent incidents rather than the N oldest-ingested.
+    results = domain.sort_newest_first(results)
     limit = parsed["value"]["limit"]
     if limit is not None:
         results = results[:limit]

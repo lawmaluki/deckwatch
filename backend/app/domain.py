@@ -97,6 +97,17 @@ def shift_incidents(incidents: List[Incident], to_ms: int) -> List[Incident]:
     return shifted
 
 
+def sort_newest_first(incidents: List[Incident]) -> List[Incident]:
+    """Most recent first — the order a feed is read in.
+
+    Must run *after* shift_incidents: seed rows are stored in the REFERENCE
+    frame and real ones in true time, so raw stored timestamps are not
+    comparable across the two and sorting in SQL would interleave them wrongly.
+    Ties break on id so the order is deterministic and matches the TS side.
+    """
+    return sorted(incidents, key=lambda i: (-parse_iso_ms(i["reportedAt"]), i["id"]))
+
+
 # --- stats -------------------------------------------------------------------
 
 def hours_ago(incident: Incident, at_ms: int) -> float:

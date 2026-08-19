@@ -32,14 +32,26 @@ export function shiftIncidents(incidents: Incident[], nowMs: number): Incident[]
   }));
 }
 
+// Newest first — the order a feed is read in. Mirrors domain.sort_newest_first
+// on the backend (same tie-break on id) so both modes agree exactly. The mock
+// generator emits incidents in generation order, not chronological order, so
+// without this the newest event lands wherever it happened to be generated.
+export function sortNewestFirst(incidents: Incident[]): Incident[] {
+  return [...incidents].sort(
+    (a, b) =>
+      Date.parse(b.reportedAt) - Date.parse(a.reportedAt) ||
+      a.id.localeCompare(b.id)
+  );
+}
+
 // Always-live read for the route handlers: the API simulates a live feed in
 // every mode, anchored to the caller's request time.
 export function getLiveIncidents(nowMs: number): Incident[] {
-  return shiftIncidents(MOCK_INCIDENTS, nowMs);
+  return sortNewestFirst(shiftIncidents(MOCK_INCIDENTS, nowMs));
 }
 
 const MOCK_SNAPSHOT: DataSnapshot = {
-  incidents: MOCK_INCIDENTS,
+  incidents: sortNewestFirst(MOCK_INCIDENTS),
   referenceTime: DATA_REFERENCE_TIME,
 };
 
@@ -107,7 +119,9 @@ const fetchBackendIncidents = cache(async (): Promise<Incident[] | null> => {
 export async function getIncidents(): Promise<Incident[]> {
   if (IS_SERVER && USE_API) {
     const backend = await fetchBackendIncidents();
-    if (backend) return backend.filter((i) => i.isLive);
+    // Sorted again rather than trusted: server pages slice this for "recent"
+    // lists, so the ordering guarantee should not depend on the backend's.
+    if (backend) return sortNewestFirst(backend.filter((i) => i.isLive));
   }
   return getDataSnapshot().incidents;
 }

@@ -51,6 +51,43 @@ def test_shift_does_not_mutate_input():
     assert INCIDENTS[0]["reportedAt"] == before
 
 
+# --- ordering ----------------------------------------------------------------
+
+def test_sort_newest_first():
+    older = {"id": "ing-b", "reportedAt": "2026-07-03T19:29:00.000Z"}
+    newer = {"id": "ing-a", "reportedAt": "2026-08-19T20:52:00.000Z"}
+    assert domain.sort_newest_first([older, newer]) == [newer, older]
+
+
+def test_sort_newest_first_breaks_ties_on_id():
+    """Deterministic order matters: the TS side must agree exactly."""
+    same = "2026-08-19T09:00:00.000Z"
+    b = {"id": "ing-b", "reportedAt": same}
+    a = {"id": "ing-a", "reportedAt": same}
+    assert domain.sort_newest_first([b, a]) == [a, b]
+    assert domain.sort_newest_first([a, b]) == [a, b]
+
+
+def test_sort_newest_first_does_not_mutate_input():
+    original = [
+        {"id": "ing-b", "reportedAt": "2026-07-03T19:29:00.000Z"},
+        {"id": "ing-a", "reportedAt": "2026-08-19T20:52:00.000Z"},
+    ]
+    before = [i["id"] for i in original]
+    domain.sort_newest_first(original)
+    assert [i["id"] for i in original] == before
+
+
+def test_sort_after_shift_interleaves_seed_and_real_correctly():
+    """Seed is stored in the REFERENCE frame and real data in true time, so the
+    sort is only meaningful once shift_incidents has put them on one clock."""
+    to = REF + 40 * 24 * 3_600_000  # 40 days past the reference
+    seed = {"id": "ow-0001", "reportedAt": domain.to_iso_z(REF)}  # shifts to `to`
+    real = {"id": "ing-x", "reportedAt": domain.to_iso_z(REF)}  # stays put
+    ordered = domain.sort_newest_first(domain.shift_incidents([real, seed], to))
+    assert [i["id"] for i in ordered] == ["ow-0001", "ing-x"]
+
+
 # --- risk score parity (hand-computed against stats.ts formula) --------------
 
 def test_risk_score_single_critical_now():

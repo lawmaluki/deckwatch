@@ -1,7 +1,42 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { shiftIncidents, getIncidentsSnapshot } from "@/lib/incidents-source";
+import {
+  shiftIncidents,
+  getIncidentsSnapshot,
+  sortNewestFirst,
+} from "@/lib/incidents-source";
 import { DATA_REFERENCE_TIME } from "@/lib/data/mock-incidents";
 import { hoursAgo } from "@/lib/stats";
+
+describe("sortNewestFirst", () => {
+  const older = { id: "ing-b", reportedAt: "2026-07-03T19:29:00.000Z" };
+  const newer = { id: "ing-a", reportedAt: "2026-08-19T20:52:00.000Z" };
+
+  it("puts the most recent incident first", () => {
+    const sorted = sortNewestFirst([older, newer] as never);
+    expect(sorted.map((i) => i.id)).toEqual(["ing-a", "ing-b"]);
+  });
+
+  it("breaks ties on id so the order matches the Python side exactly", () => {
+    const at = "2026-08-19T09:00:00.000Z";
+    const b = { id: "ing-b", reportedAt: at };
+    const a = { id: "ing-a", reportedAt: at };
+    expect(sortNewestFirst([b, a] as never).map((i) => i.id)).toEqual([
+      "ing-a",
+      "ing-b",
+    ]);
+  });
+
+  it("does not mutate its input", () => {
+    const input = [older, newer] as never[];
+    sortNewestFirst(input);
+    expect(input.map((i: { id: string }) => i.id)).toEqual(["ing-b", "ing-a"]);
+  });
+
+  it("orders the shipped snapshot newest-first", () => {
+    const times = getIncidentsSnapshot().map((i) => Date.parse(i.reportedAt));
+    expect(times).toEqual([...times].sort((a, b) => b - a));
+  });
+});
 
 describe("shiftIncidents", () => {
   const snapshot = getIncidentsSnapshot();
