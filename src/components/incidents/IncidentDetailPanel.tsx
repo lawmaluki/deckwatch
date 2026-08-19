@@ -97,10 +97,13 @@ export function IncidentDetailPanel() {
             <p className="text-xs leading-relaxed text-foreground/85">{incident.aiSummary}</p>
           </section>
 
+          {/* Says only what we know: nothing is attached. It claimed "no
+              verified media", which implied a media-verification step that
+              does not exist — ingestion reads title, summary and link only. */}
           {!incident.hasImage && (
             <div className="mb-4 flex items-center gap-2 rounded-xl border border-dashed border-border p-3 text-xs text-muted">
               <ImageOff className="h-4 w-4" />
-              No verified media attached to this report
+              No photo or video attached to this report
             </div>
           )}
 
