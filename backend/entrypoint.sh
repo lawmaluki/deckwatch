@@ -7,16 +7,20 @@ import os, time
 import psycopg
 
 url = os.environ["DATABASE_URL"].replace("postgresql+psycopg://", "postgresql://")
-for attempt in range(60):
+attempts = 8
+for attempt in range(attempts):
     try:
-        psycopg.connect(url).close()
+        psycopg.connect(url, connect_timeout=10).close()
         print("database is ready")
         break
     except Exception as exc:
+        # A pooled host (e.g. Supabase) can rate-limit or circuit-break after
+        # a burst of failed connections, so a bad DATABASE_URL should fail
+        # fast rather than hammer it with retries every second.
         print(f"waiting for database... ({exc})")
-        time.sleep(1)
+        time.sleep(5)
 else:
-    raise SystemExit("database not reachable after 60s")
+    raise SystemExit(f"database not reachable after {attempts} attempts")
 PY
 
 python -m app.init_db
