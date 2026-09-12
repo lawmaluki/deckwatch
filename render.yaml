@@ -1,0 +1,50 @@
+# Render Blueprint for the Deckwatch API.
+#
+# In the Render dashboard: New -> Blueprint -> connect this repo. Render reads
+# this file and creates both services below. The database itself is NOT
+# defined here — it lives in Supabase (Render's managed Postgres has no
+# PostGIS). Create the Supabase project first, enable the postgis extension,
+# and paste its connection string into DATABASE_URL on both services when
+# prompted (marked `sync: false` so Render asks rather than storing a value
+# here).
+#
+# Platform UIs and the Blueprint schema change over time; if a field below is
+# rejected, check Render's current render.yaml reference and adjust — the
+# requirements are stable even if the exact keys aren't: (a) build
+# backend/Dockerfile, (b) set DATABASE_URL to the Supabase connection string,
+# (c) the API listens on $PORT (entrypoint.sh already does), (d) the cron job
+# runs `python -m app.ingest` on the same DATABASE_URL every 15 minutes.
+
+services:
+  - type: web
+    name: deckwatch-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false # paste the Supabase connection string
+      - key: SEED_ON_START
+        value: "true" # keeps the map non-empty before the first ingest run
+      - key: INGEST_CLASSIFIER
+        value: "rule" # free, no API key; set "llm" + ANTHROPIC_API_KEY for Claude
+      - key: ANTHROPIC_API_KEY
+        sync: false # only needed if INGEST_CLASSIFIER=llm
+
+  - type: cron
+    name: deckwatch-ingest
+    runtime: docker
+    plan: starter # Render cron jobs are not on the free plan; check current pricing
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    dockerCommand: python -m app.ingest
+    schedule: "*/15 * * * *"
+    envVars:
+      - key: DATABASE_URL
+        sync: false # same Supabase connection string as the API service
+      - key: INGEST_CLASSIFIER
+        value: "rule"
+      - key: ANTHROPIC_API_KEY
+        sync: false

@@ -101,10 +101,9 @@ Feed URLs are in `app/ingest/sources.py` — outlets change RSS paths over time;
 dead feed is skipped, not fatal. The pure stages and classifier mapping are
 covered DB-free in `tests/test_ingest.py` (the Anthropic client is stubbed).
 
-## Deploying (not yet done)
+## Deploying
 
-Any host that runs a container + managed Postgres with PostGIS works
-(Railway, Render, Fly.io, or Supabase for the DB). Build the `Dockerfile`,
-set `DATABASE_URL` to the managed PostGIS instance, and the entrypoint runs
-`init_db` + `seed` on boot. Then set `API_BASE_URL` on the Vercel frontend to
-the deployed API URL.
+Target stack: **Render** (API service + cron job) + **Supabase** (managed
+Postgres with PostGIS) + **Vercel** (frontend), source on **GitHub**. See
+[`DEPLOY.md`](DEPLOY.md) for the full runbook and the `render.yaml` Blueprint
+at the repo root.
