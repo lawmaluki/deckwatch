@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Python service — nothing here for a JS linter, and walking it trips on
+    // tool caches (.pytest_cache, .venv).
+    "backend/**",
   ]),
 ]);
 
