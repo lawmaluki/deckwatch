@@ -12,7 +12,9 @@ import {
   ExternalLink,
   Radio,
 } from "lucide-react";
+import clsx from "clsx";
 import { useAppStore } from "@/store/useAppStore";
+import { useUiStore } from "@/store/useUiStore";
 import { useIncidents } from "@/hooks/useIncidents";
 import { CATEGORIES } from "@/lib/data/categories";
 import { CategoryBadge } from "@/components/incidents/CategoryBadge";
@@ -33,6 +35,7 @@ const SOURCE_TYPE_LABEL: Record<string, string> = {
 export function IncidentDetailPanel() {
   const selectedId = useAppStore((s) => s.selectedIncidentId);
   const selectIncident = useAppStore((s) => s.selectIncident);
+  const intelFeedOpen = useUiStore((s) => s.intelFeedOpen);
   const { incidents } = useIncidents();
   const incident = incidents.find((i) => i.id === selectedId) ?? null;
   const similar = incident ? findSimilarIncidents(incident, incidents) : [];
@@ -46,7 +49,14 @@ export function IncidentDetailPanel() {
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: 40, opacity: 0 }}
           transition={{ type: "spring", damping: 30, stiffness: 320 }}
-          className="glass-panel absolute inset-x-0 bottom-0 z-[900] max-h-[70vh] overflow-y-auto rounded-t-2xl p-4 sm:inset-x-auto sm:right-4 sm:top-4 sm:bottom-4 sm:max-h-none sm:w-[400px] sm:rounded-2xl sm:p-5"
+          className={clsx(
+            "glass-panel absolute inset-x-0 bottom-0 max-h-[70vh] overflow-y-auto rounded-t-2xl p-4 sm:inset-x-auto sm:right-4 sm:top-4 sm:bottom-4 sm:max-h-none sm:w-[400px] sm:rounded-2xl sm:p-5",
+            // With the feed open, clear its 24rem drawer and rise above its
+            // scrim so both panels read as one side-by-side surface. Only from
+            // lg up: below that the two widths can't fit, so the detail panel
+            // covers the feed instead.
+            intelFeedOpen ? "z-[1402] lg:right-[25rem]" : "z-[900]"
+          )}
         >
           <div className="mb-3 flex items-start justify-between gap-3">
             <div className="flex flex-wrap items-center gap-1.5">

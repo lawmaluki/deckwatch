@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, Radio, X } from "lucide-react";
 import clsx from "clsx";
 import { useUiStore } from "@/store/useUiStore";
@@ -25,6 +24,7 @@ export function IntelFeedPanel() {
   const open = useUiStore((s) => s.intelFeedOpen);
   const setOpen = useUiStore((s) => s.setIntelFeedOpen);
   const selectIncident = useAppStore((s) => s.selectIncident);
+  const selectedId = useAppStore((s) => s.selectedIncidentId);
   const liveOnly = useAppStore((s) => s.liveOnly);
   const toggleLiveOnly = useAppStore((s) => s.toggleLiveOnly);
   const router = useRouter();
@@ -54,28 +54,18 @@ export function IntelFeedPanel() {
 
   function openIncident(id: string) {
     selectIncident(id);
-    setOpen(false);
     if (pathname !== "/") router.push("/");
   }
 
   return (
-    <AnimatePresence>
+    <>
       {open && (
         <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <div
             onClick={() => setOpen(false)}
             className="fixed inset-0 z-[1400] bg-black/60"
           />
-          <motion.div
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 30, stiffness: 320 }}
-            className="glass-panel fixed inset-y-0 right-0 z-[1401] flex w-full max-w-sm flex-col border-l border-border font-sans sm:top-14"
-          >
+          <div className="glass-panel fixed inset-y-0 right-0 z-[1401] flex w-full max-w-sm flex-col border-l border-border font-sans sm:top-14">
             <div className="shrink-0 border-b border-border p-4">
               <div className="mb-1 flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -151,11 +141,18 @@ export function IntelFeedPanel() {
               {shown.map((incident) => {
                 const cat = CATEGORIES[incident.category];
                 const verification = VERIFICATION_CONFIG[incident.verificationStatus];
+                const active = incident.id === selectedId;
                 return (
                   <button
                     key={incident.id}
                     onClick={() => openIncident(incident.id)}
-                    className="block w-full border-b border-border px-4 py-3 text-left transition-colors hover:bg-surface-raised"
+                    className={clsx(
+                      "block w-full border-b border-l-2 border-border px-4 py-3 text-left transition-colors",
+                      active
+                        ? "bg-surface-raised"
+                        : "border-l-transparent hover:bg-surface-raised"
+                    )}
+                    style={active ? { borderLeftColor: cat.color } : undefined}
                   >
                     <div className="mb-1 flex items-center justify-between gap-2">
                       <span
@@ -187,9 +184,9 @@ export function IntelFeedPanel() {
                 );
               })}
             </div>
-          </motion.div>
+          </div>
         </>
       )}
-    </AnimatePresence>
+    </>
   );
 }
