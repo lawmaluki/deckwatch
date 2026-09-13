@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDateTime, relativeTime } from "@/lib/format";
+import { formatDateTime, relativeTime, stripHtml } from "@/lib/format";
 import { DATA_REFERENCE_TIME } from "@/lib/data/mock-incidents";
 import { MS_PER_MINUTE, MS_PER_HOUR, MS_PER_DAY } from "@/lib/constants";
 
@@ -29,5 +29,26 @@ describe("formatDateTime", () => {
     expect(out).toContain("2026");
     expect(out).toContain("Jul");
     expect(out).toMatch(/12:00/);
+  });
+});
+
+describe("stripHtml", () => {
+  it("removes tags and decodes entities from feed markup", () => {
+    const input =
+      '<p>The UDA condemned the disruption&#8230;</p> <p>The post <a href="https://nairobinews.co';
+    expect(stripHtml(input)).toBe(
+      "The UDA condemned the disruption… The post"
+    );
+  });
+
+  it("leaves plain text untouched", () => {
+    expect(stripHtml("Six dead in Nakuru-Eldoret Highway crash")).toBe(
+      "Six dead in Nakuru-Eldoret Highway crash"
+    );
+  });
+
+  it("decodes common named and numeric entities", () => {
+    expect(stripHtml("Tom &amp; Jerry &lt;3")).toBe("Tom & Jerry <3");
+    expect(stripHtml("&#65;&#x42;")).toBe("AB");
   });
 });

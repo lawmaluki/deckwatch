@@ -19,7 +19,7 @@ import { CategoryBadge } from "@/components/incidents/CategoryBadge";
 import { SeverityBadge } from "@/components/incidents/SeverityBadge";
 import { VerificationBadge } from "@/components/incidents/VerificationBadge";
 import { IncidentListItem } from "@/components/incidents/IncidentListItem";
-import { formatDateTime, relativeTime } from "@/lib/format";
+import { formatDateTime, relativeTime, stripHtml } from "@/lib/format";
 import { findSimilarIncidents } from "@/lib/geo";
 
 const SOURCE_TYPE_LABEL: Record<string, string> = {
@@ -94,7 +94,9 @@ export function IncidentDetailPanel() {
             <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-brand">
               <Sparkles className="h-3.5 w-3.5" /> AI Summary
             </p>
-            <p className="text-xs leading-relaxed text-foreground/85">{incident.aiSummary}</p>
+            <p className="text-xs leading-relaxed text-foreground/85">
+              {stripHtml(incident.aiSummary)}
+            </p>
           </section>
 
           {/* Says only what we know: nothing is attached. It claimed "no

@@ -24,3 +24,33 @@ export function formatDateTime(iso: string): string {
     minute: "2-digit",
   });
 }
+
+const HTML_ENTITIES: Record<string, string> = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  nbsp: " ",
+  hellip: "…",
+};
+
+/** Strips HTML tags and decodes entities. Feed summaries often carry markup
+ * (e.g. "<p>...</p>") that isn't meant to render as text. */
+export function stripHtml(input: string): string {
+  return input
+    .replace(/<[^>]*$/, "") // trailing unterminated tag (e.g. markup truncated mid-attribute)
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (match, code: string) => {
+      if (code[0] === "#") {
+        const codePoint =
+          code[1] === "x" || code[1] === "X"
+            ? parseInt(code.slice(2), 16)
+            : parseInt(code.slice(1), 10);
+        return Number.isNaN(codePoint) ? match : String.fromCodePoint(codePoint);
+      }
+      return HTML_ENTITIES[code] ?? match;
+    })
+    .replace(/\s+/g, " ")
+    .trim();
+}

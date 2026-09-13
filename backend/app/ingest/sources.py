@@ -4,10 +4,35 @@ Feed URLs are best-effort and easy to edit — outlets change RSS paths over tim
 The pipeline tolerates a dead feed (logs and skips). Tests run against a
 committed fixture, not the live network."""
 
+import html
+import re
 from datetime import datetime, timezone
+from html.parser import HTMLParser
 from typing import Dict, List, Optional
 
 import feedparser
+
+
+class _TextExtractor(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.parts: List[str] = []
+
+    def handle_data(self, data: str) -> None:
+        self.parts.append(data)
+
+
+def _strip_html(raw: str) -> str:
+    """Strips HTML tags and decodes entities. Feed summaries commonly carry
+    markup (e.g. "<p>...</p>") that isn't meant to reach downstream text."""
+    # Drop a trailing unterminated tag (e.g. markup truncated mid-attribute) —
+    # otherwise HTMLParser treats the dangling "<a href=..." as plain text.
+    raw = re.sub(r"<[^>]*$", "", raw)
+    parser = _TextExtractor()
+    parser.feed(raw)
+    parser.close()
+    text = html.unescape("".join(parser.parts))
+    return re.sub(r"\s+", " ", text).strip()
 
 
 class Feed:
@@ -69,7 +94,7 @@ def parse_feed(content: str, feed: Feed) -> List[Dict[str, str]]:
     items = []
     for entry in parsed.entries:
         title = getattr(entry, "title", "").strip()
-        summary = getattr(entry, "summary", "").strip()
+        summary = _strip_html(getattr(entry, "summary", ""))
         link = getattr(entry, "link", "").strip()
         if not title or not link:
             continue
@@ -104,7 +129,7 @@ def fetch_items(feeds: Optional[List[Feed]] = None) -> List[Dict[str, str]]:
             items.append(
                 {
                     "title": title,
-                    "summary": getattr(entry, "summary", "").strip(),
+                    "summary": _strip_html(getattr(entry, "summary", "")),
                     "link": link,
                     "published": _published_iso(entry),
                     "source": feed.name,
