@@ -54,6 +54,10 @@ export function IntelFeedPanel() {
 
   function openIncident(id: string) {
     selectIncident(id);
+    // Only wide viewports show the two panels side by side. Below that the
+    // feed is full-bleed and the detail panel lands on top of it, so keeping
+    // it open would bury the map under two stacked sheets.
+    if (!window.matchMedia("(min-width: 1024px)").matches) setOpen(false);
     if (pathname !== "/") router.push("/");
   }
 

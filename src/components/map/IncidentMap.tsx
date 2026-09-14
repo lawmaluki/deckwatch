@@ -14,26 +14,38 @@ const KENYA_CENTER: [number, number] = [0.4, 37.9];
 const FLY_ZOOM = 11;
 const FLY_DURATION_S = 1.1;
 
-/** Width in px hidden behind panels docked over the map's right edge.
+// A panel has to leave at least this much of the map to be worth aiming at.
+// Anything covering more (the full-screen mobile feed) is ignored: there is no
+// strip left to centre an incident in, and offsetting would fling it off-map.
+const MIN_VISIBLE_FRACTION = 0.2;
+
+/** Pixels of map hidden behind docked panels, per edge.
  *
  * Panels opt in with `data-map-occluder` rather than this hardcoding their
- * widths, so the answer stays right across breakpoints and however many are
- * open. Full-width elements (the mobile sheet, the mobile feed) are skipped:
- * they don't leave a narrower strip to aim at. */
-function occludedRightPx(map: LeafletMap): number {
+ * widths, so the answer holds across breakpoints and however many are open.
+ * Side panels cost width; the mobile sheet costs height. */
+function occlusion(map: LeafletMap): { right: number; bottom: number } {
   const rect = map.getContainer().getBoundingClientRect();
-  const midpoint = rect.left + rect.width / 2;
+  const midX = rect.left + rect.width / 2;
+  const midY = rect.top + rect.height / 2;
   let leftmost = rect.right;
+  let topmost = rect.bottom;
 
   document.querySelectorAll<HTMLElement>("[data-map-occluder]").forEach((el) => {
     const r = el.getBoundingClientRect();
     if (r.width === 0 || r.height === 0) return;
-    if (r.left <= rect.left + 1) return;
-    if (r.right <= midpoint) return;
-    leftmost = Math.min(leftmost, r.left);
+
+    if (r.right > midX && r.left > rect.left + rect.width * MIN_VISIBLE_FRACTION) {
+      leftmost = Math.min(leftmost, r.left);
+    } else if (r.bottom > midY && r.top > rect.top + rect.height * MIN_VISIBLE_FRACTION) {
+      topmost = Math.min(topmost, r.top);
+    }
   });
 
-  return Math.max(0, rect.right - leftmost);
+  return {
+    right: Math.max(0, rect.right - leftmost),
+    bottom: Math.max(0, rect.bottom - topmost),
+  };
 }
 
 function FlyToIncident() {
@@ -59,10 +71,14 @@ function FlyToIncident() {
     flownTo.current = selectedIncidentId;
 
     const zoom = Math.max(map.getZoom(), FLY_ZOOM);
-    // Shift the centre by half the hidden strip so the incident settles in
-    // the middle of the visible map rather than behind a panel.
+    // Shift the centre by half of each hidden strip so the incident settles in
+    // the middle of the visible map rather than behind a panel — sideways for
+    // the desktop panels, upward for the mobile sheet.
+    const hidden = occlusion(map);
     const target = map.unproject(
-      map.project([incident.lat, incident.lng], zoom).add([occludedRightPx(map) / 2, 0]),
+      map
+        .project([incident.lat, incident.lng], zoom)
+        .add([hidden.right / 2, hidden.bottom / 2]),
       zoom
     );
     map.flyTo(target, zoom, { duration: FLY_DURATION_S });

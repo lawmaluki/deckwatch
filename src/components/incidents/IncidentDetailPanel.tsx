@@ -51,7 +51,10 @@ export function IncidentDetailPanel() {
           exit={{ x: 40, opacity: 0 }}
           transition={{ type: "spring", damping: 30, stiffness: 320 }}
           className={clsx(
-            "glass-panel absolute inset-x-0 bottom-0 max-h-[70vh] overflow-y-auto rounded-t-2xl p-4 sm:inset-x-auto sm:right-4 sm:top-4 sm:bottom-4 sm:max-h-none sm:w-[400px] sm:rounded-2xl sm:p-5",
+            // bottom-16 clears the mobile nav, which is only hidden from md —
+            // anchoring to the viewport bottom buries the panel's last rows
+            // behind it.
+            "glass-panel absolute inset-x-0 bottom-16 max-h-[70vh] overflow-y-auto rounded-t-2xl p-4 sm:inset-x-auto sm:right-4 sm:top-4 sm:max-h-none sm:w-[400px] sm:rounded-2xl sm:p-5 md:bottom-4",
             // With the feed open, clear its 24rem drawer so the two read as
             // one side-by-side surface — but only from lg up: below that the
             // widths can't both fit, so this stacks over the feed instead

@@ -44,11 +44,11 @@ export function MapExperience() {
         </div>
       </div>
 
-      <div className="pointer-events-none absolute bottom-16 left-3 z-[500] hidden sm:bottom-4 sm:block">
+      <div className="pointer-events-none absolute bottom-16 left-3 z-[500] hidden sm:block md:bottom-4">
         <MapLegend />
       </div>
 
-      <div className="pointer-events-none absolute inset-x-3 bottom-16 z-[500] flex justify-center sm:bottom-4">
+      <div className="pointer-events-none absolute inset-x-3 bottom-16 z-[500] flex justify-center md:bottom-4">
         <TimelineControl />
       </div>
 

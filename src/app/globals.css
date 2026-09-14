@@ -39,7 +39,11 @@
 
 html,
 body {
-  height: 100%;
+  /* dvh tracks the viewport as mobile browser chrome shows and hides; plain
+     100%/100vh resolves against the retracted-chrome viewport, which pushes
+     the fixed bottom nav below the visible area. vh first as the fallback. */
+  height: 100vh;
+  height: 100dvh;
   background: var(--background);
   color: var(--foreground);
 }
