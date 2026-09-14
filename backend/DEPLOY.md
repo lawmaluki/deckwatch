@@ -28,10 +28,14 @@ the smallest plan. Actions' free scheduled workflows cover a
 - New project at supabase.com → pick a region, set a DB password.
 - **SQL Editor** → run `create extension if not exists postgis;` (Supabase
   ships the extension but doesn't enable it by default).
-- **Project Settings → Database → Connection string**. Use the **Session
+- **Project Settings → Database → Connection string**. Use the **Transaction
   pooler** (port 6543) connection string — Render web services and GitHub
   Actions runners can both churn through direct-connection limits fast; the
   pooler handles that.
+- Transaction mode hands each statement whichever backend is free, so
+  server-side prepared statements can't be used. `db.py` disables them
+  (`prepare_threshold=None`); without that, boot dies on
+  `DuplicatePreparedStatement: prepared statement "_pg3_0" already exists`.
 - The app's `config.py` already rewrites a bare `postgresql://` or
   `postgres://` URL to `postgresql+psycopg://`, so paste Supabase's string as
   given — no manual edits needed.
