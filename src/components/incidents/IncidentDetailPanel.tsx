@@ -45,16 +45,17 @@ export function IncidentDetailPanel() {
       {incident && (
         <motion.aside
           key={incident.id}
+          data-map-occluder
           initial={{ x: 40, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           exit={{ x: 40, opacity: 0 }}
           transition={{ type: "spring", damping: 30, stiffness: 320 }}
           className={clsx(
             "glass-panel absolute inset-x-0 bottom-0 max-h-[70vh] overflow-y-auto rounded-t-2xl p-4 sm:inset-x-auto sm:right-4 sm:top-4 sm:bottom-4 sm:max-h-none sm:w-[400px] sm:rounded-2xl sm:p-5",
-            // With the feed open, clear its 24rem drawer and rise above its
-            // scrim so both panels read as one side-by-side surface. Only from
-            // lg up: below that the two widths can't fit, so the detail panel
-            // covers the feed instead.
+            // With the feed open, clear its 24rem drawer so the two read as
+            // one side-by-side surface — but only from lg up: below that the
+            // widths can't both fit, so this stacks over the feed instead
+            // (hence sitting above its z-index).
             intelFeedOpen ? "z-[1402] lg:right-[25rem]" : "z-[900]"
           )}
         >

@@ -61,11 +61,13 @@ export function IntelFeedPanel() {
     <>
       {open && (
         <>
+          {/* No backdrop: the feed is a working surface alongside the map, not
+              a modal over it, so panning and marker clicks stay live while it
+              is open. Closing is the X button only. */}
           <div
-            onClick={() => setOpen(false)}
-            className="fixed inset-0 z-[1400] bg-black/60"
-          />
-          <div className="glass-panel fixed inset-y-0 right-0 z-[1401] flex w-full max-w-sm flex-col border-l border-border font-sans sm:top-14">
+            data-map-occluder
+            className="glass-panel fixed inset-y-0 right-0 z-[1401] flex w-full max-w-sm flex-col border-l border-border font-sans sm:top-14"
+          >
             <div className="shrink-0 border-b border-border p-4">
               <div className="mb-1 flex items-center justify-between">
                 <div className="flex items-center gap-2">
