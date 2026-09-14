@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   X,
@@ -32,6 +33,11 @@ const SOURCE_TYPE_LABEL: Record<string, string> = {
   social: "Social",
 };
 
+// Seeded incidents routinely carry four to eight sources, which let the list
+// run longer than everything above it combined. Three is enough to show the
+// corroboration is real; the rest stay one tap away.
+const SOURCES_SHOWN = 3;
+
 export function IncidentDetailPanel() {
   const selectedId = useAppStore((s) => s.selectedIncidentId);
   const selectIncident = useAppStore((s) => s.selectIncident);
@@ -39,6 +45,19 @@ export function IncidentDetailPanel() {
   const { incidents } = useIncidents();
   const incident = incidents.find((i) => i.id === selectedId) ?? null;
   const similar = incident ? findSimilarIncidents(incident, incidents) : [];
+  // Keyed by incident rather than a bare boolean: the panel doesn't remount
+  // between incidents, so a boolean would leave the next one pre-expanded.
+  const [sourcesExpandedFor, setSourcesExpandedFor] = useState<string | null>(null);
+
+  const sourcesExpanded = !!incident && sourcesExpandedFor === incident.id;
+  const visibleSources = incident
+    ? sourcesExpanded
+      ? incident.sources
+      : incident.sources.slice(0, SOURCES_SHOWN)
+    : [];
+  const hiddenSourceCount = incident
+    ? incident.sources.length - visibleSources.length
+    : 0;
 
   return (
     <AnimatePresence>
@@ -124,32 +143,67 @@ export function IncidentDetailPanel() {
           )}
 
           <section className="mb-4">
-            <p className="mb-2 text-xs font-medium text-muted">Sources</p>
+            <div className="mb-2 flex items-baseline justify-between gap-2">
+              <p className="text-xs font-medium text-muted">Sources</p>
+              <p className="text-[10px] tabular-nums text-muted/70">
+                {incident.sources.length}
+              </p>
+            </div>
+
             <ul className="space-y-1.5">
-              {incident.sources.map((source, idx) => (
-                <li
-                  key={`${source.name}-${idx}`}
-                  className="flex items-center justify-between rounded-lg bg-surface px-2.5 py-1.5 text-xs"
-                >
-                  {source.url ? (
-                    <a
-                      href={source.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-foreground/90 hover:text-brand hover:underline"
-                    >
-                      {source.name}
-                      <ExternalLink className="h-3 w-3 opacity-60" />
-                    </a>
-                  ) : (
-                    <span className="text-foreground/90">{source.name}</span>
-                  )}
-                  <span className="rounded-full bg-surface-raised px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted">
-                    {SOURCE_TYPE_LABEL[source.type] ?? source.type}
-                  </span>
-                </li>
-              ))}
+              {visibleSources.map((source, idx) => {
+                const label = SOURCE_TYPE_LABEL[source.type] ?? source.type;
+                // The whole row is the target, not just the name: a two-word
+                // outlet gave a tap area far too small on a phone.
+                const body = (
+                  <>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-xs text-foreground/90">
+                        {source.name}
+                      </span>
+                      <span className="mt-0.5 block text-[10px] uppercase tracking-wide text-muted">
+                        {label}
+                      </span>
+                    </span>
+                    {source.url && (
+                      <ExternalLink className="mt-0.5 h-3 w-3 shrink-0 text-muted" />
+                    )}
+                  </>
+                );
+
+                return (
+                  <li key={`${source.name}-${idx}`}>
+                    {source.url ? (
+                      <a
+                        href={source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-start gap-2 rounded-lg border border-border/70 bg-surface px-2.5 py-2 transition-colors hover:border-brand/40 hover:bg-surface-raised"
+                      >
+                        {body}
+                      </a>
+                    ) : (
+                      <div className="flex items-start gap-2 rounded-lg border border-border/70 bg-surface px-2.5 py-2">
+                        {body}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
+
+            {(hiddenSourceCount > 0 || sourcesExpanded) && (
+              <button
+                onClick={() =>
+                  setSourcesExpandedFor(sourcesExpanded ? null : incident.id)
+                }
+                className="mt-1.5 w-full rounded-lg border border-dashed border-border py-1.5 text-[11px] font-medium text-muted transition-colors hover:border-brand/40 hover:text-foreground"
+              >
+                {sourcesExpanded
+                  ? "Show fewer"
+                  : `Show ${hiddenSourceCount} more`}
+              </button>
+            )}
           </section>
 
           <section className="mb-4">
