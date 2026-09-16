@@ -14,6 +14,13 @@ const KENYA_CENTER: [number, number] = [0.4, 37.9];
 const FLY_ZOOM = 11;
 const FLY_DURATION_S = 1.1;
 
+/** Kenya with a margin for border areas — mirrors the bounding box the backend
+ * validates citizen reports against (app/domain.py). */
+const KENYA_BOUNDS: [[number, number], [number, number]] = [
+  [-5.0, 33.0],
+  [5.5, 42.5],
+];
+
 // A panel has to leave at least this much of the map to be worth aiming at.
 // Anything covering more (the full-screen mobile feed) is ignored: there is no
 // strip left to centre an incident in, and offsetting would fling it off-map.
@@ -46,6 +53,31 @@ function occlusion(map: LeafletMap): { right: number; bottom: number } {
     right: Math.max(0, rect.right - leftmost),
     bottom: Math.max(0, rect.bottom - topmost),
   };
+}
+
+/** Opens on the whole country sized to this viewport.
+ *
+ * A fixed starting zoom can only be right for one screen — it left Kenya
+ * marooned in empty space on a desktop and cropped on a phone. Fitting instead
+ * makes the opening view the same view everywhere, whatever the window. */
+function FitCountry() {
+  const map = useMap();
+
+  useEffect(() => {
+    // Drop the floor before measuring: fitBounds clamps to minZoom, so a wide,
+    // short window would silently settle for a cropped country and then report
+    // that clamped zoom as the fit.
+    map.setMinZoom(0);
+    // Leaflet can measure the container before layout has settled, and then
+    // fits to a size the map never actually had.
+    map.invalidateSize();
+    map.fitBounds(KENYA_BOUNDS, { animate: false });
+    // The opening view becomes the floor: zooming out past it only ever buys
+    // empty ocean and neighbouring countries this app has nothing to say about.
+    map.setMinZoom(map.getZoom());
+  }, [map]);
+
+  return null;
 }
 
 function FlyToIncident() {
@@ -96,6 +128,12 @@ export default function IncidentMap({ incidents }: { incidents: Incident[] }) {
       zoom={6.3}
       minZoom={5.5}
       maxZoom={17}
+      // Leaflet rounds every zoom to a whole level by default, which quietly
+      // made the 6.3 above a 6 — and would floor the opening fit to the same
+      // 6, further out than the fixed zoom it replaces. Kenya needs somewhere
+      // between 5.9 and 6.9 depending on the window, so the levels have to be
+      // continuous for the fit to mean anything.
+      zoomSnap={0}
       zoomControl={false}
       className="h-full w-full"
       preferCanvas
@@ -104,6 +142,7 @@ export default function IncidentMap({ incidents }: { incidents: Incident[] }) {
         attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.basemaps.cartocdn.com/dark_matter/{z}/{x}/{y}{r}.png"
       />
+      <FitCountry />
       <CountyBoundaries />
       {showHeatmap ? (
         <HeatmapLayer incidents={incidents} />
