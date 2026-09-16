@@ -5,12 +5,31 @@ import { USE_API } from "@/lib/incidents-source";
 
 export type TimelineRange = 24 | 168 | 720;
 
-interface NotificationSubscription {
+export interface NotificationSubscription {
   counties: string[];
   categories: Category[];
   radiusKm: number;
+  /** Whether radius matching is wanted. The coordinates themselves are held in
+   * memory only (see userLocation) — an intent is worth remembering across
+   * visits, a person's last known position is not. */
+  useLocation: boolean;
   channels: { push: boolean; sms: boolean; email: boolean };
 }
+
+export interface Coords {
+  lat: number;
+  lng: number;
+}
+
+/** Named once so the initial state and the reset can't drift apart, and so a
+ * subscription persisted before a field existed can be filled in from it. */
+const DEFAULT_NOTIFICATIONS: NotificationSubscription = {
+  counties: [],
+  categories: [],
+  radiusKm: 10,
+  useLocation: false,
+  channels: { push: true, sms: false, email: false },
+};
 
 interface AppState {
   activeCategories: Category[];
@@ -45,6 +64,10 @@ interface AppState {
 
   notifications: NotificationSubscription;
   updateNotifications: (partial: Partial<NotificationSubscription>) => void;
+  resetNotifications: () => void;
+
+  userLocation: Coords | null;
+  setUserLocation: (coords: Coords | null) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -105,18 +128,30 @@ export const useAppStore = create<AppState>()(
       liveOnly: USE_API,
       toggleLiveOnly: () => set((s) => ({ liveOnly: !s.liveOnly })),
 
-      notifications: {
-        counties: [],
-        categories: [],
-        radiusKm: 10,
-        channels: { push: true, sms: false, email: false },
-      },
+      notifications: DEFAULT_NOTIFICATIONS,
       updateNotifications: (partial) =>
         set((s) => ({ notifications: { ...s.notifications, ...partial } })),
+      // useLocation returning to false lets the location effect drop the
+      // coordinates, so there's nothing to clear here.
+      resetNotifications: () => set({ notifications: DEFAULT_NOTIFICATIONS }),
+
+      userLocation: null,
+      setUserLocation: (coords) => set({ userLocation: coords }),
     }),
     {
       name: "deckwatch-kenya-preferences",
       partialize: (s) => ({ notifications: s.notifications }),
+      // Persisted subscriptions predate later fields, and zustand replaces the
+      // whole object rather than filling the gaps — so merge over the defaults
+      // or a returning reader gets `undefined` where a flag should be.
+      merge: (persisted, current) => {
+        const saved = (persisted ?? {}) as Partial<AppState>;
+        return {
+          ...current,
+          ...saved,
+          notifications: { ...DEFAULT_NOTIFICATIONS, ...(saved.notifications ?? {}) },
+        };
+      },
     }
   )
 );

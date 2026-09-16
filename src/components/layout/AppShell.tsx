@@ -3,6 +3,7 @@
 import { Header } from "@/components/layout/Header";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { NotificationsModal } from "@/components/notifications/NotificationsModal";
+import { AlertRuntime } from "@/components/notifications/AlertRuntime";
 import { IntelFeedPanel } from "@/components/incidents/IntelFeedPanel";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -13,6 +14,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <MobileNav />
       <NotificationsModal />
       <IntelFeedPanel />
+      <AlertRuntime />
     </>
   );
 }

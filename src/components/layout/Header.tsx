@@ -5,7 +5,9 @@ import { usePathname } from "next/navigation";
 import { Bell, Map, LayoutDashboard, Building2, ShieldAlert, Radio } from "lucide-react";
 import clsx from "clsx";
 import { useUiStore } from "@/store/useUiStore";
+import { useAppStore } from "@/store/useAppStore";
 import { useIncidents } from "@/hooks/useIncidents";
+import { hasActiveSubscription } from "@/lib/alerts";
 import { withinHours } from "@/lib/stats";
 import { LiveClock } from "@/components/layout/LiveClock";
 
@@ -19,6 +21,7 @@ export function Header() {
   const pathname = usePathname();
   const setNotificationsOpen = useUiStore((s) => s.setNotificationsOpen);
   const setIntelFeedOpen = useUiStore((s) => s.setIntelFeedOpen);
+  const alertsConfigured = useAppStore((s) => hasActiveSubscription(s.notifications));
   const { incidents } = useIncidents();
   const activeToday = incidents.filter((i) => withinHours(i, 24)).length;
   const critical = incidents.filter(
@@ -102,11 +105,16 @@ export function Header() {
           )}
         </button>
         <button
-          aria-label="Notifications"
+          aria-label={
+            alertsConfigured ? "Alert subscriptions active" : "Alert subscriptions"
+          }
           onClick={() => setNotificationsOpen(true)}
-          className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-muted transition-colors hover:text-foreground"
+          className="relative flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-muted transition-colors hover:text-foreground"
         >
-          <Bell className="h-4 w-4" />
+          <Bell className={clsx("h-4 w-4", alertsConfigured && "text-brand")} />
+          {alertsConfigured && (
+            <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-brand" />
+          )}
         </button>
       </div>
     </header>
