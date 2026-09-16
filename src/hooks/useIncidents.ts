@@ -7,8 +7,7 @@ import {
   USE_API,
 } from "@/lib/incidents-source";
 import type { Incident } from "@/lib/types";
-
-const POLL_INTERVAL_MS = 60_000;
+import { POLL_INTERVAL_MS } from "@/lib/constants";
 
 // Module-scoped poller shared by every component using this hook: one
 // interval and one in-flight request total, not one per consumer.

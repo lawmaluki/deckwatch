@@ -2,6 +2,7 @@
 
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { CATEGORIES } from "@/lib/data/categories";
+import { useMapFocus } from "@/hooks/useMapFocus";
 import type { Category } from "@/lib/types";
 
 export function CategoryBreakdownChart({
@@ -9,10 +10,12 @@ export function CategoryBreakdownChart({
 }: {
   data: { category: Category; count: number }[];
 }) {
+  const focus = useMapFocus();
   const chartData = data.map((d) => ({
     name: CATEGORIES[d.category].shortLabel,
     count: d.count,
     color: CATEGORIES[d.category].color,
+    category: d.category,
   }));
 
   return (
@@ -38,7 +41,15 @@ export function CategoryBreakdownChart({
             fontSize: 12,
           }}
         />
-        <Bar dataKey="count" radius={[0, 6, 6, 0]}>
+        <Bar
+          dataKey="count"
+          radius={[0, 6, 6, 0]}
+          cursor="pointer"
+          onClick={(bar) => {
+            const { category } = (bar.payload ?? {}) as { category?: Category };
+            if (category) focus({ kind: "category", value: category });
+          }}
+        >
           {chartData.map((entry) => (
             <Cell key={entry.name} fill={entry.color} />
           ))}

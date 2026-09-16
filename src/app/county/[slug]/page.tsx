@@ -52,15 +52,28 @@ export default async function CountyDashboardPage({
         </div>
 
         <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-3">
-          <StatCard label="Active incidents (24h)" value={last24h.length} icon={AlertTriangle} />
+          <StatCard
+            label="Active incidents (24h)"
+            value={last24h.length}
+            icon={<AlertTriangle className="h-4 w-4" />}
+            action={{ kind: "county", value: county.name }}
+          />
           <StatCard
             label="Most common category"
             value={topCategory ? CATEGORIES[topCategory.category].label : "—"}
-            icon={Clock}
+            icon={<Clock className="h-4 w-4" />}
             accent={topCategory ? CATEGORIES[topCategory.category].color : undefined}
             sublabel={topCategory ? `${topCategory.count} reports` : undefined}
+            action={
+              topCategory ? { kind: "category", value: topCategory.category } : undefined
+            }
           />
-          <StatCard label="Total tracked" value={incidents.length} icon={AlertTriangle} />
+          <StatCard
+            label="Total tracked"
+            value={incidents.length}
+            icon={<AlertTriangle className="h-4 w-4" />}
+            action={{ kind: "county", value: county.name }}
+          />
         </div>
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
