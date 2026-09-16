@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { MOCK_INCIDENTS, DATA_REFERENCE_TIME } from "@/lib/data/mock-incidents";
 import { BACKEND_URL } from "@/lib/backend";
+import { POLL_INTERVAL_MS } from "@/lib/constants";
 import type { Incident } from "@/lib/types";
 
 // Single seam for incident data. Everything outside this module (and the
@@ -106,7 +107,14 @@ export function replaceClientSnapshot(next: DataSnapshot): void {
 const fetchBackendIncidents = cache(async (): Promise<Incident[] | null> => {
   if (!BACKEND_URL) return null;
   try {
-    const res = await fetch(`${BACKEND_URL}/incidents`, { cache: "no-store" });
+    // Shared across requests for the length of one poll. Every navigation used
+    // to block on an uncached round trip to the API — which on a free instance
+    // that has spun down is the better part of a minute — to recompute
+    // aggregates over data the cron only moves every 15 minutes. Caching past
+    // the poll would be pointless: nothing here can be fresher than that.
+    const res = await fetch(`${BACKEND_URL}/incidents`, {
+      next: { revalidate: POLL_INTERVAL_MS / 1000 },
+    });
     if (!res.ok) return null;
     const body = (await res.json()) as { results: Incident[] };
     return body.results;
