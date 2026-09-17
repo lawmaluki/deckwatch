@@ -75,7 +75,7 @@ const ENDPOINTS: EndpointDoc[] = [
     method: "POST",
     path: "/api/reports",
     summary:
-      "Submit a citizen report for moderation (photo/video, description, location, optional anonymity).",
+      "Submit a citizen report: category, description, location, optional anonymity. Validated and acknowledged, but not stored — there is no moderation queue behind it yet.",
     example: `// Request
 {
   "category": "crime",
@@ -112,15 +112,21 @@ export default function ApiDocsPage() {
         <div className="mb-8 flex gap-3 rounded-2xl border border-medium/30 bg-medium/10 p-4">
           <AlertTriangle className="h-5 w-5 shrink-0 text-medium" />
           <p className="text-sm leading-relaxed text-foreground/90">
-            <span className="font-semibold">Live in this deployment — sample data.</span>{" "}
-            These endpoints are served by this site and can be called as
-            documented. They currently return the same seeded sample dataset
-            that powers the map; real ingestion arrives with the FastAPI +
+            <span className="font-semibold">Live in this deployment — real data.</span>{" "}
+            These endpoints are served by this site and proxy to the FastAPI +
             PostgreSQL/PostGIS backend described on the{" "}
             <a href="/why" className="text-brand hover:underline">
               Why Deckwatch
             </a>{" "}
-            page.
+            page. The incident endpoints return real reporting ingested from 13
+            Kenyan newsrooms, alongside the seeded sample set that keeps the map
+            populated while coverage grows — pass{" "}
+            <code className="rounded bg-surface px-1 py-0.5 text-[13px] text-foreground">
+              live=true
+            </code>{" "}
+            for only the real ones. <code className="text-foreground">/api/reports</code>{" "}
+            is the exception: it validates a submission and hands back an id,
+            but stores nothing until there is a moderation queue behind it.
           </p>
         </div>
 

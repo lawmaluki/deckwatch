@@ -83,15 +83,38 @@ export default function WhyDeckwatchPage() {
             <AlertTriangle className="h-4 w-4 text-medium" />
             Current status
           </h2>
+          <p className="mb-3 text-sm leading-relaxed text-muted">
+            Live news ingestion is running. Deckwatch reads 13 Kenyan newsrooms
+            every 15 minutes, classifies what it finds, locates it, and puts it
+            on the map. Incidents marked{" "}
+            <span className="font-medium text-brand">LIVE</span> are real
+            reporting, gathered automatically.
+          </p>
+          <p className="mb-3 text-sm leading-relaxed text-muted">
+            A seeded sample dataset still sits alongside it, so the map has
+            something to show while coverage grows. The map hides it by default,
+            and that LIVE badge is what separates the two.
+          </p>
+          <p className="mb-3 text-sm leading-relaxed text-muted">
+            Confidence measures corroboration, not truth. An event carried by
+            several genuinely independent newsrooms scores higher than one
+            carried by four mastheads that share an owner — and so, one
+            newsroom. It is deliberately not a judgement about whether a story
+            is accurate, which is not a call this system is in any position to
+            make.
+          </p>
           <p className="text-sm leading-relaxed text-muted">
-            Deckwatch is currently a working prototype. The map, dashboards, and
-            incident feed you see are running on realistic seeded sample data, not
-            a live feed of real incidents yet. Live news ingestion, AI-based
-            verification, and citizen reporting are on the roadmap — see the{" "}
+            Citizen reporting is not live yet. The API accepts and validates a
+            submission, but nothing is stored until there is a moderation queue
+            behind it — see the{" "}
             <a href="/api-docs" className="text-brand hover:underline">
               API page
             </a>{" "}
-            for how the data model is shaped for that transition.
+            for how that endpoint is shaped, and{" "}
+            <a href="/whats-new" className="text-brand hover:underline">
+              What&rsquo;s new
+            </a>{" "}
+            for what has shipped since.
           </p>
         </div>
       </div>
