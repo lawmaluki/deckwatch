@@ -85,6 +85,13 @@ export function Header() {
           </Link>
           <span className="text-border">|</span>
           <Link
+            href="/whats-new"
+            className="rounded-full px-2 py-1 transition-colors hover:bg-surface-raised hover:text-foreground"
+          >
+            What&rsquo;s new
+          </Link>
+          <span className="text-border">|</span>
+          <Link
             href="/api-docs"
             className="rounded-full px-2 py-1 transition-colors hover:bg-surface-raised hover:text-foreground"
           >
