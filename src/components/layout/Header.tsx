@@ -46,13 +46,13 @@ export function Header() {
                 key={link.href}
                 href={link.href}
                 className={clsx(
-                  "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                  "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
                   active
                     ? "bg-surface-raised text-foreground"
                     : "text-muted hover:text-foreground"
                 )}
               >
-                <link.icon className="h-4 w-4" />
+                <link.icon className="h-3.5 w-3.5" />
                 {link.label}
               </Link>
             );
@@ -76,7 +76,7 @@ export function Header() {
             </span>
           )}
         </div>
-        <div className="hidden items-center gap-1 rounded-full border border-border bg-surface px-1 py-1 text-[11px] font-medium text-muted lg:flex">
+        <div className="hidden items-center gap-1 rounded-full border border-border bg-surface px-1 py-1 text-xs font-medium text-muted lg:flex">
           <Link
             href="/why"
             className="rounded-full px-2 py-1 transition-colors hover:bg-surface-raised hover:text-foreground"
