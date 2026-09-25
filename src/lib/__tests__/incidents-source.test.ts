@@ -107,12 +107,36 @@ describe("getIncidents (server, api mode)", () => {
     expect(incidents.map((i) => i.id)).toEqual(["a"]);
   });
 
-  it("falls back to the seed dataset when the backend is unreachable", async () => {
+  // The seed is development scaffolding, not reporting. Substituting it for a
+  // spun-down backend would put 300-odd invented incidents on a page that
+  // claims to list collected ones, at the moment nobody is watching.
+  it("renders empty rather than seed when the backend is unreachable", async () => {
     vi.resetModules();
     vi.stubEnv("NEXT_PUBLIC_DATA_SOURCE", "api");
     vi.stubEnv("API_BASE_URL", "https://backend.example");
     global.fetch = vi.fn().mockRejectedValue(new Error("network down"));
     vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const { getIncidents } = await import("@/lib/incidents-source");
+    expect(await getIncidents()).toEqual([]);
+  });
+
+  it("renders empty rather than seed when the backend errors", async () => {
+    vi.resetModules();
+    vi.stubEnv("NEXT_PUBLIC_DATA_SOURCE", "api");
+    vi.stubEnv("API_BASE_URL", "https://backend.example");
+    global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 502 }) as unknown as typeof fetch;
+
+    const { getIncidents } = await import("@/lib/incidents-source");
+    expect(await getIncidents()).toEqual([]);
+  });
+
+  // api mode with no backend configured is a valid local setup: the /api
+  // routes serve the seed themselves, so the seed is the intended source.
+  it("still serves the seed in api mode when no backend is configured", async () => {
+    vi.resetModules();
+    vi.stubEnv("NEXT_PUBLIC_DATA_SOURCE", "api");
+    vi.stubEnv("API_BASE_URL", "");
 
     const { getIncidents } = await import("@/lib/incidents-source");
     const incidents = await getIncidents();

@@ -93,9 +93,13 @@ export function replaceClientSnapshot(next: DataSnapshot): void {
 // here, not through useIncidents()/getDataSnapshot() — those exist to keep
 // the client map's SSR and hydration snapshots identical, which server
 // pages don't need. So this talks to the real backend directly, and filters
-// to live incidents on success (matching the map's default), falling back
-// to the unfiltered shifted seed if the backend is unreachable rather than
-// rendering an empty page.
+// to live incidents on success (matching the map's default).
+//
+// There is deliberately no seed fallback once a backend is configured: an
+// unreachable backend renders an empty page rather than passing the seeded
+// sample set off as collected reporting. The seed exists to keep local
+// development populated, and a spun-down instance is exactly when a silent
+// substitution would be least visible and most misleading.
 //
 // Wrapped in React's cache() so every getIncidents() call within one request
 // shares a single fetch. Without this, Next can invoke a dynamic page's
@@ -119,17 +123,20 @@ const fetchBackendIncidents = cache(async (): Promise<Incident[] | null> => {
     const body = (await res.json()) as { results: Incident[] };
     return body.results;
   } catch (err) {
-    console.error("getIncidents: backend fetch failed, falling back to seed", err);
+    console.error("getIncidents: backend fetch failed, rendering empty", err);
     return null;
   }
 });
 
 export async function getIncidents(): Promise<Incident[]> {
-  if (IS_SERVER && USE_API) {
+  // BACKEND_URL, not USE_API, is what makes the seed inappropriate here.
+  // `api` mode without a backend is a valid local setup — the /api routes
+  // serve the seed themselves — and there the seed is the intended source.
+  if (IS_SERVER && USE_API && BACKEND_URL) {
     const backend = await fetchBackendIncidents();
     // Sorted again rather than trusted: server pages slice this for "recent"
     // lists, so the ordering guarantee should not depend on the backend's.
-    if (backend) return sortNewestFirst(backend.filter((i) => i.isLive));
+    return backend ? sortNewestFirst(backend.filter((i) => i.isLive)) : [];
   }
   return getDataSnapshot().incidents;
 }

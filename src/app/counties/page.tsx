@@ -2,7 +2,7 @@ import Link from "next/link";
 import { COUNTIES } from "@/lib/data/counties";
 import { connection } from "next/server";
 import { getIncidents, USE_API } from "@/lib/incidents-source";
-import { summarizeByCounty, riskLabel, withinHours } from "@/lib/stats";
+import { summarizeByCounty, riskLabel } from "@/lib/stats";
 
 export default async function CountiesIndexPage() {
   if (USE_API) await connection();
@@ -26,8 +26,10 @@ export default async function CountiesIndexPage() {
         <div className="mb-6">
           <h1 className="text-xl font-semibold text-foreground">Counties</h1>
           <p className="text-sm text-muted">
-            All 47 counties ranked by current risk score. Active incidents in the last 24 hours: {" "}
-            {incidents.filter((i) => withinHours(i, 24)).length}.
+            All 47 counties ranked by current risk score.{" "}
+            {incidents.length === 0
+              ? "No incidents collected yet."
+              : `${incidents.length} reported incidents in total, across ${summaries.length} counties.`}
           </p>
         </div>
 
