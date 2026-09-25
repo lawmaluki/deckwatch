@@ -13,6 +13,7 @@
     "export-seed": "tsx scripts/export-seed.ts"
   },
   "dependencies": {
+    "@next/third-parties": "^16.2.10",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "framer-motion": "^12.42.2",
