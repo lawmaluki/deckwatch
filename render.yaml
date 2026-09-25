@@ -31,7 +31,11 @@ services:
       - key: DATABASE_URL
         sync: false # paste the Supabase connection string
       - key: SEED_ON_START
-        value: "true" # keeps the map non-empty before the first ingest run
+        # Off: nothing serves the seed any more. Server pages filter to
+        # ingested incidents and /api/incidents forces live=true, so seeded
+        # rows would sit in the database unreadable, padding every query.
+        # Existing ones: python -m app.purge_seed
+        value: "false"
       - key: INGEST_CLASSIFIER
         value: "rule" # free, no API key; set "llm" + ANTHROPIC_API_KEY for Claude
       - key: ANTHROPIC_API_KEY
