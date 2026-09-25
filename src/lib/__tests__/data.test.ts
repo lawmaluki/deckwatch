@@ -53,7 +53,9 @@ describe("mock incident generation", () => {
       expect(i.verificationScore).toBeGreaterThanOrEqual(4);
       expect(i.verificationScore).toBeLessThanOrEqual(99);
       expect(i.sources.length).toBeGreaterThan(0);
-      expect(i.recommendedActions.length).toBeGreaterThan(0);
+      // Optional on the type because list responses omit it; the mock
+      // dataset is the complete form and must always carry it.
+      expect(i.recommendedActions?.length).toBeGreaterThan(0);
       expect(new Date(i.reportedAt).getTime()).toBeLessThanOrEqual(refTime);
       // Rough Kenya bounding box.
       expect(i.lat).toBeGreaterThan(-5.5);

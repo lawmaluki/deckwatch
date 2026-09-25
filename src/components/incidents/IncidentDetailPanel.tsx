@@ -22,6 +22,7 @@ import { CategoryBadge } from "@/components/incidents/CategoryBadge";
 import { SeverityBadge } from "@/components/incidents/SeverityBadge";
 import { VerificationBadge } from "@/components/incidents/VerificationBadge";
 import { IncidentListItem } from "@/components/incidents/IncidentListItem";
+import { useIncidentDetail } from "@/hooks/useIncidentDetail";
 import { formatDateTime, relativeTime, stripHtml } from "@/lib/format";
 import { findSimilarIncidents } from "@/lib/geo";
 
@@ -43,7 +44,12 @@ export function IncidentDetailPanel() {
   const selectIncident = useAppStore((s) => s.selectIncident);
   const intelFeedOpen = useUiStore((s) => s.intelFeedOpen);
   const { incidents } = useIncidents();
-  const incident = incidents.find((i) => i.id === selectedId) ?? null;
+  const listed = incidents.find((i) => i.id === selectedId) ?? null;
+  // The list omits aiSummary/recommendedActions to stay small, so they are
+  // fetched for the one incident actually opened. Mock data carries them
+  // inline, and then this never fires.
+  const detail = useIncidentDetail(listed);
+  const incident = detail ?? listed;
   const similar = incident ? findSimilarIncidents(incident, incidents) : [];
   // Keyed by incident rather than a bare boolean: the panel doesn't remount
   // between incidents, so a boolean would leave the next one pre-expanded.
@@ -127,9 +133,16 @@ export function IncidentDetailPanel() {
             <p className="mb-1.5 flex items-center gap-1.5 text-xs font-medium text-brand">
               <Sparkles className="h-3.5 w-3.5" /> AI Summary
             </p>
-            <p className="text-xs leading-relaxed text-foreground/85">
-              {stripHtml(incident.aiSummary)}
-            </p>
+            {incident.aiSummary === undefined ? (
+              <div className="space-y-1.5" aria-label="Loading summary">
+                <div className="h-3 w-full animate-pulse rounded bg-surface-raised" />
+                <div className="h-3 w-4/5 animate-pulse rounded bg-surface-raised" />
+              </div>
+            ) : (
+              <p className="text-xs leading-relaxed text-foreground/85">
+                {stripHtml(incident.aiSummary)}
+              </p>
+            )}
           </section>
 
           {/* Says only what we know: nothing is attached. It claimed "no
@@ -206,19 +219,23 @@ export function IncidentDetailPanel() {
             )}
           </section>
 
-          <section className="mb-4">
-            <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-muted">
-              <ShieldAlert className="h-3.5 w-3.5" /> Recommended actions
-            </p>
-            <ul className="space-y-1.5">
-              {incident.recommendedActions.map((action) => (
-                <li key={action} className="flex gap-2 text-xs text-foreground/85">
-                  <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-brand" />
-                  {action}
-                </li>
-              ))}
-            </ul>
-          </section>
+          {/* Hidden entirely until it arrives: a heading over an empty list
+              reads as "no actions recommended", which is not what we mean. */}
+          {incident.recommendedActions !== undefined && (
+            <section className="mb-4">
+              <p className="mb-2 flex items-center gap-1.5 text-xs font-medium text-muted">
+                <ShieldAlert className="h-3.5 w-3.5" /> Recommended actions
+              </p>
+              <ul className="space-y-1.5">
+                {incident.recommendedActions.map((action) => (
+                  <li key={action} className="flex gap-2 text-xs text-foreground/85">
+                    <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-brand" />
+                    {action}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           {similar.length > 0 && (
             <section>

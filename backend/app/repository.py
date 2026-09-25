@@ -12,8 +12,15 @@ from . import domain
 from .models import County, Incident
 
 
-def _to_dict(inc: Incident, lat: float, lng: float) -> domain.Incident:
-    return {
+def _to_dict(inc: Incident, lat: float, lng: float, detail: bool = True) -> domain.Incident:
+    """`detail=False` omits aiSummary and recommendedActions.
+
+    Together they are ~35% of a list response and are read only for the one
+    incident a reader opens, which /incidents/{id} serves. Nothing filters or
+    aggregates on them — free-text search covers title, location and county —
+    so leaving them out of the list costs no behaviour.
+    """
+    out: domain.Incident = {
         "id": inc.id,
         "title": inc.title,
         "category": inc.category,
@@ -27,14 +34,16 @@ def _to_dict(inc: Incident, lat: float, lng: float) -> domain.Incident:
         "verificationStatus": inc.verification_status,
         "sources": inc.sources,
         "reportCount": inc.report_count,
-        "aiSummary": inc.ai_summary,
-        "recommendedActions": inc.recommended_actions,
         "hasImage": inc.has_image,
         "isCitizenReport": inc.is_citizen_report,
         # Ingested incidents are id-prefixed "ing-" (see pipeline.build_incident);
         # computed rather than stored so no migration was needed to add this.
         "isLive": inc.id.startswith("ing-"),
     }
+    if detail:
+        out["aiSummary"] = inc.ai_summary
+        out["recommendedActions"] = inc.recommended_actions
+    return out
 
 
 def _select_with_coords():
@@ -43,9 +52,10 @@ def _select_with_coords():
     ).order_by(Incident.ordinal)
 
 
-def get_all_incidents(session: Session) -> List[domain.Incident]:
+def get_all_incidents(session: Session, detail: bool = False) -> List[domain.Incident]:
+    """Summaries by default: every caller is a list or an aggregate."""
     rows = session.execute(_select_with_coords()).all()
-    return [_to_dict(inc, lat, lng) for inc, lat, lng in rows]
+    return [_to_dict(inc, lat, lng, detail) for inc, lat, lng in rows]
 
 
 def get_incident(session: Session, incident_id: str) -> Optional[domain.Incident]:
@@ -64,7 +74,7 @@ def get_incidents_by_county(
     rows = session.execute(
         _select_with_coords().where(Incident.county_name == county_name)
     ).all()
-    return [_to_dict(inc, lat, lng) for inc, lat, lng in rows]
+    return [_to_dict(inc, lat, lng, detail=False) for inc, lat, lng in rows]
 
 
 def get_county_by_slug(session: Session, slug: str) -> Optional[County]:

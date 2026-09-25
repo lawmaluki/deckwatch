@@ -4,10 +4,12 @@ import { filterIncidents } from "@/lib/incident-filter";
 import { parseIncidentQuery } from "@/lib/api-validation";
 import { BACKEND_URL, proxyJson } from "@/lib/backend";
 
-// NOTE: results are full Incident objects — a deliberate superset of the
-// example in /api-docs (aiSummary/recommendedActions included) so clients can
-// render incident detail without a per-incident follow-up fetch. Data is
-// re-anchored to request time (asOf) so the feed always reads as live.
+// NOTE: results are summaries. aiSummary and recommendedActions were once
+// included so a client could render detail without a follow-up fetch, but
+// they are ~35% of the payload and are read for the one incident a reader
+// opens, so that trade stopped paying at this list size — /incidents/{id}
+// serves them instead. Data is re-anchored to request time (asOf) so the
+// feed always reads as live.
 export async function GET(request: NextRequest) {
   if (BACKEND_URL) {
     // Seed rows live in the deployed database but can never be displayed, so

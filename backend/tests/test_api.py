@@ -42,7 +42,11 @@ def test_list_returns_full_dataset(client):
     # asOf ~ now, and the newest incident is re-anchored to near it.
     as_of = datetime.fromisoformat(body["asOf"].replace("Z", "+00:00"))
     assert abs((as_of - datetime.now(timezone.utc)).total_seconds()) < 30
-    assert "aiSummary" in body["results"][0]
+    # The list is summaries: the detail fields are ~35% of it and are read
+    # only for the incident a reader opens, which /incidents/{id} serves.
+    assert "aiSummary" not in body["results"][0]
+    assert "recommendedActions" not in body["results"][0]
+    assert body["results"][0]["title"]
 
 
 def test_filter_category_and_reject_unknown(client):
@@ -68,7 +72,9 @@ def test_since_and_limit(client):
 def test_incident_by_id(client):
     first = client.get("/incidents?limit=1").json()["results"][0]["id"]
     r = client.get(f"/incidents/{first}")
+    # The detail route is the one place that carries them.
     assert r.status_code == 200 and isinstance(r.json()["recommendedActions"], list)
+    assert isinstance(r.json()["aiSummary"], str)
     assert client.get("/incidents/nope").status_code == 404
 
 

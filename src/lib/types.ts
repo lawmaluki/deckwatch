@@ -42,8 +42,10 @@ export interface Incident {
   verificationStatus: VerificationStatus;
   sources: Source[];
   reportCount: number;
-  aiSummary: string;
-  recommendedActions: string[];
+  /** Detail-only. Absent from list responses, which omit both to stay small;
+   * /api/incidents/{id} carries them. See IncidentDetailPanel. */
+  aiSummary?: string;
+  recommendedActions?: string[];
   hasImage: boolean;
   isCitizenReport: boolean;
   /** True for incidents written by the real news-ingestion pipeline, as

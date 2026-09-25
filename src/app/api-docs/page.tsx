@@ -18,7 +18,7 @@ const ENDPOINTS: EndpointDoc[] = [
     method: "GET",
     path: "/api/incidents",
     summary:
-      "List incidents, newest first. Only real ingested reporting is returned (isLive: true, ids starting ing-), and reportedAt is the source article's own publish time. Supports query params: category, severity, county, verification, since (ISO date), limit (positive integer; applied after sorting, so limit=N returns the N most recent). Results are full incident objects — the example below is trimmed, and each result also carries aiSummary and recommendedActions.",
+      "List incidents, newest first. Only real ingested reporting is returned (isLive: true, ids starting ing-), and reportedAt is the source article's own publish time. Supports query params: category, severity, county, verification, since (ISO date), limit (positive integer; applied after sorting, so limit=N returns the N most recent). Results are summaries: aiSummary and recommendedActions are omitted here and served by /api/incidents/{id}, which keeps a full list around a third smaller.",
     example: `{
   "count": 2,
   "asOf": "2026-07-12T10:30:00.000Z",
