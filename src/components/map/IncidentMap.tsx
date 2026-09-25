@@ -1,6 +1,6 @@
 "use client";
 
-import { MapContainer, TileLayer, useMap } from "react-leaflet";
+import { MapContainer, useMap } from "react-leaflet";
 import { useEffect, useRef } from "react";
 import type { Map as LeafletMap } from "leaflet";
 import type { Incident } from "@/lib/types";
@@ -138,16 +138,8 @@ export default function IncidentMap({ incidents }: { incidents: Incident[] }) {
       className="h-full w-full"
       preferCanvas
     >
-      {/* CARTO's free dark tiles now come back watermarked without an API key,
-          so this uses OSM's keyless standard tiles, darkened in CSS
-          (.dark-tiles in globals.css). Fine for light traffic; OSM's tile
-          policy rules out heavy production use — move to a keyed provider
-          before scaling. */}
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-        className="dark-tiles"
-      />
+      {/* No basemap tiles on purpose: only the county outlines are drawn, so
+          lakes, vegetation and roads don't compete with the incident markers. */}
       <FitCountry />
       <CountyBoundaries />
       {showHeatmap ? (
