@@ -32,7 +32,12 @@ export default function MiniHeatmapInner({
       className="h-full w-full rounded-xl"
       preferCanvas
     >
-      <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_matter/{z}/{x}/{y}{r}.png" />
+      {/* Same keyless OSM + CSS-dark basemap as IncidentMap. */}
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+        className="dark-tiles"
+      />
       <CountyBoundaries />
       <HeatmapLayer incidents={incidents} />
     </MapContainer>

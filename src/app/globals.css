@@ -80,6 +80,12 @@ body {
   background: #060a10;
   font-family: var(--font-sans), sans-serif;
 }
+/* Turns OSM's light tiles into a dark basemap: invert, rotate hue back so
+   water stays bluish, then mute it so markers stand out. */
+.leaflet-tile-pane .dark-tiles {
+  filter: invert(1) hue-rotate(180deg) grayscale(0.6) brightness(0.75)
+    contrast(0.9);
+}
 .leaflet-control-zoom a {
   background-color: var(--surface-raised) !important;
   color: var(--foreground) !important;

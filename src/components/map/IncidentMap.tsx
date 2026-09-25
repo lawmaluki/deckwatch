@@ -138,9 +138,15 @@ export default function IncidentMap({ incidents }: { incidents: Incident[] }) {
       className="h-full w-full"
       preferCanvas
     >
+      {/* CARTO's free dark tiles now come back watermarked without an API key,
+          so this uses OSM's keyless standard tiles, darkened in CSS
+          (.dark-tiles in globals.css). Fine for light traffic; OSM's tile
+          policy rules out heavy production use — move to a keyed provider
+          before scaling. */}
       <TileLayer
-        attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        url="https://{s}.basemaps.cartocdn.com/dark_matter/{z}/{x}/{y}{r}.png"
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+        className="dark-tiles"
       />
       <FitCountry />
       <CountyBoundaries />
