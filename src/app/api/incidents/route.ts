@@ -9,7 +9,17 @@ import { BACKEND_URL, proxyJson } from "@/lib/backend";
 // render incident detail without a per-incident follow-up fetch. Data is
 // re-anchored to request time (asOf) so the feed always reads as live.
 export async function GET(request: NextRequest) {
-  if (BACKEND_URL) return proxyJson(`/incidents${request.nextUrl.search}`);
+  if (BACKEND_URL) {
+    // Seed rows live in the deployed database but can never be displayed, so
+    // the filter is forced here rather than left to the client: unfiltered,
+    // better than half of every poll was seed the browser downloaded only to
+    // discard. Gated on BACKEND_URL for the same reason getIncidents() is —
+    // api mode without a backend serves the seed from here, and there it is
+    // the only data there is.
+    const params = new URLSearchParams(request.nextUrl.searchParams);
+    params.set("live", "true");
+    return proxyJson(`/incidents?${params}`);
+  }
 
   const asOf = new Date();
   const parsed = parseIncidentQuery(request.nextUrl.searchParams, asOf.getTime());

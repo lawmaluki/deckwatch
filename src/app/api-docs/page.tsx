@@ -18,7 +18,7 @@ const ENDPOINTS: EndpointDoc[] = [
     method: "GET",
     path: "/api/incidents",
     summary:
-      "List incidents, newest first. Supports query params: category, severity, county, verification, live (true/false — real ingested incidents vs seed data), since (ISO date), limit (positive integer; applied after sorting, so limit=N returns the N most recent). Results are full incident objects — the example below is trimmed, and each result also carries aiSummary and recommendedActions. Live incidents (isLive: true, ids starting ing-) keep their source article's real publish time in reportedAt; seed incidents have theirs shifted to read as recent.",
+      "List incidents, newest first. Only real ingested reporting is returned (isLive: true, ids starting ing-), and reportedAt is the source article's own publish time. Supports query params: category, severity, county, verification, since (ISO date), limit (positive integer; applied after sorting, so limit=N returns the N most recent). Results are full incident objects — the example below is trimmed, and each result also carries aiSummary and recommendedActions.",
     example: `{
   "count": 2,
   "asOf": "2026-07-12T10:30:00.000Z",
@@ -121,12 +121,10 @@ export default function ApiDocsPage() {
               Why Deckwatch
             </a>{" "}
             page. The incident endpoints return real reporting ingested from 13
-            Kenyan newsrooms, alongside the seeded sample set that keeps the map
-            populated while coverage grows — pass{" "}
-            <code className="rounded bg-surface px-1 py-0.5 text-[13px] text-foreground">
-              live=true
-            </code>{" "}
-            for only the real ones. <code className="text-foreground">/api/reports</code>{" "}
+            Kenyan newsrooms — and only that. A seeded sample set exists to keep
+            local development populated, but it is never served here, so nothing
+            you read from this API is invented.{" "}
+            <code className="text-foreground">/api/reports</code>{" "}
             is the exception: it validates a submission and hands back an id,
             but stores nothing until there is a moderation queue behind it.
           </p>
