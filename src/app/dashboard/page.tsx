@@ -1,6 +1,7 @@
 import { AlertTriangle, Flame, MapPinned, TrendingUp } from "lucide-react";
 import { connection } from "next/server";
-import { getIncidents, getReferenceTime, USE_API } from "@/lib/incidents-source";
+import { readIncidents, getReferenceTime, USE_API } from "@/lib/incidents-source";
+import { DataUnavailableNotice } from "@/components/layout/DataUnavailableNotice";
 import { withinHours, summarizeByCounty, categoryBreakdown, dailyTrend, riskLabel } from "@/lib/stats";
 import { CATEGORIES } from "@/lib/data/categories";
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -18,7 +19,7 @@ export default async function NationalDashboardPage() {
   // Live data must be re-anchored per request; mock builds inline USE_API to
   // false and stay fully static.
   if (USE_API) await connection();
-  const incidents = await getIncidents();
+  const { incidents, unavailable } = await readIncidents();
   const last24h = incidents.filter((i) => withinHours(i, 24));
   const critical24h = last24h.filter((i) => i.severity === "critical");
   const countySummaries = summarizeByCounty(incidents);
@@ -32,6 +33,7 @@ export default async function NationalDashboardPage() {
     <div className="h-full overflow-y-auto px-4 py-5 sm:px-8">
       <LiveRefresh />
       <div className="mx-auto max-w-6xl">
+        {unavailable && <DataUnavailableNotice />}
         <div className="mb-6">
           <h1 className="text-xl font-semibold text-foreground">National Dashboard</h1>
           <p className="text-sm text-muted">

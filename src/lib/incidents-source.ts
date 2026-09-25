@@ -128,17 +128,30 @@ const fetchBackendIncidents = cache(async (): Promise<Incident[] | null> => {
   }
 });
 
-export async function getIncidents(): Promise<Incident[]> {
+export interface IncidentsRead {
+  incidents: Incident[];
+  /** The backend could not be reached. Distinguishes "nothing has been
+   * collected" from "we cannot see what was collected" — without it an
+   * outage reads as a country with no incidents, which is its own untruth. */
+  unavailable: boolean;
+}
+
+export async function readIncidents(): Promise<IncidentsRead> {
   // BACKEND_URL, not USE_API, is what makes the seed inappropriate here.
   // `api` mode without a backend is a valid local setup — the /api routes
   // serve the seed themselves — and there the seed is the intended source.
   if (IS_SERVER && USE_API && BACKEND_URL) {
     const backend = await fetchBackendIncidents();
+    if (!backend) return { incidents: [], unavailable: true };
     // Sorted again rather than trusted: server pages slice this for "recent"
     // lists, so the ordering guarantee should not depend on the backend's.
-    return backend ? sortNewestFirst(backend.filter((i) => i.isLive)) : [];
+    return { incidents: sortNewestFirst(backend.filter((i) => i.isLive)), unavailable: false };
   }
-  return getDataSnapshot().incidents;
+  return { incidents: getDataSnapshot().incidents, unavailable: false };
+}
+
+export async function getIncidents(): Promise<Incident[]> {
+  return (await readIncidents()).incidents;
 }
 
 // Synchronous snapshot for the client path (useIncidents only).

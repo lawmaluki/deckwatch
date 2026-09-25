@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, AlertTriangle, Clock } from "lucide-react";
 import { COUNTIES, COUNTY_BY_SLUG } from "@/lib/data/counties";
 import { connection } from "next/server";
-import { getIncidents, USE_API } from "@/lib/incidents-source";
+import { readIncidents, USE_API } from "@/lib/incidents-source";
+import { DataUnavailableNotice } from "@/components/layout/DataUnavailableNotice";
 import {
   withinHours,
   categoryBreakdown,
@@ -35,7 +36,7 @@ export default async function CountyDashboardPage({
   const county = COUNTY_BY_SLUG[slug];
   if (!county) notFound();
 
-  const allIncidents = await getIncidents();
+  const { incidents: allIncidents, unavailable } = await readIncidents();
   const incidents = allIncidents.filter((i) => i.county === county.name);
   const last24h = incidents.filter((i) => withinHours(i, 24));
   const riskScore = countyRiskScore(incidents);
@@ -54,6 +55,7 @@ export default async function CountyDashboardPage({
   return (
     <div className="h-full overflow-y-auto px-4 py-5 sm:px-8">
       <div className="mx-auto max-w-6xl">
+        {unavailable && <DataUnavailableNotice />}
         <Link href="/counties" className="mb-4 inline-flex items-center gap-1.5 text-xs text-muted hover:text-foreground">
           <ArrowLeft className="h-3.5 w-3.5" /> All counties
         </Link>

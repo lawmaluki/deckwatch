@@ -121,6 +121,30 @@ describe("getIncidents (server, api mode)", () => {
     expect(await getIncidents()).toEqual([]);
   });
 
+  it("flags a failed read as unavailable, not as an empty country", async () => {
+    vi.resetModules();
+    vi.stubEnv("NEXT_PUBLIC_DATA_SOURCE", "api");
+    vi.stubEnv("API_BASE_URL", "https://backend.example");
+    global.fetch = vi.fn().mockRejectedValue(new Error("network down"));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const { readIncidents } = await import("@/lib/incidents-source");
+    expect(await readIncidents()).toEqual({ incidents: [], unavailable: true });
+  });
+
+  it("does not flag a genuinely empty backend as unavailable", async () => {
+    vi.resetModules();
+    vi.stubEnv("NEXT_PUBLIC_DATA_SOURCE", "api");
+    vi.stubEnv("API_BASE_URL", "https://backend.example");
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ results: [] }),
+    }) as unknown as typeof fetch;
+
+    const { readIncidents } = await import("@/lib/incidents-source");
+    expect(await readIncidents()).toEqual({ incidents: [], unavailable: false });
+  });
+
   it("renders empty rather than seed when the backend errors", async () => {
     vi.resetModules();
     vi.stubEnv("NEXT_PUBLIC_DATA_SOURCE", "api");

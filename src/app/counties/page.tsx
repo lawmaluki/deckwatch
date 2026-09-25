@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { COUNTIES } from "@/lib/data/counties";
 import { connection } from "next/server";
-import { getIncidents, USE_API } from "@/lib/incidents-source";
+import { readIncidents, USE_API } from "@/lib/incidents-source";
+import { DataUnavailableNotice } from "@/components/layout/DataUnavailableNotice";
 import { summarizeByCounty, riskLabel } from "@/lib/stats";
 
 export default async function CountiesIndexPage() {
   if (USE_API) await connection();
-  const incidents = await getIncidents();
+  const { incidents, unavailable } = await readIncidents();
   const summaries = summarizeByCounty(incidents);
   const summaryByName = new Map(summaries.map((s) => [s.county, s]));
 
@@ -23,13 +24,18 @@ export default async function CountiesIndexPage() {
   return (
     <div className="h-full overflow-y-auto px-4 py-5 sm:px-8">
       <div className="mx-auto max-w-6xl">
+        {unavailable && <DataUnavailableNotice />}
         <div className="mb-6">
           <h1 className="text-xl font-semibold text-foreground">Counties</h1>
           <p className="text-sm text-muted">
             All 47 counties ranked by current risk score.{" "}
-            {incidents.length === 0
-              ? "No incidents collected yet."
-              : `${incidents.length} reported incidents in total, across ${summaries.length} counties.`}
+            {/* Silent when unavailable: the notice above already explains the
+                zeroes, and "none collected" would contradict it. */}
+            {unavailable
+              ? "Counts are unavailable."
+              : incidents.length === 0
+                ? "No incidents collected yet."
+                : `${incidents.length} reported incidents in total, across ${summaries.length} counties.`}
           </p>
         </div>
 
