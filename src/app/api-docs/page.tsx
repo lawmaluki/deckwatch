@@ -18,7 +18,7 @@ const ENDPOINTS: EndpointDoc[] = [
     method: "GET",
     path: "/api/incidents",
     summary:
-      "List incidents. Supports query params: category, severity, county, verification, live (true/false — real ingested incidents vs seed data), since (ISO date), limit.",
+      "List incidents, newest first. Supports query params: category, severity, county, verification, live (true/false — real ingested incidents vs seed data), since (ISO date), limit (positive integer; applied after sorting, so limit=N returns the N most recent). Results are full incident objects — the example below is trimmed, and each result also carries aiSummary and recommendedActions. Live incidents (isLive: true, ids starting ing-) keep their source article's real publish time in reportedAt; seed incidents have theirs shifted to read as recent.",
     example: `{
   "count": 2,
   "asOf": "2026-07-12T10:30:00.000Z",
@@ -48,7 +48,8 @@ const ENDPOINTS: EndpointDoc[] = [
   {
     method: "GET",
     path: "/api/incidents/{id}",
-    summary: "Fetch a single incident, including AI summary and recommended actions.",
+    summary:
+      "Fetch a single incident, including AI summary and recommended actions. Returns 404 if the id is unknown.",
     example: `{
   "id": "ow-0001",
   "title": "Flash flooding reported Tana River County",
@@ -62,7 +63,8 @@ const ENDPOINTS: EndpointDoc[] = [
   {
     method: "GET",
     path: "/api/counties/{slug}",
-    summary: "County summary: active incidents, risk score, category breakdown, trend.",
+    summary:
+      "County summary: risk score, incidents in the last 24 hours, and the top incident category (null if the county has no incidents). Returns 404 if the slug is unknown.",
     example: `{
   "name": "Nairobi",
   "slug": "nairobi",
@@ -75,7 +77,7 @@ const ENDPOINTS: EndpointDoc[] = [
     method: "POST",
     path: "/api/reports",
     summary:
-      "Submit a citizen report: category, description, location, optional anonymity. Validated and acknowledged, but not stored — there is no moderation queue behind it yet.",
+      "Submit a citizen report: category, description, location (lat/lng within Kenya), optional anonymity. Validated and acknowledged with 201, but not stored — there is no moderation queue behind it yet.",
     example: `// Request
 {
   "category": "crime",
@@ -164,6 +166,23 @@ export default function ApiDocsPage() {
               </pre>
             </div>
           ))}
+        </div>
+
+        <div className="mt-8 rounded-2xl border border-border bg-surface p-4 sm:p-5">
+          <h2 className="mb-2 text-sm font-semibold text-foreground">Errors</h2>
+          <p className="mb-3 text-sm leading-relaxed text-muted">
+            Errors return a JSON body with a single{" "}
+            <code className="text-foreground">error</code> message. Invalid query
+            parameters or a malformed report body return 400; an unknown incident
+            or county returns 404.
+          </p>
+          <pre className="overflow-x-auto rounded-lg border border-border bg-background p-3 font-mono text-[11px] leading-relaxed text-foreground/90">
+            {`// 400
+{ "error": "Invalid limit \\"0\\". Expected a positive integer." }
+
+// 404
+{ "error": "Incident not found" }`}
+          </pre>
         </div>
       </div>
     </div>
