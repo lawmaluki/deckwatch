@@ -25,8 +25,6 @@ export function IntelFeedPanel() {
   const setOpen = useUiStore((s) => s.setIntelFeedOpen);
   const selectIncident = useAppStore((s) => s.selectIncident);
   const selectedId = useAppStore((s) => s.selectedIncidentId);
-  const liveOnly = useAppStore((s) => s.liveOnly);
-  const toggleLiveOnly = useAppStore((s) => s.toggleLiveOnly);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -47,10 +45,7 @@ export function IntelFeedPanel() {
     [rangeIncidents, county]
   );
 
-  const shown = useMemo(
-    () => (liveOnly ? countyIncidents.filter((i) => i.isLive) : countyIncidents),
-    [countyIncidents, liveOnly]
-  );
+  const shown = countyIncidents;
 
   function openIncident(id: string) {
     selectIncident(id);
@@ -124,18 +119,6 @@ export function IntelFeedPanel() {
                 </div>
               </div>
 
-              <button
-                onClick={toggleLiveOnly}
-                className={clsx(
-                  "mt-2 flex w-full items-center justify-center gap-1.5 rounded-md border px-2 py-1 text-[10px] font-semibold transition-colors",
-                  liveOnly
-                    ? "border-brand/60 bg-brand/10 text-brand"
-                    : "border-border text-muted hover:text-foreground"
-                )}
-              >
-                <Radio className="h-3 w-3" />
-                {liveOnly ? "SHOWING LIVE ONLY" : "SHOW LIVE ONLY"}
-              </button>
             </div>
 
             <div className="flex-1 overflow-y-auto">

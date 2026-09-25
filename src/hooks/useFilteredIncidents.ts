@@ -18,7 +18,6 @@ export function useFilteredIncidents(opts?: { ignoreCategoryFilter?: boolean }):
   const timelineMode = useAppStore((s) => s.timelineMode);
   const timelineRange = useAppStore((s) => s.timelineRange);
   const timelineCursor = useAppStore((s) => s.timelineCursor);
-  const liveOnly = useAppStore((s) => s.liveOnly);
   const { incidents, referenceTime } = useIncidents();
 
   return useMemo(() => {
@@ -49,7 +48,6 @@ export function useFilteredIncidents(opts?: { ignoreCategoryFilter?: boolean }):
       withinHours: parsed?.hours ?? null,
       freeText: parsed && !parsedToStructured ? parsed.freeText : "",
       timeWindow,
-      liveOnly,
     });
   }, [
     ignoreCategoryFilter,
@@ -61,7 +59,6 @@ export function useFilteredIncidents(opts?: { ignoreCategoryFilter?: boolean }):
     timelineMode,
     timelineRange,
     timelineCursor,
-    liveOnly,
     incidents,
     referenceTime,
   ]);
