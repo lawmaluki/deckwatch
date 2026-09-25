@@ -62,8 +62,16 @@ function occlusion(map: LeafletMap): { right: number; bottom: number } {
  * makes the opening view the same view everywhere, whatever the window. */
 function FitCountry() {
   const map = useMap();
+  const fitted = useRef(false);
 
   useEffect(() => {
+    // Once per map instance. React invokes effects twice in development, and
+    // the second fit lands after FlyToIncident has started animating: it
+    // cancels the fly and strands the map on the country view, while the fly's
+    // own once-per-selection guard is already spent, so nothing retries it.
+    if (fitted.current) return;
+    fitted.current = true;
+
     // Drop the floor before measuring: fitBounds clamps to minZoom, so a wide,
     // short window would silently settle for a cropped country and then report
     // that clamped zoom as the fit.
@@ -71,10 +79,19 @@ function FitCountry() {
     // Leaflet can measure the container before layout has settled, and then
     // fits to a size the map never actually had.
     map.invalidateSize();
-    map.fitBounds(KENYA_BOUNDS, { animate: false });
+
+    // Arriving with an incident already chosen — from the feed, a dashboard
+    // list or an alert — the fly-to owns the opening view, so fitting here
+    // would show the whole country only to snap away from it.
+    if (useAppStore.getState().selectedIncidentId === null) {
+      map.fitBounds(KENYA_BOUNDS, { animate: false });
+    }
+
     // The opening view becomes the floor: zooming out past it only ever buys
     // empty ocean and neighbouring countries this app has nothing to say about.
-    map.setMinZoom(map.getZoom());
+    // Measured rather than read back off the map, so it holds on the path
+    // above where the country fit is skipped.
+    map.setMinZoom(map.getBoundsZoom(KENYA_BOUNDS));
   }, [map]);
 
   return null;

@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useIncidents } from "@/hooks/useIncidents";
 import { useAppStore } from "@/store/useAppStore";
 import { useAlertStore } from "@/store/useAlertStore";
+import { useMapFocus } from "@/hooks/useMapFocus";
 import { matchesSubscription, newIncidents } from "@/lib/alerts";
 import { CATEGORIES } from "@/lib/data/categories";
 import type { Incident } from "@/lib/types";
@@ -20,6 +21,7 @@ export function useAlertWatcher(): void {
   const subscription = useAppStore((s) => s.notifications);
   const location = useAppStore((s) => s.userLocation);
   const raise = useAlertStore((s) => s.raise);
+  const focus = useMapFocus();
 
   const seen = useRef<Set<string> | null>(null);
 
@@ -39,14 +41,18 @@ export function useAlertWatcher(): void {
     if (matching.length === 0) return;
 
     raise(matching);
-    if (subscription.channels.push) matching.forEach(notifyOs);
-  }, [incidents, subscription, location, raise]);
+    if (subscription.channels.push) {
+      matching.forEach((incident) =>
+        notifyOs(incident, () => focus({ kind: "incident", value: incident.id }))
+      );
+    }
+  }, [incidents, subscription, location, raise, focus]);
 }
 
 /** Best-effort OS notification. Silent when unsupported or not granted — the
  * in-app toast has already fired, so this is the second of two channels rather
  * than the only one, and a failure here is not worth surfacing. */
-function notifyOs(incident: Incident): void {
+function notifyOs(incident: Incident, openOnMap: () => void): void {
   if (typeof Notification === "undefined" || Notification.permission !== "granted") {
     return;
   }
@@ -57,7 +63,9 @@ function notifyOs(incident: Incident): void {
     });
     notification.onclick = () => {
       window.focus();
-      useAppStore.getState().selectIncident(incident.id);
+      // Routed, not just selected: the reader may have been left on the
+      // dashboard or a county page, where nothing renders the selection.
+      openOnMap();
     };
   } catch {
     // Some browsers throw on construction where a service worker is expected.
