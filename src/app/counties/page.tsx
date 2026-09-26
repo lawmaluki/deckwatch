@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { COUNTIES } from "@/lib/data/counties";
 import { connection } from "next/server";
 import { readIncidents, USE_API } from "@/lib/incidents-source";
 import { DataUnavailableNotice } from "@/components/layout/DataUnavailableNotice";
 import { summarizeByCounty, riskLabel } from "@/lib/stats";
+
+export const metadata: Metadata = {
+  title: "All Counties",
+  description:
+    "All 47 Kenyan counties ranked by current risk score, with incident totals and 24-hour activity for each.",
+};
 
 export default async function CountiesIndexPage() {
   if (USE_API) await connection();

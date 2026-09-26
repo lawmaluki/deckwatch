@@ -19,10 +19,37 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://deckwatch.vercel.app";
+const TITLE = "Deckwatch Kenya — Public Safety Intelligence";
+const DESCRIPTION =
+  "Live public safety and incident intelligence for Kenya. Incident map, verification scoring, and county risk intelligence, ingested from 13 Kenyan newsrooms.";
+
 export const metadata: Metadata = {
-  title: "Deckwatch Kenya — Public Safety Intelligence",
-  description:
-    "AI-powered public safety and incident intelligence platform for Kenya. Live incident map, verification, and county risk intelligence.",
+  // Absolute URLs for social cards are resolved against this; without it
+  // Next emits relative og:image paths, which no scraper will follow.
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: TITLE,
+    // Pages set only their own name; this keeps the brand on every tab and
+    // every shared link without 47 counties repeating it by hand.
+    template: "%s — Deckwatch Kenya",
+  },
+  description: DESCRIPTION,
+  applicationName: "Deckwatch Kenya",
+  openGraph: {
+    type: "website",
+    siteName: "Deckwatch Kenya",
+    locale: "en_KE",
+    url: SITE_URL,
+    title: TITLE,
+    description: DESCRIPTION,
+  },
+  // Card type only. Pinning a title here would override every page's own,
+  // so a shared county link announced itself as the site's front page; left
+  // unset, each page's title and description carry through, and Twitter
+  // falls back to og:image for the picture.
+  twitter: { card: "summary_large_image" },
+  robots: { index: true, follow: true },
 };
 
 export const viewport: Viewport = {

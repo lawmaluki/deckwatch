@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { AlertTriangle, Flame, MapPinned, TrendingUp } from "lucide-react";
 import { connection } from "next/server";
 import { readIncidents, getReferenceTime, USE_API } from "@/lib/incidents-source";
@@ -14,6 +15,12 @@ import { LiveRefresh } from "@/components/dashboard/LiveRefresh";
 import { MiniHeatmap } from "@/components/map/MiniHeatmap";
 import { COUNTY_BY_NAME } from "@/lib/data/counties";
 import { formatDateTime } from "@/lib/format";
+
+export const metadata: Metadata = {
+  title: "National Dashboard",
+  description:
+    "Kenya-wide incident intelligence: severity breakdown, 14-day trend, category mix and the counties carrying the most risk right now.",
+};
 
 export default async function NationalDashboardPage() {
   // Live data must be re-anchored per request; mock builds inline USE_API to
