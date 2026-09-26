@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -25,6 +26,39 @@ import type { Severity } from "@/lib/types";
 export function generateStaticParams() {
   return COUNTIES.map((c) => ({ slug: c.slug }));
 }
+
+/** All 47 shared the root title, so a Nairobi link and a Turkana one were
+ * indistinguishable in search results, browser tabs and shared messages. */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const county = COUNTY_BY_SLUG[slug];
+  if (!county) return {};
+
+  const title = `${county.name} County`;
+  const description = `Live incident intelligence for ${county.name} County, Kenya: current risk score, recent reports by category and severity, and 14-day trend.`;
+  return {
+    title,
+    description,
+    openGraph: {
+      title: `${title} — Deckwatch Kenya`,
+      description,
+      // Restated, not inherited: naming openGraph here replaces the parent's
+      // object wholesale, which silently dropped the generated card and left
+      // all 47 county links previewing as bare URLs.
+      images: ["/opengraph-image"],
+    },
+    alternates: { canonical: `/county/${county.slug}` },
+  };
+}
+
+// The 47 below are the whole set, so anything else is a 404 and not a page
+// to attempt. Without this an unknown slug rendered the not-found body with
+// a 200, which tells a crawler every mistyped county is a real page.
+export const dynamicParams = false;
 
 export default async function CountyDashboardPage({
   params,
