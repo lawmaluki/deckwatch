@@ -100,6 +100,7 @@ export function ClusteredIncidentLayer({ incidents }: { incidents: Incident[] })
               key={`cluster-${props.cluster_id}`}
               position={[lat, lng]}
               icon={clusterDivIcon(props.point_count, color)}
+              alt={`Cluster of ${props.point_count} incidents. Activate to zoom in.`}
               eventHandlers={{
                 click: () => {
                   const expansionZoom = Math.min(
@@ -123,7 +124,16 @@ export function ClusteredIncidentLayer({ incidents }: { incidents: Incident[] })
             key={incident.id}
             position={[lat, lng]}
             icon={incidentDivIcon(incident.severity)}
-            eventHandlers={{ click: () => selectIncident(incident.id) }}
+            alt={`${category.label}, ${incident.severity} severity, ${incident.county} County: ${incident.title}`}
+            eventHandlers={{
+              click: () => selectIncident(incident.id),
+              // Leaflet focuses markers but only forwards clicks; without
+              // this a keyboard user can reach a marker and not open it.
+              keypress: (e) => {
+                const key = (e.originalEvent as KeyboardEvent).key;
+                if (key === "Enter" || key === " ") selectIncident(incident.id);
+              },
+            }}
           >
             <Tooltip direction="top" offset={[0, -10]} opacity={1} className="incident-tooltip">
               <p className="text-xs font-bold leading-snug" style={{ color: category.color }}>

@@ -75,6 +75,34 @@ body {
   border: 1px solid var(--border);
 }
 
+/* A focus ring that survives this background. The UA default is a thin dark
+   outline, effectively invisible at #05070a, which left keyboard users with
+   no way to tell where they were. :focus-visible only, so it appears for
+   keyboard and assistive tech without ringing every mouse click. */
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Jumps past the header and nav straight to the page. Off-screen until
+   focused, which is the first Tab on every page. */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  z-index: 3000;
+}
+.skip-link:focus {
+  left: 0.75rem;
+  top: 0.75rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.5rem;
+  background: var(--surface-raised);
+  color: var(--foreground);
+  border: 1px solid var(--border);
+  font-size: 0.875rem;
+}
+
 /* Leaflet overrides for dark, chrome-free map */
 .leaflet-container {
   background: var(--background);

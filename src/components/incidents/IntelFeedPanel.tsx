@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { ChevronDown, Radio, X } from "lucide-react";
 import clsx from "clsx";
+import { useDismissible } from "@/hooks/useDismissible";
 import { useUiStore } from "@/store/useUiStore";
 import { useAppStore } from "@/store/useAppStore";
 import { useIncidents } from "@/hooks/useIncidents";
@@ -23,6 +24,12 @@ const RANGE_OPTIONS: { label: string; hours: number | null }[] = [
 export function IntelFeedPanel() {
   const open = useUiStore((s) => s.intelFeedOpen);
   const setOpen = useUiStore((s) => s.setIntelFeedOpen);
+  // Escape closes it, but focus is not trapped: the feed sits alongside the
+  // map rather than over it, and holding focus captive would stop a reader
+  // tabbing to the map it is meant to be read against.
+  const panelRef = useDismissible<HTMLDivElement>(open, () => setOpen(false), {
+    trapFocus: false,
+  });
   const selectIncident = useAppStore((s) => s.selectIncident);
   const selectedId = useAppStore((s) => s.selectedIncidentId);
   const router = useRouter();
@@ -64,6 +71,9 @@ export function IntelFeedPanel() {
               a modal over it, so panning and marker clicks stay live while it
               is open. Closing is the X button only. */}
           <div
+            ref={panelRef}
+            role="region"
+            aria-label="Intel feed"
             data-map-occluder
             className="glass-panel fixed inset-y-0 right-0 z-[1401] flex w-full max-w-sm flex-col border-l border-border font-sans sm:top-14"
           >

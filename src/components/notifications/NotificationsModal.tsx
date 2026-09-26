@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Bell, MapPin, Radio, Crosshair, RotateCcw } from "lucide-react";
 import clsx from "clsx";
+import { useDismissible } from "@/hooks/useDismissible";
 import { useUiStore } from "@/store/useUiStore";
 import { useAppStore } from "@/store/useAppStore";
 import { useAlertStore } from "@/store/useAlertStore";
@@ -39,6 +40,10 @@ export function NotificationsModal() {
     setTestMessage(null);
     setOpen(false);
   }
+
+  // Focus moves into the dialog on open, is held there while it is up, and
+  // returns to the bell that opened it on close.
+  const dialogRef = useDismissible<HTMLDivElement>(open, close);
 
   async function requestOsPermission() {
     if (typeof Notification === "undefined") return;
@@ -84,6 +89,10 @@ export function NotificationsModal() {
             onClick={close}
           />
           <motion.div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="alert-subscriptions-title"
             className="glass-panel fixed inset-x-0 bottom-0 z-[2001] max-h-[85vh] overflow-y-auto rounded-t-2xl p-5 sm:inset-x-auto sm:right-6 sm:top-16 sm:bottom-auto sm:w-[420px] sm:rounded-2xl"
             initial={{ y: 40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -93,9 +102,9 @@ export function NotificationsModal() {
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Bell className="h-4 w-4 text-brand" />
-                <h2 className="text-sm font-semibold">Alert Subscriptions</h2>
+                <h2 id="alert-subscriptions-title" className="text-sm font-semibold">Alert Subscriptions</h2>
               </div>
-              <button onClick={close} className="text-muted hover:text-foreground">
+              <button onClick={close} aria-label="Close alert subscriptions" className="text-muted hover:text-foreground">
                 <X className="h-4 w-4" />
               </button>
             </div>
