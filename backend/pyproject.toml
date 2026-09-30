@@ -10,7 +10,7 @@ dependencies = [
     "geoalchemy2>=0.15",
     "psycopg[binary]>=3.2",
     "pydantic-settings>=2.4",
-    "anthropic>=0.40",
+    "anthropic>=1.5",  # server-side refusal fallbacks (app.monthly)
     "feedparser>=6.0",
 ]
 

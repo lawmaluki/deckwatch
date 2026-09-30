@@ -15,6 +15,8 @@ import { LiveRefresh } from "@/components/dashboard/LiveRefresh";
 import { MiniHeatmap } from "@/components/map/MiniHeatmap";
 import { COUNTY_BY_NAME } from "@/lib/data/counties";
 import { formatDateTime } from "@/lib/format";
+import { listMonthlyReports } from "@/lib/monthly-reports";
+import { LatestReportCard } from "@/components/dashboard/LatestReportCard";
 
 export const metadata: Metadata = {
   title: "National Dashboard",
@@ -26,7 +28,7 @@ export default async function NationalDashboardPage() {
   // Live data must be re-anchored per request; mock builds inline USE_API to
   // false and stay fully static.
   if (USE_API) await connection();
-  const { incidents, unavailable } = await readIncidents();
+  const [{ incidents, unavailable }, reports] = await Promise.all([readIncidents(), listMonthlyReports()]);
   const last24h = incidents.filter((i) => withinHours(i, 24));
   const critical24h = last24h.filter((i) => i.severity === "critical");
   const countySummaries = summarizeByCounty(incidents);
@@ -47,6 +49,8 @@ export default async function NationalDashboardPage() {
             Kenya-wide incident intelligence · data as of {formatDateTime(getReferenceTime().toISOString())}
           </p>
         </div>
+
+        <LatestReportCard latest={reports[0]} />
 
         <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
           <StatCard

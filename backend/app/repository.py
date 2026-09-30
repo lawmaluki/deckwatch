@@ -9,7 +9,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from . import domain
-from .models import County, Incident
+from .models import County, Incident, MonthlyReport
 
 
 def _to_dict(inc: Incident, lat: float, lng: float, detail: bool = True) -> domain.Incident:
@@ -143,3 +143,50 @@ def merge_incident(
     obj.report_count = report_count
     obj.verification_score = verification_score
     obj.verification_status = verification_status
+
+
+# --- monthly reports -----------------------------------------------------------
+
+def get_live_incidents_between(
+    session: Session, start: datetime, end: datetime
+) -> List[domain.Incident]:
+    """Real ingested incidents published in [start, end). Seed rows are
+    excluded: their timestamps are synthetic, so they belong to no month."""
+    rows = session.execute(
+        _select_with_coords().where(
+            Incident.id.startswith("ing-"),
+            Incident.reported_at >= start,
+            Incident.reported_at < end,
+        )
+    ).all()
+    return [_to_dict(inc, lat, lng) for inc, lat, lng in rows]
+
+
+def upsert_monthly_report(session: Session, report: Dict[str, Any]) -> None:
+    values = dict(
+        month=report["month"],
+        generated_at=_parse_dt(report["generatedAt"]),
+        method=report["method"],
+        data=report,
+    )
+    stmt = insert(MonthlyReport).values(**values)
+    session.execute(
+        stmt.on_conflict_do_update(
+            index_elements=["month"],
+            set_={k: stmt.excluded[k] for k in ("generated_at", "method", "data")},
+        )
+    )
+
+
+def get_monthly_report(session: Session, month: str) -> Optional[Dict[str, Any]]:
+    row = session.get(MonthlyReport, month)
+    return row.data if row is not None else None
+
+
+def list_monthly_reports(session: Session) -> List[Dict[str, Any]]:
+    """Every stored report, newest month first."""
+    return list(
+        session.execute(
+            select(MonthlyReport.data).order_by(MonthlyReport.month.desc())
+        ).scalars()
+    )

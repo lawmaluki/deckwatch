@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers import counties, incidents, reports
+from .routers import counties, incidents, monthly_reports, reports
 
 app = FastAPI(
     title="Deckwatch Kenya API",
@@ -22,6 +22,7 @@ app.add_middleware(
 app.include_router(incidents.router)
 app.include_router(counties.router)
 app.include_router(reports.router)
+app.include_router(monthly_reports.router)
 
 
 @app.get("/health")

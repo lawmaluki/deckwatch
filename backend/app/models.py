@@ -41,3 +41,18 @@ class Incident(Base):
     sources = mapped_column(JSONB, nullable=False)
     has_image: Mapped[bool] = mapped_column(Boolean, nullable=False)
     is_citizen_report: Mapped[bool] = mapped_column(Boolean, nullable=False)
+
+
+class MonthlyReport(Base):
+    """One generated monthly safety report per calendar month ("2026-09").
+
+    The whole report is one JSON document (app.monthly.report.build_report):
+    it is written once a month and read whole, so there is nothing to gain
+    from normalising it, and a regenerated month simply replaces the row."""
+
+    __tablename__ = "monthly_reports"
+
+    month: Mapped[str] = mapped_column(Text, primary_key=True)
+    generated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    method: Mapped[str] = mapped_column(Text, nullable=False)
+    data = mapped_column(JSONB, nullable=False)

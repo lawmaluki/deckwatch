@@ -14,6 +14,11 @@ class Settings(BaseSettings):
     ingest_model: str = "claude-haiku-4-5"
     anthropic_api_key: str = ""
 
+    # Monthly report (python -m app.monthly). Consolidation is one long request
+    # a month, so it uses the most capable model; without an API key the report
+    # falls back to one incident per article, clearly marked as unreviewed.
+    report_model: str = "claude-opus-5-5"
+
     # Whether the API container seeds the sample dataset on boot. Keep true so
     # the map isn't blank before the first ingest; set false for a clean prod DB.
     seed_on_start: bool = True

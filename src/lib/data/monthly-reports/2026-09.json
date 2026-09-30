@@ -1,0 +1,2874 @@
+{
+ "version": 1,
+ "month": "2026-09",
+ "generatedAt": "2026-10-01T00:00:00Z",
+ "asOf": "2026-09-30T22:18:35Z",
+ "method": "editorial",
+ "coverageFrom": "2026-09-12",
+ "articles": 369,
+ "eventArticles": 212,
+ "contextArticles": 116,
+ "offTopic": 41,
+ "autoMerged": 10,
+ "statusCounts": {
+  "unconfirmed": 361,
+  "likely_true": 5,
+  "verified": 3
+ },
+ "outletCounts": [
+  [
+   "Tuko News",
+   73
+  ],
+  [
+   "Citizen Digital",
+   72
+  ],
+  [
+   "People Daily",
+   62
+  ],
+  [
+   "Nairobi News",
+   60
+  ],
+  [
+   "Nation Africa",
+   29
+  ],
+  [
+   "Capital FM News",
+   28
+  ],
+  [
+   "Kenyans.co.ke",
+   23
+  ],
+  [
+   "K24",
+   15
+  ],
+  [
+   "KBC",
+   10
+  ],
+  [
+   "NTV Kenya",
+   10
+  ],
+  [
+   "The Standard",
+   4
+  ],
+  [
+   "Business Daily",
+   1
+  ]
+ ],
+ "catAgree": 85,
+ "countyAgree": 83,
+ "context": [
+  {
+   "key": "warnings",
+   "label": "El Niño preparedness and flood warnings",
+   "count": 35
+  },
+  {
+   "key": "outages",
+   "label": "Scheduled power outages",
+   "count": 6
+  },
+  {
+   "key": "courts",
+   "label": "Court cases and arrests over earlier incidents",
+   "count": 48
+  },
+  {
+   "key": "aftermath",
+   "label": "Personal stories and aftermath of earlier events",
+   "count": 11
+  },
+  {
+   "key": "policy",
+   "label": "Security policy, anniversaries and commentary",
+   "count": 16
+  }
+ ],
+ "events": [
+  {
+   "key": "baringo-sawmill",
+   "title": "Saw-millers protest alleged discrimination in forest resource allocation",
+   "date": "2026-09-05",
+   "county": "Baringo",
+   "category": "unrest",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "The Standard"
+   ],
+   "sources": [
+    {
+     "name": "The Standard",
+     "url": "https://www.standardmedia.co.ke/article/2001557037/saw-millers-in-baringo-protest-alleged-discrimination-in-forest-resource-distribution",
+     "title": "Saw-millers in Baringo protest alleged discrimination in forest resource distribution"
+    }
+   ]
+  },
+  {
+   "key": "gilgil-0905",
+   "title": "Five killed, eight injured in Saturday morning road accident",
+   "date": "2026-09-05",
+   "county": "Nakuru",
+   "category": "road",
+   "deaths": 5,
+   "articles": 1,
+   "outlets": [
+    "The Standard"
+   ],
+   "sources": [
+    {
+     "name": "The Standard",
+     "url": "https://www.standardmedia.co.ke/article/2001557028/five-people-killed-eight-injured-in-saturday-morning-road-accident",
+     "title": "Five people killed, eight injured in Saturday morning road accident"
+    }
+   ]
+  },
+  {
+   "key": "isiolo-fire",
+   "title": "Mabatini fire leaves two children dead",
+   "date": "2026-09-05",
+   "county": "Isiolo",
+   "category": "fire",
+   "deaths": 2,
+   "articles": 1,
+   "outlets": [
+    "The Standard"
+   ],
+   "sources": [
+    {
+     "name": "The Standard",
+     "url": "https://www.standardmedia.co.ke/article/2001557031/isiolo-s-mabatini-fire-tragedy-leaves-two-minors-dead",
+     "title": "Isiolo's Mabatini fire tragedy leaves two minors dead"
+    }
+   ]
+  },
+  {
+   "key": "kilimani-garage",
+   "title": "Over 45 vehicles damaged as fire ravages Kilimani garage",
+   "date": "2026-09-08",
+   "county": "Nairobi",
+   "category": "fire",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "NTV Kenya"
+   ],
+   "sources": [
+    {
+     "name": "NTV Kenya",
+     "url": "https://ntvkenya.co.ke/news/45-vehicles-damaged-after-fire-ravages-garage-in-kilimani/",
+     "title": "Over 45 vehicles damaged after fire ravages garage in Kilimani"
+    }
+   ]
+  },
+  {
+   "key": "lavington",
+   "title": "Body of woman found in Lavington apartment a month after death",
+   "date": "2026-09-10",
+   "county": "Nairobi",
+   "category": "security",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "NTV Kenya"
+   ],
+   "sources": [
+    {
+     "name": "NTV Kenya",
+     "url": "https://ntvkenya.co.ke/news/body-of-woman-discovered-in-lavington-apartment-a-month-after-death/",
+     "title": "Body of woman discovered in Lavington apartment a month after death"
+    }
+   ]
+  },
+  {
+   "key": "asf",
+   "title": "African Swine Fever kills more than 1,470 pigs in Kiambu and spreads to Ruai",
+   "date": "2026-09-12",
+   "county": "Kiambu",
+   "category": "health",
+   "deaths": 0,
+   "articles": 5,
+   "outlets": [
+    "Citizen Digital",
+    "Nation Africa",
+    "People Daily",
+    "Capital FM News"
+   ],
+   "sources": [
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/kiambu-county-govt-defends-piglet-programme-amid-african-swine-fever-outbreak-n390050",
+     "title": "Kiambu County Gov't defends piglet programme amid African Swine Fever outbreak"
+    },
+    {
+     "name": "Nation Africa",
+     "url": "https://nation.africa/kenya/videos/-kiambu-more-than-1-470-pigs-die-following-an-outbreak-of-african-swine-fever-5593228",
+     "title": "Kiambu: More than 1,470 pigs die following an outbreak of African Swine Fever"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/farmers-count-losses-amid-swine-flu-outbreak-in-kiambu-n390110",
+     "title": "Farmers count losses amid Swine Flu outbreak in Kiambu"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/swine-flu-outbreak-kiambu-farmer-loses-152-pigs-worth-ksh2-9m",
+     "title": "Swine flu outbreak: Ruai farmer loses 152 pigs worth Ksh2.9M"
+    },
+    {
+     "name": "Capital FM News",
+     "url": "https://capitalfm.africa/kiambu-defends-piglet-programme-as-swine-fever-kills-1470-pigs/",
+     "title": "Kiambu defends piglet programme as swine fever kills 1,470 pigs"
+    }
+   ]
+  },
+  {
+   "key": "coast-floods",
+   "title": "Heavy rains flood parts of Mombasa, Kwale and Kilifi, disrupting transport",
+   "date": "2026-09-12",
+   "county": "Kilifi",
+   "category": "weather",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "People Daily"
+   ],
+   "sources": [
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/heavy-rains-trigger-floods-in-mombasa-kwale-and-kilifi-affecting-transport",
+     "title": "Heavy rains trigger floods in Mombasa, Kwale and Kilifi, affecting transport"
+    }
+   ]
+  },
+  {
+   "key": "dandora",
+   "title": "Police appeal for information on two Dandora robbery suspects",
+   "date": "2026-09-12",
+   "county": "Nairobi",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Capital FM News"
+   ],
+   "sources": [
+    {
+     "name": "Capital FM News",
+     "url": "https://capitalfm.africa/police-appeal-for-information-on-two-dandora-robbery-suspects/",
+     "title": "Police appeal for information on two Dandora robbery suspects"
+    }
+   ]
+  },
+  {
+   "key": "embu-rally",
+   "title": "Deadly violence at Deputy President Kindiki’s meeting in Nembure; six vehicles torched",
+   "date": "2026-09-12",
+   "county": "Embu",
+   "category": "unrest",
+   "deaths": 2,
+   "articles": 16,
+   "outlets": [
+    "People Daily",
+    "Nairobi News",
+    "Citizen Digital",
+    "Nation Africa",
+    "Kenyans.co.ke"
+   ],
+   "sources": [
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/inside-politics/mp-mukunji-mourns-young-kenyans-killed-after-chaos-rocked-kindikis-embu-event",
+     "title": "MP Mukunji mourns young Kenyans killed after chaos rocked Kindiki’s Embu event"
+    },
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/uda-condemns-deathdamage-of-property-and-disruption-of-meeting-in-embu/",
+     "title": "UDA condemns death,damage of property and disruption of meeting in Embu"
+    },
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/police-say-one-killed-six-vehicles-torched-in-violence-at-kindiki-meeting-in-embu/",
+     "title": "Police say one killed, six vehicles torched in violence at Kindiki meeting in Embu"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/mp-mukunji-demands-end-to-intimidation-amid-probe-into-embu-chaos-n390210",
+     "title": "MP Mukunji demands end to 'intimidation' amid probe into Embu chaos"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/ipoa-vows-probe-into-nembure-stadium-shooting-as-families-demand-justice",
+     "title": "IPOA vows probe into Nembure Stadium shooting as families demand justice"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/autopsy-confirms-gunshots-killed-two-men-in-kindikis-embu-rally-chaos",
+     "title": "Autopsy confirms gunshots killed two men in Kindiki’s Embu rally chaos"
+    },
+    {
+     "name": "Nation Africa",
+     "url": "https://nation.africa/kenya/news/ipoa-investigations-nembure-attack-during-kindiki-meeting-5602140",
+     "title": "Ipoa launches investigations into fatal shooting at Kindiki meeting in Nembure"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/vehicles-torched-as-youths-clash-with-police-at-kindikis-embu-rally-n390057",
+     "title": "Two feared dead, vehicles torched as youths clash with police at Kindiki's Embu rally"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/inside-politics/kindiki-under-fire-as-gachagua-links-embu-violence-to-mt-kenya-political-fight",
+     "title": "Kindiki under fire as Gachagua links Embu violence to Mt Kenya political fight"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/embu-chaos-police-confirm-one-death-6-vehicles-torched-as-probe-commences",
+     "title": "Embu chaos: Police confirm one death, 6 vehicles torched as probe commences"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/gachagua-accuses-kindiki-of-political-bribery-links-embu-deaths-to-mt-kenya-divisions-n390080",
+     "title": "Gachagua accuses Kindiki of political bribery, links Embu deaths to Mt Kenya divisions"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/inside-politics/gachagua-claims-police-have-surrounded-mp-mukunjis-home-after-embu-chaos",
+     "title": "Gachagua claims police have surrounded MP Mukunji’s home after Embu chaos"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/gachagua-accuses-kindiki-of-targeting-mp-mukunji-after-embu-clashes-n390085",
+     "title": "Gachagua accuses Kindiki of targeting MP Mukunji after Embu clashes"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/gachagua-allies-warn-president-ruto-over-embu-clashes-church-attacks-n390100",
+     "title": "Gachagua allies warn President Ruto over Embu clashes, church attacks"
+    },
+    {
+     "name": "Nation Africa",
+     "url": "https://nation.africa/kenya/counties/embu/embu-chaos-two-families-in-nembure-to-bury-their-sons-5595298",
+     "title": "Embu chaos: Two families in Nembure to bury their sons"
+    },
+    {
+     "name": "Kenyans.co.ke",
+     "url": "https://www.kenyans.co.ke/news/127154-postmortem-confirms-gunshot-injuries-killed-two-men-nembure-stadium",
+     "title": "Autopsy Reveals How Victims During Kindiki Meeting Died"
+    }
+   ],
+   "conflict": "Police first reported one death. The autopsy confirmed two.",
+   "defining": true,
+   "why": "Political violence a year before the 2027 election. Police now say they are mapping election-violence hotspots, and IPOA is investigating the shooting."
+  },
+  {
+   "key": "kisumu-robbery",
+   "title": "Robbery and phone-snatching spree; suspect arrested",
+   "date": "2026-09-12",
+   "county": "Kisumu",
+   "category": "security",
+   "deaths": 0,
+   "articles": 2,
+   "outlets": [
+    "People Daily",
+    "Capital FM News"
+   ],
+   "sources": [
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/police-arrest-one-individual-linked-to-kisumu-robbery-and-phone-snatching",
+     "title": "Police arrest one individual linked to Kisumu robbery and phone snatching"
+    },
+    {
+     "name": "Capital FM News",
+     "url": "https://capitalfm.africa/suspect-arrested-over-kisumu-robbery-phone-snatching-spree/",
+     "title": "Suspect Arrested Over Kisumu Robbery, Phone-Snatching Spree"
+    }
+   ],
+   "hotspot": "kisumu"
+  },
+  {
+   "key": "nairobi-shooting",
+   "title": "Police launch manhunt for armed robbers after Nairobi shooting",
+   "date": "2026-09-12",
+   "county": "Nairobi",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Kenyans.co.ke"
+   ],
+   "sources": [
+    {
+     "name": "Kenyans.co.ke",
+     "url": "https://www.kenyans.co.ke/news/126990-police-kill-suspected-robber-dandora-shootout-recover-pistol",
+     "title": "Police Launch Manhunt for Armed Robbers After Nairobi Shooting"
+    }
+   ]
+  },
+  {
+   "key": "ruiru-mpesa",
+   "title": "Armed gang shoots M-Pesa attendant and steals Ksh 600,000 in Ruiru",
+   "date": "2026-09-12",
+   "county": "Kiambu",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Citizen Digital",
+    "People Daily",
+    "Nation Africa"
+   ],
+   "sources": [
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/armed-gang-shoots-m-pesa-attendant-steals-ksh600k-in-ruiru-n390065",
+     "title": "Armed gang shoots M-Pesa attendant, steals Ksh.600K in Ruiru"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/ruiru-m-pesa-robbery-leaves-businessman-fighting-for-life-as-police-probe-syndicate",
+     "title": "Armed gang shoots M-Pesa attendant, steals Ksh.600K in Ruiru"
+    },
+    {
+     "name": "Nation Africa",
+     "url": "https://nation.africa/kenya/news/gunmen-on-the-run-after-shooting-robbing-ruiru-man-5594814",
+     "title": "Armed gang shoots M-Pesa attendant, steals Ksh.600K in Ruiru"
+    }
+   ],
+   "hotspot": "cash"
+  },
+  {
+   "key": "kisima",
+   "title": "Several feared dead after matatu accident at Kisima on Meru–Nanyuki road",
+   "date": "2026-09-13",
+   "county": "Meru",
+   "category": "road",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/politics/639632-several-feared-dead-psv-matatu-accident-kisima-meru-nanyuki-road/",
+     "title": "Several feared dead after PSV matatu accident at Kisima on Meru-Nanyuki Road"
+    }
+   ]
+  },
+  {
+   "key": "linda-rally",
+   "title": "Young man killed during Linda Mwananchi rally at Jacaranda grounds",
+   "date": "2026-09-13",
+   "county": "Nairobi",
+   "category": "unrest",
+   "deaths": 1,
+   "articles": 2,
+   "outlets": [
+    "People Daily",
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/inside-politics/crowds-gather-momentum-at-jacaranda-ground-ahead-of-planned-linda-mwananchi-rally",
+     "title": "Crowds gather momentum at Jacaranda Ground ahead of planned Linda Mwananchi rally"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/639753-nairobi-mum-tears-identifying-body-son-allegedly-killed-linda-mwananchi-rally/",
+     "title": "Nairobi mum in tears after identifying body of son allegedly killed during Linda Mwananchi rally"
+    }
+   ]
+  },
+  {
+   "key": "makueni-girl",
+   "title": "Family searches for Form 3 girl last seen at a church event in August",
+   "date": "2026-09-13",
+   "county": "Makueni",
+   "category": "missing",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/639597-makueni-family-searches-missing-form-3-girl-church-event-3-weeks-ago/",
+     "title": "Makueni family searches for missing Form 3 girl last seen at church event in mid-August"
+    }
+   ],
+   "status": "Open"
+  },
+  {
+   "key": "meru-corridor",
+   "title": "Body of unidentified man found near elephant corridor",
+   "date": "2026-09-13",
+   "county": "Meru",
+   "category": "wildlife",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/body-of-unidentified-man-found-near-elephant-corridor-in-meru/",
+     "title": "Body of unidentified man found near elephant corridor in Meru"
+    }
+   ]
+  },
+  {
+   "key": "meru-man",
+   "title": "67-year-old man found dead inside a commercial building",
+   "date": "2026-09-13",
+   "county": "Meru",
+   "category": "security",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/67-year-old-man-found-dead-inside-commercial-house-in-meru/",
+     "title": "67-year-old man found dead inside commercial house in Meru"
+    }
+   ]
+  },
+  {
+   "key": "mombasa-boat",
+   "title": "Two dead after leisure boat capsizes off Mombasa",
+   "date": "2026-09-13",
+   "county": "Mombasa",
+   "category": "road",
+   "deaths": 2,
+   "articles": 3,
+   "outlets": [
+    "Nation Africa",
+    "Kenyans.co.ke",
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "Nation Africa",
+     "url": "https://nation.africa/kenya/counties/mombasa/two-dead-after-leisure-boat-capsizes-in-mombasa--5593934",
+     "title": "Two dead after leisure boat capsizes in Mombasa"
+    },
+    {
+     "name": "Kenyans.co.ke",
+     "url": "https://www.kenyans.co.ke/news/127035-mombasa-governor-orders-inspection-all-passenger-boats-after-fatal-capsizing",
+     "title": "Governor Issues New Orders After Boat Accident Leaves Two Dead"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/639680-mca-aspirant-sister-die-boat-capsizes-indian-ocean/",
+     "title": "Busia: Tragedy as Malaba South MCA aspirant, sister die in Indian Ocean boat accident"
+    }
+   ]
+  },
+  {
+   "key": "juja-donkeys",
+   "title": "Juja residents protest dumping of dead donkeys",
+   "date": "2026-09-14",
+   "county": "Kiambu",
+   "category": "unrest",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "People Daily"
+   ],
+   "sources": [
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/juja-residents-protest-dumping-of-dead-donkeys",
+     "title": "Juja residents protest dumping of dead donkeys"
+    }
+   ]
+  },
+  {
+   "key": "kikopey",
+   "title": "Five members of one family killed as bus and saloon car collide at Kikopey",
+   "date": "2026-09-14",
+   "county": "Nakuru",
+   "category": "road",
+   "deaths": 5,
+   "articles": 10,
+   "outlets": [
+    "Tuko News",
+    "Citizen Digital",
+    "NTV Kenya",
+    "Capital FM News",
+    "People Daily",
+    "Kenyans.co.ke"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/kenya/639670-5-killed-injured-psv-bus-collided-saloon-car-gilgil-nakuru-highway/",
+     "title": "5 killed, others injured after Easy Coach bus collided with saloon car along Gilgil-Nakuru Highway"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/5-people-killed-after-road-accident-in-gilgil-n390132",
+     "title": "5 people killed after road accident in Gilgil"
+    },
+    {
+     "name": "NTV Kenya",
+     "url": "https://ntvkenya.co.ke/news/5-people-killed-as-bus-and-private-car-collide-at-kikopey/",
+     "title": "5 people killed as bus and saloon car collide at Kikopey"
+    },
+    {
+     "name": "Capital FM News",
+     "url": "https://capitalfm.africa/five-people-killed-in-a-midnight-crash-at-kikopey/",
+     "title": "Five people killed in a midnight crash at Kikopey"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/5-feared-dead-several-injured-in-road-accident-in-kikopey-along-nairobi-nakuru-highway",
+     "title": "5 feared dead, several injured following road accident in Kikopey along Nairobi-Nakuru Highway"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/639688-nakuru-man-devastated-losing-family-members-kikopey-crash/",
+     "title": "Nakuru: Man devastated after losing 5 family members in Kikopey crash"
+    },
+    {
+     "name": "Kenyans.co.ke",
+     "url": "https://www.kenyans.co.ke/news/127051-man-recounts-losing-wife-daughter-and-three-relatives-gilgil-crash",
+     "title": "Fresh Details Emerge on Kikopey Accident Which Claimed 5 Family Members"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/family-in-seme-appeals-for-help-after-losing-5-members-in-kikopey-accident",
+     "title": "Family in Seme appeals for help after losing 5 members in Kikopey accident"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/640709-kenyans-heartbroken-photos-5-family-members-killed-kikopey-crash-emerge/",
+     "title": "Kikopey crash: Photos of 5 family members killed on Nairobi-Nakuru Highway emerge"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/640719-kikopey-crash-fresh-details-show-1-child-survived-accident-killed-5-relatives/",
+     "title": "Kikopey crash: Fresh details show 1 child survived accident that killed 5 relatives"
+    }
+   ],
+   "hotspot": "a104",
+   "defining": true,
+   "why": "Covered by more outlets than any other road crash this month. It is one of four serious incidents Deckwatch captured on the Nairobi–Nakuru highway in September."
+  },
+  {
+   "key": "lamu-kidnap",
+   "title": "Businessman kidnapped by armed men in front of his wife and children",
+   "date": "2026-09-14",
+   "county": "Lamu",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Nation Africa"
+   ],
+   "sources": [
+    {
+     "name": "Nation Africa",
+     "url": "https://nation.africa/kenya/counties/lamu/night-of-horror-lamu-businessman-kidnapped-by-armed-men-in-front-of-wife-children-5594270",
+     "title": "Night of horror: Lamu businessman kidnapped by armed men in front of wife, children"
+    }
+   ],
+   "hotspot": "lamu"
+  },
+  {
+   "key": "meru-woman",
+   "title": "Woman killed while walking to an outdoor toilet at 5 am; suspect later arrested",
+   "date": "2026-09-14",
+   "county": "Meru",
+   "category": "security",
+   "deaths": 1,
+   "articles": 3,
+   "outlets": [
+    "Tuko News",
+    "KBC",
+    "Citizen Digital"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/639684-meru-woman-killed-by-unknown-people-outdoor-toilet-5am/",
+     "title": "Meru woman killed by unknown people while walking to outdoor toilet at 5 am"
+    },
+    {
+     "name": "KBC",
+     "url": "https://www.kbc.co.ke/detectives-arrest-suspect-in-meru-womans-murder/",
+     "title": "Detectives arrest suspect in Meru woman’s murder"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/suspect-arrested-over-brutal-murder-of-65-year-old-grandmother-in-meru-n391035",
+     "title": "Suspect arrested over brutal murder of 65-year-old grandmother in Meru"
+    }
+   ]
+  },
+  {
+   "key": "mwea-embu",
+   "title": "Three killed in two separate crashes on Mwea–Embu highway",
+   "date": "2026-09-14",
+   "county": "Embu",
+   "category": "road",
+   "deaths": 3,
+   "articles": 1,
+   "outlets": [
+    "Citizen Digital"
+   ],
+   "sources": [
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/three-killed-in-two-separate-crashes-on-mwea-embu-highway-n390165",
+     "title": "Three killed in two separate crashes on Mwea-Embu highway"
+    }
+   ]
+  },
+  {
+   "key": "starehe",
+   "title": "Robbery in Starehe; suspect arrested, stolen phone recovered",
+   "date": "2026-09-14",
+   "county": "Nairobi",
+   "category": "security",
+   "deaths": 0,
+   "articles": 2,
+   "outlets": [
+    "People Daily",
+    "KBC"
+   ],
+   "sources": [
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/starehe-robbery-incident-person-of-interest-arrested-as-police-recover-stolen-phone-crude-weapon",
+     "title": "Starehe robbery incident: Person of interest arrested as police recover stolen phone, crude weapon"
+    },
+    {
+     "name": "KBC",
+     "url": "https://www.kbc.co.ke/suspect-arrested-after-robbery-in-starehe-nairobi/",
+     "title": "Suspect arrested after robbery in Starehe, Nairobi"
+    }
+   ]
+  },
+  {
+   "key": "mombasa-wall",
+   "title": "Wall collapse kills a man and his son",
+   "date": "2026-09-15",
+   "county": "Mombasa",
+   "category": "collapse",
+   "deaths": 2,
+   "articles": 1,
+   "outlets": [
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/639783-mombasa-woman-heartbroken-wall-collapses-kills-hubby-son/",
+     "title": "Mombasa woman heartbroken after wall collapses, kills hubby and son"
+    }
+   ]
+  },
+  {
+   "key": "moto-gang",
+   "title": "CCTV captures armed motorcycle gang robbing residents",
+   "date": "2026-09-15",
+   "county": "Nairobi",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "People Daily"
+   ],
+   "sources": [
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/cctv-captures-armed-motorcycle-gang-terrorising-nairobi-residents",
+     "title": "CCTV captures armed motorcycle gang terrorising Nairobi residents"
+    }
+   ]
+  },
+  {
+   "key": "gotu",
+   "title": "Bandits kill five, including two police officers, in Gotu ambush",
+   "date": "2026-09-16",
+   "county": "Isiolo",
+   "category": "security",
+   "deaths": 5,
+   "articles": 4,
+   "outlets": [
+    "Capital FM News",
+    "Nairobi News",
+    "KBC",
+    "People Daily"
+   ],
+   "sources": [
+    {
+     "name": "Capital FM News",
+     "url": "https://capitalfm.africa/two-police-officers-among-five-killed-in-isiolo-bandit-attack/",
+     "title": "Two police officers among five killed in Isiolo bandit attack"
+    },
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/five-people-including-two-police-officers-killed-in-ambush-in-gotu-isiolo-county/",
+     "title": "Five people, including two police officers killed in ambush in Gotu, Isiolo County"
+    },
+    {
+     "name": "KBC",
+     "url": "https://www.kbc.co.ke/two-police-officers-among-5-killed-by-bandits-in-isiolo/",
+     "title": "Two police officers among 5 killed by bandits in Isiolo"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/gideon-moi-condemns-gotu-bandit-attacks-that-left-5-dead",
+     "title": "Gideon Moi condemns Gotu bandit attacks that left 5 dead"
+    }
+   ],
+   "hotspot": "isiolo",
+   "defining": true,
+   "why": "The deadliest single attack Deckwatch captured this month, and the start of a string of ambushes across Isiolo and Samburu that ran to the end of September."
+  },
+  {
+   "key": "juja-caretaker",
+   "title": "Caretaker found dead at a construction site in Juja",
+   "date": "2026-09-16",
+   "county": "Kiambu",
+   "category": "security",
+   "deaths": 1,
+   "articles": 2,
+   "outlets": [
+    "Nairobi News",
+    "Citizen Digital"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/caretaker-found-dead-in-pool-of-blood-at-construction-site-in-juja-kiambu-county/",
+     "title": "Caretaker found dead in pool of blood at construction site in Juja, Kiambu County"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/detectives-investigate-suspected-murder-of-juja-farm-caretaker-n390301",
+     "title": "Detectives investigate suspected murder of Juja farm caretaker"
+    }
+   ]
+  },
+  {
+   "key": "kakamega-husband",
+   "title": "Man allegedly killed by his wife",
+   "date": "2026-09-16",
+   "county": "Kakamega",
+   "category": "security",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/639986-kakamega-family-mourns-32-year-son-allegedly-killed-by-wife-narrates-what-happened/",
+     "title": "Kakamega family mourns after 32-year-old son is allegedly killed by wife, narrates what happened"
+    }
+   ]
+  },
+  {
+   "key": "kisii-lorry",
+   "title": "Lorry loses control and hits pedestrians on CBD–Daraja Mbili road",
+   "date": "2026-09-16",
+   "county": "Kisii",
+   "category": "road",
+   "deaths": 4,
+   "articles": 5,
+   "outlets": [
+    "Citizen Digital",
+    "Tuko News",
+    "Nairobi News",
+    "People Daily",
+    "Kenyans.co.ke"
+   ],
+   "sources": [
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/four-people-have-been-killed-and-several-others-seriously-injured-after-a-lorry-lost-control-and-hit-n390331",
+     "title": "Kisii: Four killed after lorry hits pedestrians along Daraja Mbili Road"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/kenya/640067-kisii-accident-4-killed-lorry-loses-control-hits-pedestrians-cbd-daraja-mbili-road/",
+     "title": "Kisii accident: 4 killed as lorry loses control, hits pedestrians along CBD–Daraja Mbili road"
+    },
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/arati-directs-action-after-waumini-plaza-accident-claims-five/",
+     "title": "Arati directs action after Waumini Plaza accident claims five"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/9-killed-in-separate-road-accidents-in-kapiti-and-kisii",
+     "title": "9 killed in separate road accidents in Kapiti and Kisii"
+    },
+    {
+     "name": "Kenyans.co.ke",
+     "url": "https://www.kenyans.co.ke/news/127126-10-killed-several-injured-separate-kisii-nairobi-mombasa-highway-accidents",
+     "title": "10 Killed in Separate Kisii, Nairobi-Mombasa Highway Accidents"
+    }
+   ],
+   "conflict": "Reports give 4 and 5 deaths.",
+   "defining": true,
+   "why": "A crash inside a town centre, killing people on foot. Reports disagree on whether four or five died, so Deckwatch uses the lower figure."
+  },
+  {
+   "key": "meru-cattle",
+   "title": "Herdsman shot dead as bandits steal more than 120 cattle",
+   "date": "2026-09-16",
+   "county": "Meru",
+   "category": "security",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/herdsman-shot-dead-as-bandits-steal-more-than-120-cattle-in-meru/",
+     "title": "Herdsman shot dead as bandits steal more than 120 cattle in Meru"
+    }
+   ],
+   "hotspot": "isiolo"
+  },
+  {
+   "key": "nairobi-stabbing",
+   "title": "Detectives pursue man who allegedly stabbed his girlfriend",
+   "date": "2026-09-16",
+   "county": "Nairobi",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/kenya/counties/640058-kenyan-newspapers-review-september-17-detectives-run-man-allegedly-stabbed-girlfriend/",
+     "title": "Kenyan newspapers, Sep 17: Detectives run after man who allegedly stabbed girlfriend at aunt's home"
+    }
+   ]
+  },
+  {
+   "key": "rabai",
+   "title": "Man found dead with head injuries after attack on travellers in Rabai",
+   "date": "2026-09-16",
+   "county": "Kilifi",
+   "category": "security",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/man-found-dead-with-head-injuries-after-fellow-traveller-is-attacked-in-rabai-kilifi-county/",
+     "title": "Man found dead with head injuries after fellow traveller is attacked in Rabai, Kilifi County"
+    }
+   ]
+  },
+  {
+   "key": "isiolo-family",
+   "title": "Four family members killed while going to recover a relative’s body",
+   "date": "2026-09-17",
+   "county": "Isiolo",
+   "category": "security",
+   "deaths": 4,
+   "articles": 1,
+   "outlets": [
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/640148-isiolo-sorrow-4-family-members-attacked-killed-recover-body-kin/",
+     "title": "Isiolo: Sorrow as 4 family members are attacked, killed while going to recover body of kin"
+    }
+   ],
+   "hotspot": "isiolo"
+  },
+  {
+   "key": "isiolo-protests",
+   "title": "Protests in Isiolo as five killed in bandit attack are buried",
+   "date": "2026-09-17",
+   "county": "Isiolo",
+   "category": "unrest",
+   "deaths": 0,
+   "articles": 2,
+   "outlets": [
+    "Nation Africa",
+    "People Daily"
+   ],
+   "sources": [
+    {
+     "name": "Nation Africa",
+     "url": "https://nation.africa/kenya/counties/isiolo/demos-rock-isiolo-as-5-killed-bandit-attack-laid-to-rest-5598590",
+     "title": "Demos rock Isiolo as 5 killed in bandit attack laid to rest"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/protests-rock-isiolo-after-suspected-bandit-attack-kills-5",
+     "title": "Protests rock Isiolo after suspected bandit attack kills 5"
+    }
+   ],
+   "hotspot": "isiolo"
+  },
+  {
+   "key": "kapiti",
+   "title": "Matatu crash on Nairobi–Mombasa highway near Kapiti kills five",
+   "date": "2026-09-17",
+   "county": "Machakos",
+   "category": "road",
+   "deaths": 5,
+   "articles": 2,
+   "outlets": [
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/kenya/640062-several-people-feared-dead-following-tragic-matatu-accident-mombasa-nairobi-highway/",
+     "title": "Several people feared dead following tragic matatu accident along Mombasa-Nairobi highway"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/640686-survivor-matatu-accident-killed-5-machakos-narrates-what-happened/",
+     "title": "Survivor of matatu accident that recently killed 5 in Machakos narrates what happened"
+    }
+   ],
+   "hotspot": "a109"
+  },
+  {
+   "key": "nairobi-dumpsite",
+   "title": "Mother finds missing son at a dumpsite after five months",
+   "date": "2026-09-17",
+   "county": "Nairobi",
+   "category": "missing",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/640125-emotional-scene-woman-dumpsite-rescue-son-5-months-missing/",
+     "title": "Nairobi mum finds missing son at dumpsite after 5 months of searching"
+    }
+   ],
+   "status": "Found"
+  },
+  {
+   "key": "narok-mum",
+   "title": "Mother goes missing with 8-month-old baby",
+   "date": "2026-09-17",
+   "county": "Narok",
+   "category": "missing",
+   "deaths": 0,
+   "articles": 2,
+   "outlets": [
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/640157-narok-worry-mum-missing-8-month-baby-leaving-house-friend-speaks/",
+     "title": "Narok: Worry as mum goes missing with 8-month-old baby after leaving house, friend speaks"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/640579-ruth-jeptoo-relief-mum-missing-8-month-baby-friend-speaks/",
+     "title": "Ruth Jeptoo: Relief as mum who went missing with 8-month-old baby is found, friend speaks"
+    }
+   ],
+   "status": "Found"
+  },
+  {
+   "key": "eldoret-tanker",
+   "title": "Fuel tanker explodes on Eldoret–Webuye highway; death toll rises to three",
+   "date": "2026-09-18",
+   "county": "Uasin Gishu",
+   "category": "fire",
+   "deaths": 3,
+   "articles": 5,
+   "outlets": [
+    "Capital FM News",
+    "Nairobi News",
+    "KBC",
+    "Tuko News",
+    "People Daily"
+   ],
+   "sources": [
+    {
+     "name": "Capital FM News",
+     "url": "https://capitalfm.africa/10-evacuated-after-tanker-explosion-on-eldoret-webuye-road/",
+     "title": "10 evacuated after tanker explosion on Eldoret-Webuye road"
+    },
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/at-least-two-killed-10-evacuated-after-petrol-tanker-fire-along-eldoret-bungoma-highway/",
+     "title": "At least two killed, 10 evacuated after petrol tanker fire along Eldoret-Bungoma Highway"
+    },
+    {
+     "name": "KBC",
+     "url": "https://www.kbc.co.ke/two-dead-following-fuel-tanker-explosion-along-eldoret-webuye-highway/",
+     "title": "Two dead following fuel tanker explosion along Eldoret-Webuye highway"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/kenya/counties/640274-eldoret-tanker-blast-death-toll-rises-3-governor-bii-appeals-blood-donations/",
+     "title": "Eldoret Tanker blast: Death toll rises to 3 as Governor Bii appeals for blood donations"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/survivors-recount-narrow-escape-after-deadly-tanker-explosion-on-eldoret-webuye-road",
+     "title": "Survivors recount narrow escape ordeal after deadly tanker explosion on Eldoret–Webuye Road"
+    }
+   ],
+   "conflict": "The toll rose from two to three over two days.",
+   "defining": true,
+   "why": "A highway fire with mass casualties. The county called for blood donations. Five outlets covered it, which let Deckwatch follow the toll as it rose."
+  },
+  {
+   "key": "kajiado-air",
+   "title": "Training aircraft crashes near Kipeto wind farm, killing instructor and student pilot",
+   "date": "2026-09-18",
+   "county": "Kajiado",
+   "category": "road",
+   "deaths": 2,
+   "articles": 23,
+   "outlets": [
+    "Citizen Digital",
+    "Kenyans.co.ke",
+    "People Daily",
+    "Nation Africa",
+    "K24",
+    "NTV Kenya",
+    "Tuko News",
+    "Capital FM News",
+    "KBC",
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/two-people-killed-after-aircraft-crashes-in-kajiado-n390435",
+     "title": "Two people killed after aircraft crashes in Kajiado"
+    },
+    {
+     "name": "Kenyans.co.ke",
+     "url": "https://www.kenyans.co.ke/news/127172-small-aircraft-crashes-kajiados-kipeto-area",
+     "title": "Casualties Reported as Aircraft Crashes in Kajiado"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/aircraft-crashes-near-kipeto-windpower-plant-in-kajiado-casualties-reported",
+     "title": "Aircraft crashes near Kipeto Windpower plant in Kajiado, casualties reported"
+    },
+    {
+     "name": "Nation Africa",
+     "url": "https://nation.africa/kenya/counties/kajiado/teacher-student-killed-in-kajiado-aircraft-crash-5599586",
+     "title": "Teacher, student killed in Kajiado aircraft crash"
+    },
+    {
+     "name": "K24",
+     "url": "https://k24.digital/news/one-feared-dead-as-aircraft-crash-lands-near-ngong-kajiado-county",
+     "title": "One feared dead as aircraft crash-lands near Ngong, Kajiado County"
+    },
+    {
+     "name": "Nation Africa",
+     "url": "https://nation.africa/kenya/counties/kajiado/flying-instructor-student-killed-in-kajiado-aircraft-crash-5599586",
+     "title": "Flying instructor, student killed in Kajiado aircraft crash"
+    },
+    {
+     "name": "NTV Kenya",
+     "url": "https://ntvkenya.co.ke/news/student-teacher-killed-in-kajiado-aircraft-crash/",
+     "title": "Student, teacher killed in Kajiado aircraft crash"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/kenya/counties/640259-police-reveal-identities-victims-killed-kajiado-plane-crash/",
+     "title": "Police reveal identities of victims killed in Kajiado plane crash"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/640262-occupants-crashed-aircraft-revealed-police-share-details/",
+     "title": "Details emerge on occupants killed in Kajiado aircraft crash"
+    },
+    {
+     "name": "Capital FM News",
+     "url": "https://capitalfm.africa/pilot-and-student-killed-in-training-aircraft-crash-in-kajiado/",
+     "title": "Pilot and Student Killed in Training Aircraft Crash in Kajiado"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/kenya/640266-air-force-helicopter-crashes-ngong-kajiado-details-emerge/",
+     "title": "Air Force helicopter crashes in Ngong, Kajiado, details emerge"
+    },
+    {
+     "name": "KBC",
+     "url": "https://www.kbc.co.ke/at-least-two-dead-after-aircraft-crash-in-kajiado/",
+     "title": "At least two dead after aircraft crash in Kajiado"
+    },
+    {
+     "name": "Nation Africa",
+     "url": "https://nation.africa/kenya/videos/two-killed-in-kajiado-aircraft-crash-5600302",
+     "title": "Two killed in Kajiado aircraft crash"
+    },
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/pilot-student-killed-in-kenya-school-of-flying-aircraft-crash-in-kajiado/",
+     "title": "Pilot, student killed in Kenya School of Flying aircraft crash in Kajiado"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/640304-captain-alex-oluka-friends-family-mourn-student-pilot-died-kajiado-crash/",
+     "title": "Captain Alex Oluka: Friends, family mourn student pilot who died in Kajiado crash"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/kenya/640321-alex-oluka-pilots-death-occured-month-graduation-details/",
+     "title": "Alex Oluka: Pilot's death occured month after graduation, new details"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/640459-alex-oluka-heartbroken-dad-pilot-died-kajiado-aircrafts-painfully-shares-plans-son-had/",
+     "title": "Alex Oluka: Dad of pilot who died in Kajiado aircraft crash painfully shares son's big plans"
+    },
+    {
+     "name": "NTV Kenya",
+     "url": "https://ntvkenya.co.ke/news/teso-north-grieves-alex-oluka-pilot-killed-in-kajiado-aircraft-crash/",
+     "title": "Village in Teso North mourns community’s first pilot after fatal crash in Kajiado"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/teso-north-mourns-25-year-old-pilot-killed-in-kipeto-plane-crash",
+     "title": "Teso North mourns 25-year-old pilot killed in Kipeto plane crash"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/640573-alex-oluka-mother-pilot-died-tragic-kajiado-crash-narrates-plea-demise/",
+     "title": "Alex Oluka: Mother of pilot who died in tragic Kajiado crash narrates his plea before his demise"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/640734-alex-oluka-identity-2nd-person-died-alongside-flight-instructor-kajiado-crash-revealed/",
+     "title": "Moses Kariuki: Identity of 2nd person who died alongside flight instructor in Kajiado crash revealed"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/641057-alex-oluka-kenya-school-flying-ksh-300k-building-home-late-pilots-parents/",
+     "title": "Alex Oluka: Kenya School of Flying gives KSh 300k towards building new home for late pilot's parents"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/641188-alex-oluka-brother-pilot-died-kajiado-crash-leaks-video-siblings-graduation/",
+     "title": "Alex Oluka: Brother of pilot who died in Kajiado crash leaks video of late sibling's graduation"
+    }
+   ],
+   "conflict": "Early reports described an Air Force helicopter and one death.",
+   "defining": true,
+   "why": "The most-reported event of the month: 23 articles from 10 outlets. Early reports disagreed on the kind of aircraft and on the death toll, which is exactly why Deckwatch groups reports before counting them."
+  },
+  {
+   "key": "kirinyaga-matatu",
+   "title": "Eleven injured as lorry crashes into matatu",
+   "date": "2026-09-18",
+   "county": "Kirinyaga",
+   "category": "road",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "People Daily"
+   ],
+   "sources": [
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/11-injured-after-lorry-crashes-into-matatu-in-kirinyaga",
+     "title": "11 injured after lorry crashes into matatu in Kirinyaga"
+    }
+   ]
+  },
+  {
+   "key": "laikipia-priest",
+   "title": "Priest found dead in his room",
+   "date": "2026-09-18",
+   "county": "Laikipia",
+   "category": "security",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/640240-family-friends-mourn-laikipia-priest-dead-room-share-details/",
+     "title": "Family, friends mourn Laikipia priest found dead in room, share more details"
+    }
+   ]
+  },
+  {
+   "key": "machakos-wall",
+   "title": "Mason dies as perimeter wall collapses at construction site",
+   "date": "2026-09-18",
+   "county": "Machakos",
+   "category": "collapse",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/mason-dies-after-perimeter-wall-collapses-at-construction-site-in-machakos/",
+     "title": "Mason dies after perimeter wall collapses at construction site in Machakos"
+    }
+   ]
+  },
+  {
+   "key": "muranga-bank",
+   "title": "Man robbed of Ksh 700,000 after leaving a bank",
+   "date": "2026-09-18",
+   "county": "Murang'a",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/drama-as-man-is-robbed-of-sh700000-after-leaving-bank-in-muranga/",
+     "title": "Drama as man is robbed of Sh700,000 after leaving bank in Murang’a"
+    }
+   ],
+   "hotspot": "cash"
+  },
+  {
+   "key": "naivasha-lorry",
+   "title": "Two killed as lorry rams stalled vehicle on Nairobi–Naivasha highway",
+   "date": "2026-09-18",
+   "county": "Nakuru",
+   "category": "road",
+   "deaths": 2,
+   "articles": 1,
+   "outlets": [
+    "Citizen Digital",
+    "People Daily"
+   ],
+   "sources": [
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/two-killed-after-lorry-rams-stalled-vehicle-on-nairobi-naivasha-highway-n390478",
+     "title": "Two killed after lorry rams stalled vehicle on Nairobi-Naivasha highway"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/2-arrested-over-vandalism-of-kenya-power-naivasha-juja-transmission-tower",
+     "title": "Two killed after lorry rams stalled vehicle on Nairobi-Naivasha highway"
+    }
+   ],
+   "hotspot": "a104"
+  },
+  {
+   "key": "thika-milk",
+   "title": "Milk lorry accident on Thika Road draws crowds scrambling for spilled milk",
+   "date": "2026-09-18",
+   "county": "Nairobi",
+   "category": "road",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "K24"
+   ],
+   "sources": [
+    {
+     "name": "K24",
+     "url": "https://k24.digital/news/chaos-as-residents-scramble-for-milk-after-lorry-accident-on-thika-road",
+     "title": "Chaos as residents scramble for milk after lorry accident on Thika Road"
+    }
+   ]
+  },
+  {
+   "key": "kakamega-watchman",
+   "title": "70-year-old church watchman found murdered",
+   "date": "2026-09-19",
+   "county": "Kakamega",
+   "category": "security",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/70-year-old-church-watchman-found-murdered-in-kakamega/",
+     "title": "70-year-old church watchman found murdered in Kakamega"
+    }
+   ]
+  },
+  {
+   "key": "kitui-arrow",
+   "title": "Man killed by a poisoned arrow",
+   "date": "2026-09-19",
+   "county": "Kitui",
+   "category": "security",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/man-shot-and-killed-by-poisonous-arrow-in-kitui/",
+     "title": "Man shot and killed by poisonous arrow in Kitui"
+    }
+   ]
+  },
+  {
+   "key": "migori-guard",
+   "title": "Guard killed during attempted robbery at gold leaching site",
+   "date": "2026-09-19",
+   "county": "Migori",
+   "category": "security",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/probe-as-guard-is-killed-during-attempted-robbery-at-migori-gold-leaching-site/",
+     "title": "Probe as guard is killed during attempted robbery at Migori gold leaching site"
+    }
+   ]
+  },
+  {
+   "key": "homabay-car",
+   "title": "Local party official escapes attack as his vehicle is burnt",
+   "date": "2026-09-20",
+   "county": "Homa Bay",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/homa-bay-uda-chair-franklin-oluoch-escapes-attack-as-vehicle-is-burnt-to-shell/",
+     "title": "Homa Bay UDA Chair Franklin Oluoch Escapes Attack as Vehicle Is Burnt to Shell"
+    }
+   ]
+  },
+  {
+   "key": "homabay-poison",
+   "title": "Woman found dead outside Ndhiwa bar in suspected poisoning",
+   "date": "2026-09-20",
+   "county": "Homa Bay",
+   "category": "security",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/woman-found-dead-outside-ndhiwa-bar-in-suspected-poisoning-incident/",
+     "title": "Woman found dead outside Ndhiwa bar in suspected poisoning incident"
+    }
+   ]
+  },
+  {
+   "key": "kangundo",
+   "title": "Three killed in head-on collision on Kangundo Road",
+   "date": "2026-09-20",
+   "county": "Nairobi",
+   "category": "road",
+   "deaths": 3,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/tragedy-as-3-killed-in-head-on-collision-along-kangundo-road-nairobi/",
+     "title": "Tragedy as 3 killed in head-on collision along Kangundo Road, Nairobi"
+    }
+   ]
+  },
+  {
+   "key": "kisii-teen",
+   "title": "Teenager vanishes a day before joining vocational college",
+   "date": "2026-09-20",
+   "county": "Kisii",
+   "category": "missing",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/640388-kisii-teen-disappears-day-joining-vocational-training-college/",
+     "title": "Kisii: Worry as teen from humble home vanishes day before joining vocational training college"
+    }
+   ],
+   "status": "Open"
+  },
+  {
+   "key": "mathare",
+   "title": "MP evacuated as gang confronts him for money in Mathare",
+   "date": "2026-09-20",
+   "county": "Nairobi",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/mp-kajwang-evacuated-as-gang-confronts-him-for-money-in-mathare/",
+     "title": "MP Kajwang evacuated as gang confronts him for money in Mathare"
+    }
+   ]
+  },
+  {
+   "key": "ndenderu",
+   "title": "Two children killed in house fire in Ndenderu",
+   "date": "2026-09-20",
+   "county": "Kiambu",
+   "category": "fire",
+   "deaths": 2,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/2-children-are-killed-in-house-fire-in-ndenderu-kiambu-county/",
+     "title": "2 children are killed in house fire in Ndenderu, Kiambu County"
+    }
+   ]
+  },
+  {
+   "key": "nyamira-fakepolice",
+   "title": "Chinese nationals robbed of Ksh 3.9 million by suspects posing as police",
+   "date": "2026-09-20",
+   "county": "Nyamira",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/probe-as-chinese-nationals-are-robbed-of-sh3-9-million-after-suspects-pose-as-police-in-nyamira/",
+     "title": "Probe as Chinese nationals are robbed of Sh3.9 million after suspects pose as police in Nyamira"
+    }
+   ],
+   "hotspot": "cash"
+  },
+  {
+   "key": "siaya-miner",
+   "title": "Gold miner dies after alleged assault during dispute at mining site",
+   "date": "2026-09-20",
+   "county": "Siaya",
+   "category": "security",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/gold-miner-dies-after-alleged-assault-during-dispute-at-siaya-mining-site/",
+     "title": "Gold miner dies after alleged assault during dispute at Siaya mining site"
+    }
+   ]
+  },
+  {
+   "key": "besigye-cbd",
+   "title": "Police disperse CBD protest over Kizza Besigye’s detention; activists arrested",
+   "date": "2026-09-21",
+   "county": "Nairobi",
+   "category": "unrest",
+   "deaths": 0,
+   "articles": 5,
+   "outlets": [
+    "People Daily",
+    "Citizen Digital",
+    "Kenyans.co.ke",
+    "Capital FM News"
+   ],
+   "sources": [
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/activists-threaten-to-stage-protests-in-nairobi-over-besigyes-continued-detention",
+     "title": "Activists threaten to stage protests in Nairobi over Besigye’s continued detention"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/nairobi-activists-to-stage-protests-on-monday-demanding-kizza-besigyes-release-n390521",
+     "title": "Nairobi activists to stage protests on Monday demanding Kizza Besigye's release"
+    },
+    {
+     "name": "Kenyans.co.ke",
+     "url": "https://www.kenyans.co.ke/news/127202-nairobi-activists-march-presidents-office-over-besigye-abduction",
+     "title": "Police on Alert as Protesters Plan Demonstration in Nairobi"
+    },
+    {
+     "name": "Kenyans.co.ke",
+     "url": "https://www.kenyans.co.ke/news/127236-activists-arrested-nairobi-during-protest-over-besigyes-detention",
+     "title": "Activists Arrested in Nairobi CBD"
+    },
+    {
+     "name": "Capital FM News",
+     "url": "https://capitalfm.africa/police-disperse-nairobi-cbd-protest-over-continued-detention-of-kizza-besigye/",
+     "title": "Police Disperse Nairobi CBD Protest Over Continued Detention of Kizza Besigye"
+    }
+   ]
+  },
+  {
+   "key": "bhang-suv",
+   "title": "SUV crash on Nakuru–Nairobi highway exposes Ksh 7.2 million bhang consignment",
+   "date": "2026-09-21",
+   "county": "Nakuru",
+   "category": "road",
+   "deaths": 0,
+   "articles": 5,
+   "outlets": [
+    "People Daily",
+    "Capital FM News",
+    "Kenyans.co.ke",
+    "Tuko News",
+    "Citizen Digital"
+   ],
+   "sources": [
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/ksh7-2m-bhang-haul-exposed-after-suv-crashes-on-nakuru-nairobi-highway",
+     "title": "Ksh7.2M bhang haul exposed after SUV crashes on Nakuru–Nairobi Highway"
+    },
+    {
+     "name": "Capital FM News",
+     "url": "https://capitalfm.africa/suv-crash-leads-police-to-sh7-2mn-bhang-consignment-on-nakuru-nairobi-highway/",
+     "title": "SUV Crash Leads Police to Sh7.2mn Bhang Consignment on Nakuru-Nairobi Highway"
+    },
+    {
+     "name": "Kenyans.co.ke",
+     "url": "https://www.kenyans.co.ke/news/127237-police-recover-ksh72-million-worth-substances-wrecked-suv",
+     "title": "DCI Uncovers Substances Worth Ksh7.2 Million After Car Crash on Nakuru Highway"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/kenya/640519-suv-crash-nakuru-nairobi-highway-uncovers-ksh-72m-bhang-trafficking-operation/",
+     "title": "SUV crash on Nakuru-Nairobi Highway uncovers KSh 7.2m bhang trafficking operation"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/police-recover-241-kilos-of-bhang-after-nakuru-highway-crash-n390590",
+     "title": "Police recover 241 kilos of bhang after Nakuru highway crash"
+    }
+   ],
+   "hotspot": "a104"
+  },
+  {
+   "key": "busia-boy",
+   "title": "8-year-old found dead at home; father arrested",
+   "date": "2026-09-21",
+   "county": "Busia",
+   "category": "security",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/father-arrested-after-8-year-old-son-found-dead-in-busia-house/",
+     "title": "Father arrested after 8-year-old son found dead in Busia house"
+    }
+   ]
+  },
+  {
+   "key": "isiolo-firewood",
+   "title": "17-year-old killed as suspected bandits ambush firewood collectors",
+   "date": "2026-09-21",
+   "county": "Isiolo",
+   "category": "security",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/17-year-old-killed-as-suspected-bandits-ambush-firewood-collectors-in-isiolo/",
+     "title": "17-year-old killed as suspected bandits ambush firewood collectors in Isiolo"
+    }
+   ],
+   "hotspot": "isiolo"
+  },
+  {
+   "key": "kiambu-trek",
+   "title": "Man who walked 750 km to Turkana found by family",
+   "date": "2026-09-21",
+   "county": "Kiambu",
+   "category": "missing",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/640510-kiambu-man-covers-750km-foot-trekking-turkana-family-finds-him/",
+     "title": "Kiambu man covers 750km on foot after trekking to Turkana, family finds him"
+    }
+   ],
+   "status": "Found"
+  },
+  {
+   "key": "kisumu-building",
+   "title": "Building collapse injures eight, two critically",
+   "date": "2026-09-21",
+   "county": "Kisumu",
+   "category": "collapse",
+   "deaths": 0,
+   "articles": 2,
+   "outlets": [
+    "Capital FM News",
+    "Kenyans.co.ke"
+   ],
+   "sources": [
+    {
+     "name": "Capital FM News",
+     "url": "https://capitalfm.africa/kisumu-building-collapse-eight-injured-two-in-critical-condition/",
+     "title": "Kisumu Building Collapse: Eight Injured, Two in Critical Condition"
+    },
+    {
+     "name": "Kenyans.co.ke",
+     "url": "https://www.kenyans.co.ke/news/127223-eight-injured-building-collapses-kisumu",
+     "title": "Injuries Reported as Building Collapses in Kisumu"
+    }
+   ],
+   "hotspot": "kisumu"
+  },
+  {
+   "key": "nakuru-pursuit",
+   "title": "Three armed robbery suspects arrested after high-speed pursuit",
+   "date": "2026-09-21",
+   "county": "Nakuru",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/kenya/640496-police-arrest-3-armed-robbery-suspects-nakuru-high-speed-pursuit/",
+     "title": "Police arrest 3 armed robbery suspects in Nakuru after high-speed pursuit"
+    }
+   ]
+  },
+  {
+   "key": "shabaab-kdf",
+   "title": "Suspected Al-Shabaab militants target KDF teams in Lamu and Garissa; no casualties reported",
+   "date": "2026-09-21",
+   "county": "Lamu",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Capital FM News"
+   ],
+   "sources": [
+    {
+     "name": "Capital FM News",
+     "url": "https://capitalfm.africa/suspected-al-shabaab-militants-target-kdf-teams-in-lamu-garissa-no-casualties-reported/",
+     "title": "Suspected Al-Shabaab Militants Target KDF Teams in Lamu, Garissa, No Casualties Reported"
+    }
+   ],
+   "hotspot": "lamu"
+  },
+  {
+   "key": "tn-woman",
+   "title": "Woman disappears with her husband’s firearm",
+   "date": "2026-09-21",
+   "county": "Trans Nzoia",
+   "category": "missing",
+   "deaths": 0,
+   "articles": 3,
+   "outlets": [
+    "Tuko News",
+    "People Daily"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/640447-trans-nzoia-retired-police-officer-distress-wife-mysteriously-disappears-gun/",
+     "title": "Trans Nzoia: Retired police officer in distress as wife mysteriously disappears with his gun"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/agony-as-trans-nzoia-family-searches-for-missing",
+     "title": "Agony as Trans-Nzoia family searches for missing woman"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/640449-trans-nzoia-police-officer-shares-troubling-message-wife-hours-missing/",
+     "title": "Trans Nzoia: Ex-police officer shares troubling message wife sent hours before she went missing"
+    }
+   ],
+   "status": "Open"
+  },
+  {
+   "key": "bungoma-man",
+   "title": "Man killed after quarrel with employer",
+   "date": "2026-09-22",
+   "county": "Bungoma",
+   "category": "security",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/bungoma-man-killed-after-quarrel-with-employer-over-sale-of-goods/",
+     "title": "Bungoma man killed after quarrel with employer over sale of goods"
+    }
+   ]
+  },
+  {
+   "key": "lamu-flood",
+   "title": "Flooded streets expose Lamu’s drainage problems",
+   "date": "2026-09-22",
+   "county": "Lamu",
+   "category": "weather",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Nation Africa"
+   ],
+   "sources": [
+    {
+     "name": "Nation Africa",
+     "url": "https://nation.africa/kenya/counties/lamu/flooded-streets-expose-lamu-s-drainage-woes-ahead-of-el-nino--5605070",
+     "title": "Flooded streets expose Lamu's drainage woes ahead of El Nino"
+    }
+   ],
+   "hotspot": "lamu"
+  },
+  {
+   "key": "mandera-market",
+   "title": "Fire destroys busy market in Mandera",
+   "date": "2026-09-22",
+   "county": "Mandera",
+   "category": "fire",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "KBC"
+   ],
+   "sources": [
+    {
+     "name": "KBC",
+     "url": "https://www.kbc.co.ke/fire-destroys-busy-market-in-mandera/",
+     "title": "Fire destroys busy market in Mandera"
+    }
+   ]
+  },
+  {
+   "key": "naromoru-cell",
+   "title": "Man found hanging in Naromoru police cell; IPOA opens probe",
+   "date": "2026-09-22",
+   "county": "Nyeri",
+   "category": "security",
+   "deaths": 1,
+   "articles": 3,
+   "outlets": [
+    "Nairobi News",
+    "Citizen Digital"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/dci-gives-account-of-dennis-osiemos-death-in-narumoru-police-custody/",
+     "title": "DCI gives account of Dennis Osiemo’s death in Narumoru police custody"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/ipoa-begins-probe-into-death-of-man-found-hanging-at-naromoru-police-cell-n390778",
+     "title": "IPOA begins probe into death of man found hanging at Naromoru police cell"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/ipoa-begins-probe-into-death-of-man-founding-hanging-at-naromoru-police-cell-n390778",
+     "title": "IPOA begins probe into death of man founding hanging at Naromoru police cell"
+    }
+   ]
+  },
+  {
+   "key": "siaya-gas",
+   "title": "Three children die in house fire after gas explosion",
+   "date": "2026-09-22",
+   "county": "Siaya",
+   "category": "fire",
+   "deaths": 3,
+   "articles": 1,
+   "outlets": [
+    "Citizen Digital"
+   ],
+   "sources": [
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/siaya-three-children-die-in-house-fire-after-gas-explosion-n390622",
+     "title": "Siaya: Three children die in house fire after gas explosion"
+    }
+   ]
+  },
+  {
+   "key": "bomet-students",
+   "title": "University students protest over water shortage and raw sewage",
+   "date": "2026-09-23",
+   "county": "Bomet",
+   "category": "unrest",
+   "deaths": 0,
+   "articles": 2,
+   "outlets": [
+    "Nation Africa"
+   ],
+   "sources": [
+    {
+     "name": "Nation Africa",
+     "url": "https://nation.africa/kenya/counties/bomet/bomet-university-students-protest-over-water-sewage-crisis-5605484",
+     "title": "Bomet University students protest over water, sewage crisis"
+    },
+    {
+     "name": "Nation Africa",
+     "url": "https://nation.africa/kenya/videos/bomet-university-students-protest-over-water-shortage-and-raw-sewage-discharge-into-nyangores-5605768",
+     "title": "Bomet University students protest over water shortage and raw sewage discharge into Nyangores"
+    }
+   ]
+  },
+  {
+   "key": "dreamline",
+   "title": "Bus crashes into trailer on Nairobi–Mombasa highway; trapped passenger dies",
+   "date": "2026-09-23",
+   "county": "Kwale",
+   "category": "road",
+   "deaths": 1,
+   "articles": 3,
+   "outlets": [
+    "People Daily",
+    "Nation Africa",
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/dreamline-bus-crashes-into-trailer-on-nairobi-mombasa-highway",
+     "title": "Dreamline bus crashes into trailer on Nairobi-Mombasa Highway"
+    },
+    {
+     "name": "Nation Africa",
+     "url": "https://nation.africa/kenya/counties/kwale/trapped-passenger-in-kwale-dreamline-bus-crash-dies-5605638",
+     "title": "Trapped passenger in Kwale Dreamline bus crash dies"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/640832-dreamline-crash-passenger-trapped-wreckage-grisly-accident-dies/",
+     "title": "Dreamline Crash: Passenger trapped alive in wreckage after grisly accident dies"
+    }
+   ],
+   "hotspot": "a109"
+  },
+  {
+   "key": "isiolo-officer",
+   "title": "Police officer shot dead in daytime bandit ambush",
+   "date": "2026-09-23",
+   "county": "Isiolo",
+   "category": "security",
+   "deaths": 1,
+   "articles": 4,
+   "outlets": [
+    "Citizen Digital",
+    "Tuko News",
+    "Capital FM News"
+   ],
+   "sources": [
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/police-officer-shot-in-daytime-ambush-by-bandits-in-isiolo-n390758",
+     "title": "Police officer shot in daytime ambush by bandits in Isiolo"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/police-officer-shot-dead-in-daytime-ambush-by-bandits-in-isiolo-n390758",
+     "title": "Police officer shot dead in daytime ambush by bandits in Isiolo"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/kenya/640811-ipoa-condemns-killing-2-police-officers-isiolo-ambush-mourns-sergeant-dead-kiambu/",
+     "title": "IPOA condemns killing of 2 police officers in Isiolo ambush; mourns sergeant found dead in Kiambu"
+    },
+    {
+     "name": "Capital FM News",
+     "url": "https://capitalfm.africa/ipoa-condemns-attacks-on-police-officers-calls-for-stronger-safety-measures/",
+     "title": "IPOA condemns attacks on police officers, calls for stronger safety measures"
+    }
+   ],
+   "hotspot": "isiolo"
+  },
+  {
+   "key": "kamakis",
+   "title": "Man robbed after leaving bank at Kamakis; police pursue gang",
+   "date": "2026-09-23",
+   "county": "Kiambu",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Citizen Digital"
+   ],
+   "sources": [
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/police-pursue-gang-after-man-leaving-bank-was-robbed-at-kamakis-n390702",
+     "title": "Police pursue gang after man leaving bank was robbed at Kamakis"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/police-pursue-gang-after-man-leaving-bank-was-robbed-in-kahawa-sukari-n390702",
+     "title": "Police pursue gang after man leaving bank was robbed at Kamakis"
+    }
+   ],
+   "hotspot": "cash"
+  },
+  {
+   "key": "kirinyaga-dam",
+   "title": "Body of missing 26-year-old found in farm dam",
+   "date": "2026-09-23",
+   "county": "Kirinyaga",
+   "category": "missing",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/body-of-missing-26-year-old-man-found-in-farm-dam-in-kirinyaga/",
+     "title": "Body of missing 26-year-old man found in farm dam in Kirinyaga"
+    }
+   ],
+   "status": "Found dead"
+  },
+  {
+   "key": "meru-bodyguard",
+   "title": "MP’s bodyguard detained over shooting incident",
+   "date": "2026-09-23",
+   "county": "Meru",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/mps-bodyguard-detained-over-shooting-drama-in-meru/",
+     "title": "MP’s bodyguard detained over shooting drama in Meru"
+    }
+   ]
+  },
+  {
+   "key": "nyandarua-mob",
+   "title": "Three rescued from mob after allegedly conning an 85-year-old woman",
+   "date": "2026-09-23",
+   "county": "Nyandarua",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Citizen Digital"
+   ],
+   "sources": [
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/nyandarua-three-rescued-from-mob-attack-after-allegedly-conning-85-year-old-woman-n390754",
+     "title": "Nyandarua: Three rescued from mob attack after allegedly conning 85-year-old woman"
+    }
+   ]
+  },
+  {
+   "key": "githurai",
+   "title": "Burglary suspect dies after Githurai chase; police deny killing him",
+   "date": "2026-09-24",
+   "county": "Nairobi",
+   "category": "security",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Citizen Digital"
+   ],
+   "sources": [
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/githurai-chase-police-deny-killing-burglary-suspect-in-custody-n390817",
+     "title": "Githurai chase: Police deny killing burglary suspect in custody"
+    }
+   ]
+  },
+  {
+   "key": "kdf-truck",
+   "title": "Traffic disrupted after KDF truck crash",
+   "date": "2026-09-24",
+   "county": "Nairobi",
+   "category": "road",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Kenyans.co.ke"
+   ],
+   "sources": [
+    {
+     "name": "Kenyans.co.ke",
+     "url": "https://www.kenyans.co.ke/news/127329-kdf-truck-involved-crash-along-nairobis-outer-ring-road",
+     "title": "Traffic Disrupted After KDF Truck Crash in Nairobi"
+    }
+   ]
+  },
+  {
+   "key": "kiambu-learner",
+   "title": "Grade 10 learner missing for 10 days found",
+   "date": "2026-09-24",
+   "county": "Kiambu",
+   "category": "missing",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/640960-kiambu-joy-police-station-grade-10-learner-missing-10-days-mum-speaks/",
+     "title": "Kiambu: Joy at police station after Grade 10 learner missing for 10 days is found, mum speaks"
+    }
+   ],
+   "status": "Found"
+  },
+  {
+   "key": "kirinyaga-protest",
+   "title": "Residents protest over politically branded free underwear",
+   "date": "2026-09-24",
+   "county": "Kirinyaga",
+   "category": "unrest",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/640987-kirinyaga-residents-protest-women-receive-free-undewear-branded-senators-name/",
+     "title": "Kirinyaga residents protest after women receive free underwear branded with senator’s name"
+    }
+   ]
+  },
+  {
+   "key": "kitui-bullets",
+   "title": "Two arrested as police recover bullets hidden inside meat",
+   "date": "2026-09-24",
+   "county": "Kitui",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Citizen Digital"
+   ],
+   "sources": [
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/two-arrested-as-police-recover-bullets-hidden-inside-meat-in-kitui-n390788",
+     "title": "Two arrested as police recover bullets hidden inside meat in Kitui"
+    }
+   ]
+  },
+  {
+   "key": "mulinge",
+   "title": "Activist Mulinge Muteti goes missing after Nairobi protests; found dumped two days later",
+   "date": "2026-09-24",
+   "county": "Nairobi",
+   "category": "missing",
+   "deaths": 0,
+   "articles": 7,
+   "outlets": [
+    "Nation Africa",
+    "People Daily",
+    "Tuko News",
+    "Kenyans.co.ke",
+    "Citizen Digital",
+    "K24"
+   ],
+   "sources": [
+    {
+     "name": "Nation Africa",
+     "url": "https://nation.africa/kenya/news/activist-mulinge-muteti-reported-missing-after-nairobi-protests-5606844",
+     "title": "Activist Mulinge Muteti reported missing after Nairobi protests"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/maraga-demands-answers-over-mulinge-mutetis-disappearance",
+     "title": "Maraga demands answers over Mulinge Muteti’s disappearance"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/kenya/641061-muteti-mulinge-missing-activists-dumped-lukenya-area-hospital/",
+     "title": "Muteti Mulinge: Missing activist found dumped near Lukenya area, taken to hospital"
+    },
+    {
+     "name": "Kenyans.co.ke",
+     "url": "https://www.kenyans.co.ke/news/127342-activist-mulinge-muteti-found-dumped-machakos-after-days-disappearance",
+     "title": "Activist Mulinge Muteti Found After Days of Disappearance"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/missing-activist-mulinge-muteti-found-alive-in-mlolongo-after-days-of-disappearance",
+     "title": "Missing activist Mulinge Muteti found alive in Mlolongo after days of disappearance"
+    },
+    {
+     "name": "Kenyans.co.ke",
+     "url": "https://www.kenyans.co.ke/news/127360-missing-activist-collins-otieno-found-dumped-along-thika-road-rushed-hospital",
+     "title": "Missing Activist Found Dumped Along Thika Road, Rushed to Hospital"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/missing-activist-collins-otieno-found-dumped-along-thika-road-rushed-to-hospital-n390923",
+     "title": "Missing Activist Found Dumped Along Thika Road, Rushed to Hospital"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/activist-collins-otieno-found-dumped-along-thika-road-day-after-mulinge-mutetis-ordeal",
+     "title": "Missing Activist Found Dumped Along Thika Road, Rushed to Hospital"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/641201-missing-activist-collins-otieno-alive-dumped-kasarani-thika-road/",
+     "title": "Missing Activist Found Dumped Along Thika Road, Rushed to Hospital"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/police-arrest-2-persons-of-interest-over-kamulu-robbery-incidents",
+     "title": "Missing Activist Found Dumped Along Thika Road, Rushed to Hospital"
+    },
+    {
+     "name": "K24",
+     "url": "https://k24.digital/news/motorists-stuck-in-heavy-traffic-on-thika-road-after-accident",
+     "title": "Missing Activist Found Dumped Along Thika Road, Rushed to Hospital"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/missing-activist-boniface-mulinge-muteti-found-alive-in-mlolongo-n390839",
+     "title": "Missing activist Boniface Mulinge Muteti found alive in Mlolongo"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/calls-for-justice-grow-after-2-kitengela-riders-are-killed-motorcycles-stolen",
+     "title": "Missing activist Boniface Mulinge Muteti found alive in Mlolongo"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/ipoa-begins-probe-after-man-dies-in-kitengela-police-station-n390995",
+     "title": "Missing activist Boniface Mulinge Muteti found alive in Mlolongo"
+    }
+   ],
+   "conflict": "Reports place where he was found variously at Lukenya, Mlolongo and Thika Road.",
+   "status": "Found alive",
+   "defining": true,
+   "why": "Six separate outlets covered it, and former Chief Justice Maraga publicly demanded answers. It came in the same week police broke up the Besigye protests in the CBD."
+  },
+  {
+   "key": "obunga",
+   "title": "One dead after demolition site collapses in Obunga",
+   "date": "2026-09-24",
+   "county": "Kisumu",
+   "category": "collapse",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Citizen Digital"
+   ],
+   "sources": [
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/one-dead-after-demolition-site-collapse-in-kisumus-obunga-n390763",
+     "title": "One dead after demolition site collapse in Kisumu’s Obunga"
+    }
+   ],
+   "hotspot": "kisumu"
+  },
+  {
+   "key": "samburu-op",
+   "title": "Security operation in Samburu: goat raid repulsed, residents protest the killing of 415 goats and 102 cattle",
+   "date": "2026-09-24",
+   "county": "Samburu",
+   "category": "security",
+   "deaths": 0,
+   "articles": 7,
+   "outlets": [
+    "Nairobi News",
+    "People Daily",
+    "Citizen Digital"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/suspected-gunmen-repulsed-during-attempted-goat-raid-in-samburu-amid-massive-operation/",
+     "title": "Suspected gunmen repulsed during attempted goat raid in Samburu amid massive operation"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/samburu-senator-lelegwe-demands-probe-into-killing-of-415-goats-102-cattle-during-security-operation",
+     "title": "Samburu Senator Lelegwe demands probe into killing of 415 goats, 102 cattle during security operation"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/murkomen-fires-warning-shot-at-bandits-after-samburu-bloodshed",
+     "title": "Murkomen fires warning shot at bandits after Samburu killings"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/murkomen-defends-samburu-security-operation-orders-caution-to-prevent-collateral-damage-n390944",
+     "title": "Murkomen defends Samburu security operation, orders caution to prevent collateral damage"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/samburu-governor-explains-ksh70m-compensation-claim-for-killed-animals",
+     "title": "Samburu governor explains Ksh70M compensation claim for killed animals"
+    },
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/waso-ward-security-operation-lesuuda-condemns-collective-punishment-of-samburu-residents",
+     "title": "Waso Ward security operation: Lesuuda condemns collective punishment of Samburu residents"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/security-operation-in-samburu-sparks-protests-over-killing-of-hundreds-of-livestock-n390845",
+     "title": "Security operation in Samburu sparks protests over killing of hundreds of livestock"
+    }
+   ],
+   "hotspot": "isiolo"
+  },
+  {
+   "key": "migori-mine",
+   "title": "Search for two trapped after gold mine collapse",
+   "date": "2026-09-25",
+   "county": "Migori",
+   "category": "collapse",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Citizen Digital"
+   ],
+   "sources": [
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/search-underway-for-two-trapped-after-gold-mine-collapses-in-migori-n390901",
+     "title": "Search underway for two trapped after gold mine collapses in Migori"
+    }
+   ]
+  },
+  {
+   "key": "nanyuki-tusks",
+   "title": "Two elephant tusks recovered; suspect apprehended in Nanyuki",
+   "date": "2026-09-25",
+   "county": "Laikipia",
+   "category": "wildlife",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "People Daily"
+   ],
+   "sources": [
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/2-elephant-tusks-recovered-as-police-apprehend-person-of-interest-in-nanyuki",
+     "title": "2 elephant tusks recovered as police apprehend person of interest in Nanyuki"
+    }
+   ]
+  },
+  {
+   "key": "eldoret-b13",
+   "title": "Suspected B13 gang member arrested over violent robberies",
+   "date": "2026-09-26",
+   "county": "Uasin Gishu",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "People Daily"
+   ],
+   "sources": [
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/police-arrest-suspected-b13-gang-member-linked-to-violent-robberies-in-eldoret",
+     "title": "Police arrest suspected B13 gang member linked to violent robberies in Eldoret"
+    }
+   ]
+  },
+  {
+   "key": "mombasa-truck",
+   "title": "Mother and son killed as truck ploughs into pedestrians returning from night vigil",
+   "date": "2026-09-26",
+   "county": "Mombasa",
+   "category": "road",
+   "deaths": 2,
+   "articles": 2,
+   "outlets": [
+    "Nation Africa",
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "Nation Africa",
+     "url": "https://nation.africa/kenya/counties/mombasa/mother-child-killed-after-truck-ploughs-into-pedestrians-in-mombasa-5610272",
+     "title": "Mother, child killed after truck ploughs into pedestrians in Mombasa"
+    },
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/kenya/counties/641248-mombasa-mother-son-die-truck-ploughs-returning-night-vigil/",
+     "title": "Mombasa: Mother, son die as truck ploughs into them while returning from night vigil"
+    }
+   ]
+  },
+  {
+   "key": "sagana-pedestrian",
+   "title": "65-year-old woman killed crossing Sagana–Makutano highway on way to church",
+   "date": "2026-09-26",
+   "county": "Kirinyaga",
+   "category": "road",
+   "deaths": 1,
+   "articles": 2,
+   "outlets": [
+    "People Daily",
+    "Citizen Digital"
+   ],
+   "sources": [
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/65-year-old-woman-killed-while-crossing-sagana-makutano-highway",
+     "title": "65-year-old woman killed while crossing Sagana-Makutano highway"
+    },
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/65-year-old-woman-knocked-down-killed-while-walking-to-church-in-kirinyaga-n390937",
+     "title": "65-year-old woman knocked down, killed while walking to church in Kirinyaga"
+    }
+   ]
+  },
+  {
+   "key": "kitale-couple",
+   "title": "Couple robbed of Ksh 1.7 million after bank withdrawal in Kitale",
+   "date": "2026-09-27",
+   "county": "Trans Nzoia",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/probe-as-gang-robs-couple-of-sh1-7-million-after-withdrawing-money-in-kitale/",
+     "title": "Probe as gang robs couple of Sh1.7 million after withdrawing money in Kitale"
+    }
+   ],
+   "hotspot": "cash"
+  },
+  {
+   "key": "marsabit-kdf",
+   "title": "KDF soldier found dead at Marsabit operation base",
+   "date": "2026-09-27",
+   "county": "Marsabit",
+   "category": "security",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/probe-as-kdf-soldier-found-dead-with-slit-throat-at-marsabit-operation-base/",
+     "title": "Probe as KDF soldier found dead with slit throat at Marsabit Operation Base"
+    }
+   ]
+  },
+  {
+   "key": "meru-river",
+   "title": "Missing man found dead in River Kamangu months after disappearance",
+   "date": "2026-09-27",
+   "county": "Meru",
+   "category": "missing",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/missing-man-found-dead-in-river-kamangu-meru-months-after-disappearance/",
+     "title": "Missing man found dead in river Kamangu, Meru, months after disappearance"
+    }
+   ],
+   "status": "Found dead"
+  },
+  {
+   "key": "migori-fisherman",
+   "title": "Fisherman killed in dispute over fishing net at Got Kachola Beach",
+   "date": "2026-09-27",
+   "county": "Migori",
+   "category": "security",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/fisherman-hit-and-killed-in-dispute-over-fishing-net-at-got-kachola-beach-migori-county/",
+     "title": "Fisherman hit and killed in dispute over fishing net at Got Kachola Beach, Migori County"
+    }
+   ]
+  },
+  {
+   "key": "mombasa-panga",
+   "title": "Panga gang attacks alarm Mombasa residents and religious leaders",
+   "date": "2026-09-27",
+   "county": "Mombasa",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "People Daily"
+   ],
+   "sources": [
+    {
+     "name": "People Daily",
+     "url": "https://peopledaily.digital/news/panga-gang-wreaks-havoc-in-mombasa-as-religious-leaders-sound-alarm",
+     "title": "Panga gang wreaks havoc in Mombasa as religious leaders sound alarm"
+    }
+   ]
+  },
+  {
+   "key": "sagana-drugged",
+   "title": "Three men drugged and robbed after a night out in Sagana",
+   "date": "2026-09-27",
+   "county": "Kirinyaga",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/three-men-drugged-robbed-after-night-out-in-sagana-kirinyaga-county/",
+     "title": "Three men drugged, robbed after night out in Sagana, Kirinyaga County"
+    }
+   ]
+  },
+  {
+   "key": "turkana-rider",
+   "title": "Armed bandits open fire on a motorbike rider (captured on video)",
+   "date": "2026-09-27",
+   "county": "Turkana",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/people/family/641231-turkana-video-captures-terrifying-moment-armed-bandits-shot-biker-lokichar/",
+     "title": "Turkana: Video captures terrifying moment armed bandits opened fire on motorbike rider"
+    }
+   ]
+  },
+  {
+   "key": "busia-officer",
+   "title": "Police officer seriously injured by suspect during arrest",
+   "date": "2026-09-28",
+   "county": "Busia",
+   "category": "security",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "Citizen Digital"
+   ],
+   "sources": [
+    {
+     "name": "Citizen Digital",
+     "url": "https://citizen.digital/article/police-officer-sustains-severe-injuries-after-suspect-attacked-him-during-arrest-n391026",
+     "title": "Police officer sustains severe injuries after suspect attacked him during arrest"
+    }
+   ]
+  },
+  {
+   "key": "embu-grandmother",
+   "title": "Elderly woman killed and grandson injured; prime suspect arrested",
+   "date": "2026-09-28",
+   "county": "Embu",
+   "category": "security",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/kenya/counties/641347-embu-dci-arrests-prime-suspect-accused-killing-elderly-woman-injuring-grandson/",
+     "title": "Embu: DCI arrests prime suspect accused of killing elderly woman, injuring her grandson"
+    }
+   ]
+  },
+  {
+   "key": "turkana-militia",
+   "title": "At least four Ethiopian militia members killed in gunfight with National Police Reservists",
+   "date": "2026-09-28",
+   "county": "Turkana",
+   "category": "security",
+   "deaths": 4,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/at-least-4-ethiopian-militia-members-killed-in-gunfight-with-npr-in-turkana/",
+     "title": "At least 4 Ethiopian militia members killed in gunfight with NPR in Turkana"
+    }
+   ]
+  },
+  {
+   "key": "kwale-elephant",
+   "title": "70-year-old man killed in elephant attack",
+   "date": "2026-09-29",
+   "county": "Kwale",
+   "category": "wildlife",
+   "deaths": 1,
+   "articles": 1,
+   "outlets": [
+    "Nairobi News"
+   ],
+   "sources": [
+    {
+     "name": "Nairobi News",
+     "url": "https://nairobinews.co.ke/70-year-old-man-killed-in-elephant-attack-in-kwale/",
+     "title": "70-Year-Old Man Killed in Elephant Attack in Kwale"
+    }
+   ]
+  },
+  {
+   "key": "lamu-dangote",
+   "title": "Residents protest the day before the Dangote refinery groundbreaking",
+   "date": "2026-09-29",
+   "county": "Lamu",
+   "category": "unrest",
+   "deaths": 0,
+   "articles": 3,
+   "outlets": [
+    "Kenyans.co.ke",
+    "K24",
+    "Nation Africa"
+   ],
+   "sources": [
+    {
+     "name": "Kenyans.co.ke",
+     "url": "https://www.kenyans.co.ke/news/127429-lamu-locals-protest-over-compensation-ahead-dangote-refinery-groundbreaking",
+     "title": "Protests Erupt in Lamu Over Dangote Oil Refinery"
+    },
+    {
+     "name": "K24",
+     "url": "https://k24.digital/news/lamu-residents-stage-protests-a-day-to-dangote-refinery-groundbreaking",
+     "title": "Lamu residents stage protests a day to Dangote Refinery groundbreaking"
+    },
+    {
+     "name": "Nation Africa",
+     "url": "https://nation.africa/kenya/counties/lamu/lamu-residents-protest-against-sh2-trillion-refinery-5614114",
+     "title": "Lamu residents protest against Sh2 trillion refinery"
+    }
+   ],
+   "hotspot": "lamu"
+  },
+  {
+   "key": "mumias-busia",
+   "title": "Two killed in vehicle–motorbike collision on Mumias–Busia road",
+   "date": "2026-09-29",
+   "county": "Busia",
+   "category": "road",
+   "deaths": 2,
+   "articles": 1,
+   "outlets": [
+    "Tuko News"
+   ],
+   "sources": [
+    {
+     "name": "Tuko News",
+     "url": "https://www.tuko.co.ke/kenya/counties/641483-2-people-killed-vehicle-motorbike-collision-mumias-busia-road/",
+     "title": "2 people killed in vehicle-motorbike collision along Mumias-Busia Road"
+    }
+   ]
+  },
+  {
+   "key": "babayaga",
+   "title": "Matatu crashes into a ditch in Nairobi",
+   "date": "2026-09-30",
+   "county": "Nairobi",
+   "category": "road",
+   "deaths": 0,
+   "articles": 1,
+   "outlets": [
+    "K24"
+   ],
+   "sources": [
+    {
+     "name": "K24",
+     "url": "https://k24.digital/entertainment/celebrity/george-rutos-famous-baba-yaga-matatu-crashes-into-huge-ditch-in-nairobi",
+     "title": "George Ruto’s famous Baba Yaga matatu crashes into huge ditch in Nairobi"
+    }
+   ]
+  }
+ ],
+ "hotspots": [
+  {
+   "key": "isiolo",
+   "title": "Isiolo–Samburu banditry belt",
+   "summary": "Ambushes on police, herders and firewood collectors from 16 September, followed by protests and a security operation. The deadliest cluster of the month."
+  },
+  {
+   "key": "a104",
+   "title": "Nairobi–Nakuru highway",
+   "summary": "The Kikopey bus crash that killed five members of one family, a lorry ramming a stalled car near Naivasha, and an SUV crash that exposed a Ksh 7.2m bhang haul."
+  },
+  {
+   "key": "a109",
+   "title": "Nairobi–Mombasa highway",
+   "summary": "A matatu crash near Kapiti and a Dreamline bus hitting a trailer. Both involved public transport."
+  },
+  {
+   "key": "cash",
+   "title": "Robberies after cash withdrawals",
+   "summary": "A pattern rather than a place. Victims were followed after withdrawing cash in Ruiru, Murang’a, Nyamira, Kamakis and Kitale."
+  },
+  {
+   "key": "lamu",
+   "title": "Lamu",
+   "summary": "A kidnapping, suspected Al-Shabaab activity against KDF teams, street flooding and protests over the Dangote refinery."
+  },
+  {
+   "key": "kisumu",
+   "title": "Kisumu city",
+   "summary": "A building collapse that injured eight, a fatal demolition-site collapse in Obunga, and a robbery spree."
+  }
+ ],
+ "watch": [
+  {
+   "title": "El Niño rains",
+   "body": "Nairobi County says it has mapped 227 flood hotspots and began moving families out of riparian areas on 29 September. The governor has raised possible school closures. Flood and landslide warnings were also issued for Kajiado's satellite towns, Kirinyaga, Budalangi in Busia, Mandera, Siaya, Sondu, Tana River and Lamu.",
+   "action": "If you live near a river or drainage channel, know your nearest high ground now. Check the Deckwatch map and Kenya Meteorological Department alerts before travelling in heavy rain."
+  },
+  {
+   "title": "Isiolo–Samburu security operation",
+   "body": "A run of bandit attacks, killings and protests across Isiolo, Samburu and northern Meru was followed by a security operation that residents say killed hundreds of their animals. The operation was still running at month’s end.",
+   "action": "Travel on the Isiolo–Marsabit road and around Gotu and Waso only with current local information."
+  },
+  {
+   "title": "The two big highways",
+   "body": "Nairobi–Nakuru and Nairobi–Mombasa saw five serious incidents and 13 reported deaths between them. Most involved buses, matatus or heavy trucks.",
+   "action": "Avoid night travel on these roads where you can. Report dangerous PSV driving to NTSA."
+  },
+  {
+   "title": "Robberies after cash withdrawals",
+   "body": "Five robberies in five counties followed victims who had just withdrawn cash, from Ksh 600,000 to Ksh 3.9 million. In one, the robbers posed as police officers.",
+   "action": "Move large sums by bank transfer or M-Pesa rather than cash. Vary your route and timing when you leave a bank."
+  },
+  {
+   "title": "Political gatherings ahead of 2027",
+   "body": "Two people died at a political meeting in Embu and one during a rally in Nairobi. Police say they are now mapping election-violence hotspots.",
+   "action": "Before attending a rally, check the venue and surrounding routes on Deckwatch, and plan a way out."
+  },
+  {
+   "title": "Lamu refinery",
+   "body": "Residents protested the day before the Dangote refinery groundbreaking over land compensation. Court cases are pending and the government says the project will go ahead.",
+   "action": "Expect more demonstrations around project milestones and court dates in Lamu."
+  }
+ ],
+ "headlines": {
+  "month": "A violent fortnight in the north, and deadly roads everywhere else",
+  "what": "Crime and security made up half of all incidents. Road crashes killed the most people."
+ }
+}

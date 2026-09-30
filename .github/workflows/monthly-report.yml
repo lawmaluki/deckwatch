@@ -1,0 +1,81 @@
+name: Monthly safety report
+
+# Publishes the month's report on its last day, at 23:30 in Kenya.
+#
+# Cron can't say "last day of the month", so this fires at 20:30 UTC (23:30
+# EAT) on the 28th-31st and `--only-last-day` (app.monthly.report.month_due)
+# works out whether a month is due: only the evening of the real last day, or
+# the morning of the 1st when GitHub started the run late. The last half hour
+# of the month isn't in the report; re-run the month manually (below) if you
+# need it complete.
+#
+# Manual run: Actions -> Monthly safety report -> Run workflow, optionally
+# with a month (YYYY-MM) to regenerate one. A regenerated month replaces the
+# stored report, including a hand-reviewed one, so leave `month` empty unless
+# that's what you want.
+
+on:
+  schedule:
+    - cron: "30 20 28-31 * *"
+  workflow_dispatch:
+    inputs:
+      month:
+        description: "Month to (re)generate, YYYY-MM. Empty = the current month."
+        required: false
+        default: ""
+
+# Never let two runs write the same month at once.
+concurrency:
+  group: monthly-report
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install backend
+        run: pip install .
+
+      # Pick up the day's last articles before the month is cut.
+      - name: Run ingest
+        if: github.event_name == 'schedule'
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          INGEST_CLASSIFIER: ${{ vars.INGEST_CLASSIFIER || 'rule' }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python -m app.ingest
+
+      - name: Generate report
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          REPORT_MODEL: ${{ vars.REPORT_MODEL || 'claude-opus-5-5' }}
+          MONTH: ${{ inputs.month }}
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            python -m app.monthly --only-last-day --out report.json
+          elif [ -n "$MONTH" ]; then
+            python -m app.monthly --month "$MONTH" --out report.json
+          else
+            python -m app.monthly --out report.json
+          fi
+
+      # Kept for 90 days so a bad run can be inspected, or re-imported with
+      # `python -m app.monthly --import report.json` after a hand edit.
+      - name: Keep the report
+        if: always() && hashFiles('backend/report.json') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: monthly-report-${{ github.run_id }}
+          path: backend/report.json
+          retention-days: 90

@@ -101,6 +101,31 @@ Feed URLs are in `app/ingest/sources.py` — outlets change RSS paths over time;
 dead feed is skipped, not fatal. The pure stages and classifier mapping are
 covered DB-free in `tests/test_ingest.py` (the Anthropic client is stubbed).
 
+## Monthly safety report
+
+`python -m app.monthly` builds the month's safety report (shown at
+`/dashboard/reports/<YYYY-MM>`) and stores it in the `monthly_reports` table.
+It reads the month's ingested incidents (on the Kenyan calendar), has
+**Claude Opus 5.5** (`REPORT_MODEL`) consolidate them — merge duplicate
+coverage into one incident, correct counties, set aside context and off-topic
+articles, and write the hotspots, "why it matters" notes and watch list — then
+computes every figure from the articles themselves (`app/monthly/report.py`).
+Without `ANTHROPIC_API_KEY` it stores an automatic report (one incident per
+article) that the page labels as unreviewed.
+
+```bash
+.venv/bin/python -m app.monthly --month 2026-09            # generate + store
+.venv/bin/python -m app.monthly --month 2026-09 --no-store --out r.json   # dry run
+.venv/bin/python -m app.monthly --import r.json            # store a hand-edited report
+```
+
+It runs on the last day of every month at 23:30 EAT from
+`.github/workflows/monthly-report.yml` (needs the `DATABASE_URL` and
+`ANTHROPIC_API_KEY` repo secrets; each run's report is kept as a workflow
+artifact). Served by `GET /monthly-reports` and `GET /monthly-reports/{month}`.
+September 2026 was reviewed by hand; its report is bundled with the frontend at
+`src/lib/data/monthly-reports/2026-09.json` and stored with `--import`.
+
 ## Deploying
 
 Target stack: **Render** (API service + cron job) + **Supabase** (managed

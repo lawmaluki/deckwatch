@@ -26,6 +26,13 @@ export const CHANGE_KIND_COLOR: Record<ChangeKind, string> = {
  * build work stays in the commit history where it belongs. */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-01",
+    kind: "new",
+    area: "Dashboard",
+    title: "A monthly safety report",
+    body: "Deckwatch now publishes a report on the last day of every month: what happened, where it happened, how confident we are, and what to watch next month. Duplicate news coverage is merged so each incident counts once, and every incident links back to the articles it came from. Open it from the top of the Dashboard. September 2026 is the first issue.",
+  },
+  {
     date: "2026-09-17",
     kind: "new",
     area: "Alerts",
