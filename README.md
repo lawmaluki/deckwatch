@@ -14,6 +14,7 @@
 </div>
 
 ---
+<img width="1919" height="958" alt="image" src="https://github.com/user-attachments/assets/b7337bd3-f9cb-4ab1-897d-072b76231afe" />
 
 Kenyans deciding whether it is safe to travel, commute or attend an event mostly rely on scattered news alerts, group chats and word of mouth. Deckwatch replaces that guesswork with one map-first view of what is happening and where, built from 13 Kenyan newsrooms, scored for how well each report is corroborated, and summed up in a monthly safety report.
 
