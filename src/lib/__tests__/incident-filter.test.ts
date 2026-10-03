@@ -63,6 +63,22 @@ describe("filterIncidents", () => {
     expect(filterIncidents(incidents, { county: null })).toHaveLength(3);
   });
 
+  it("excludes a headline explicitly assigned to a different county", () => {
+    const mismatch = makeIncident({
+      id: "mismatch",
+      category: "infrastructure",
+      severity: "critical",
+      county: "Nairobi",
+      title: "Mine collapse in West Pokot",
+      verificationStatus: "unconfirmed",
+      reportedAt: hoursBeforeReference(2),
+      isLive: true,
+    });
+    expect(
+      ids(filterIncidents([...incidents, mismatch], { county: "Nairobi" }))
+    ).toEqual(["a", "c"]);
+  });
+
   it("filters by recency window", () => {
     expect(ids(filterIncidents(incidents, { withinHours: 24 }))).toEqual(["a", "c"]);
   });

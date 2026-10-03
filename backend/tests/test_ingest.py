@@ -29,6 +29,16 @@ def test_prefilter_keeps_incidents_drops_noise():
     )
 
 
+def test_headline_county_beats_outlet_name_in_summary():
+    incident = rules.classify({
+        "title": "At least 5 dead after gold mine collapses in West Pokot",
+        "summary": "Nairobi News reports the mine collapse in Longorokomol Larga.",
+    })
+
+    assert incident is not None
+    assert incident["county"] == "West Pokot"
+
+
 # --- geocode -----------------------------------------------------------------
 
 def test_geocode_resolves_hotspot():

@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import math
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 # Fixed reference "now" the seed is anchored to (mirrors DATA_REFERENCE_TIME).
@@ -143,6 +143,72 @@ def category_breakdown(incidents: List[Incident]) -> List[Dict[str, Any]]:
     return [{"category": c, "count": n} for c, n in ordered]
 
 
+def county_incident_summary(
+    incidents: List[Incident], at_ms: int, days: int = 30
+) -> Dict[str, Any]:
+    """Summarize real reported incidents over this and the prior equal window."""
+    window_ms = days * 24 * MS_PER_HOUR
+    current_start = at_ms - window_ms
+    previous_start = current_start - window_ms
+    current = [
+        i for i in incidents
+        if current_start <= parse_iso_ms(i["reportedAt"]) < at_ms
+    ]
+    previous = [
+        i for i in incidents
+        if previous_start <= parse_iso_ms(i["reportedAt"]) < current_start
+    ]
+
+    current_categories = {row["category"]: row["count"] for row in category_breakdown(current)}
+    previous_categories = {row["category"]: row["count"] for row in category_breakdown(previous)}
+    categories = sorted(
+        set(current_categories) | set(previous_categories),
+        key=lambda category: (-current_categories.get(category, 0), category),
+    )
+
+    def percent_change(now: int, before: int) -> Optional[int]:
+        if before == 0:
+            return None
+        return _js_round((now - before) * 100 / before)
+
+    end_date = datetime.fromtimestamp(at_ms / 1000, tz=timezone.utc).date()
+    daily = {
+        (end_date - timedelta(days=offset)).isoformat(): 0
+        for offset in range(days, -1, -1)
+    }
+    for incident in current:
+        date = incident["reportedAt"][:10]
+        if date in daily:
+            daily[date] += 1
+
+    return {
+        "periodDays": days,
+        "unit": "incidents",
+        "total": len(current),
+        "previousTotal": len(previous),
+        "changePercent": percent_change(len(current), len(previous)),
+        "categories": [
+            {
+                "category": category,
+                "count": current_categories.get(category, 0),
+                "previousCount": previous_categories.get(category, 0),
+                "changePercent": percent_change(
+                    current_categories.get(category, 0),
+                    previous_categories.get(category, 0),
+                ),
+            }
+            for category in categories
+        ],
+        "severities": [
+            {"severity": severity, "count": sum(1 for i in current if i["severity"] == severity)}
+            for severity in SEVERITIES
+        ],
+        "dailyTrend": [
+            {"date": date, "count": count} for date, count in sorted(daily.items())
+        ],
+    }
+
+
 # --- filtering ---------------------------------------------------------------
 
 def filter_incidents(
@@ -181,6 +247,18 @@ def filter_incidents(
                 continue
         out.append(i)
     return out
+
+
+def county_headline_is_consistent(
+    incident: Mapping[str, Any], expected_county: str, county_names
+) -> bool:
+    """Reject a single explicit county in the headline if it contradicts the row."""
+    title = str(incident.get("title", ""))
+    mentioned = [
+        name for name in county_names
+        if re.search(r"(?<!\w)" + re.escape(name) + r"(?!\w)", title, re.IGNORECASE)
+    ]
+    return len(mentioned) != 1 or mentioned[0] == expected_county
 
 
 # --- request validation ------------------------------------------------------

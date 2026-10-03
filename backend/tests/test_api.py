@@ -87,6 +87,25 @@ def test_county_summary(client):
     assert client.get("/counties/atlantis").status_code == 404
 
 
+def test_county_incident_summary(client):
+    r = client.get("/counties/nairobi/summary")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["county"] == "Nairobi"
+    assert body["slug"] == "nairobi"
+    assert body["periodDays"] == 30
+    assert body["total"] >= 0
+    assert body["previousTotal"] >= 0
+    assert {"category", "count", "previousCount", "changePercent"} <= set(
+        body["categories"][0]
+    ) if body["categories"] else True
+    assert [row["severity"] for row in body["severities"]] == [
+        "low", "medium", "high", "critical"
+    ]
+    assert client.get("/counties/nairobi/summary?days=14").status_code == 400
+    assert client.get("/counties/atlantis/summary").status_code == 404
+
+
 def test_reports(client):
     ok = client.post(
         "/reports",

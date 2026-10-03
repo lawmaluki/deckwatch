@@ -18,6 +18,45 @@ def test_fixtures_loaded():
     assert len(COUNTIES) == 47
 
 
+def test_county_headline_guard_rejects_clear_mismatch_only():
+    assert not domain.county_headline_is_consistent(
+        {"title": "Mine collapse reported in West Pokot"}, "Nairobi", COUNTY_NAMES
+    )
+    assert domain.county_headline_is_consistent(
+        {"title": "Mine collapse reported in Nairobi"}, "Nairobi", COUNTY_NAMES
+    )
+    assert domain.county_headline_is_consistent(
+        {"title": "Nairobi-Nakuru highway crash"}, "Nairobi", COUNTY_NAMES
+    )
+
+
+def test_county_incident_summary_compares_equal_windows_and_counts_incidents():
+    as_of = domain.parse_iso_ms("2026-10-03T12:00:00Z")
+    incidents = [
+        {"reportedAt": "2026-10-02T12:00:00Z", "category": "crime", "severity": "high"},
+        {"reportedAt": "2026-10-01T12:00:00Z", "category": "crime", "severity": "low"},
+        {"reportedAt": "2026-09-02T12:00:00Z", "category": "flood", "severity": "medium"},
+        {"reportedAt": "2026-08-03T12:00:00Z", "category": "fire", "severity": "critical"},
+    ]
+
+    result = domain.county_incident_summary(incidents, as_of, days=30)
+
+    assert result["total"] == 2
+    assert result["previousTotal"] == 1
+    assert result["changePercent"] == 100
+    assert result["categories"] == [
+        {"category": "crime", "count": 2, "previousCount": 0, "changePercent": None},
+        {"category": "flood", "count": 0, "previousCount": 1, "changePercent": -100},
+    ]
+    assert [row for row in result["dailyTrend"] if row["count"]] == [
+        {"date": "2026-10-01", "count": 1},
+        {"date": "2026-10-02", "count": 1},
+    ]
+    assert len(result["dailyTrend"]) == 31
+    assert sum(row["count"] for row in result["dailyTrend"]) == result["total"]
+    assert sum(row["count"] for row in result["severities"]) == 2
+
+
 # --- time-shift invariance ---------------------------------------------------
 
 def test_iso_roundtrip():
