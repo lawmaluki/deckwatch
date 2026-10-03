@@ -14,14 +14,21 @@ router = APIRouter()
 @router.get("/incidents")
 def list_incidents(request: Request, session: Session = Depends(get_session)):
     as_of = domain.now_ms()
+    county_names = repository.get_county_names(session)
     parsed = domain.parse_incident_query(
-        dict(request.query_params), repository.get_county_names(session), as_of
+        dict(request.query_params), county_names, as_of
     )
     if not parsed["ok"]:
         return JSONResponse({"error": parsed["error"]}, status_code=400)
 
     incidents = domain.shift_incidents(repository.get_all_incidents(session), as_of)
     results = domain.filter_incidents(incidents, parsed["value"]["filter"], as_of)
+    county = parsed["value"]["filter"].get("county")
+    if county:
+        results = [
+            incident for incident in results
+            if domain.county_headline_is_consistent(incident, county, county_names)
+        ]
     # Newest first, and before the limit is applied so ?limit=N returns the N
     # most recent incidents rather than the N oldest-ingested.
     results = domain.sort_newest_first(results)

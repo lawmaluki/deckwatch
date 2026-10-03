@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { getLiveIncidents } from "@/lib/incidents-source";
 import { COUNTY_BY_SLUG } from "@/lib/data/counties";
+import { countyHeadlineIsConsistent } from "@/lib/incident-filter";
 import { countyRiskScore, categoryBreakdown, withinHours } from "@/lib/stats";
 import { BACKEND_URL, proxyJson } from "@/lib/backend";
 
@@ -17,7 +18,10 @@ export async function GET(
   }
 
   const nowMs = Date.now();
-  const incidents = getLiveIncidents(nowMs).filter((i) => i.county === county.name);
+  const incidents = getLiveIncidents(nowMs).filter(
+    (i) =>
+      i.county === county.name && countyHeadlineIsConsistent(i, county.name)
+  );
 
   return Response.json({
     name: county.name,

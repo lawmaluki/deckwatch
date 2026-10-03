@@ -77,6 +77,19 @@ def get_incidents_by_county(
     return [_to_dict(inc, lat, lng, detail=False) for inc, lat, lng in rows]
 
 
+def get_live_incidents_by_county(
+    session: Session, county_name: str
+) -> List[domain.Incident]:
+    """Return only news-ingested incidents, excluding synthetic seed records."""
+    rows = session.execute(
+        _select_with_coords().where(
+            Incident.county_name == county_name,
+            Incident.id.startswith("ing-"),
+        )
+    ).all()
+    return [_to_dict(inc, lat, lng, detail=False) for inc, lat, lng in rows]
+
+
 def get_county_by_slug(session: Session, slug: str) -> Optional[County]:
     return session.execute(
         select(County).where(County.slug == slug)

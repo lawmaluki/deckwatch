@@ -18,6 +18,11 @@ def get_county(slug: str, session: Session = Depends(get_session)):
     incidents = domain.shift_incidents(
         repository.get_incidents_by_county(session, county.name), as_of
     )
+    county_names = repository.get_county_names(session)
+    incidents = [
+        incident for incident in incidents
+        if domain.county_headline_is_consistent(incident, county.name, county_names)
+    ]
     breakdown = domain.category_breakdown(incidents)
 
     return {

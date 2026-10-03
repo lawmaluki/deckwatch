@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { GET as getIncidentsRoute } from "@/app/api/incidents/route";
 import { GET as getIncidentByIdRoute } from "@/app/api/incidents/[id]/route";
 import { GET as getCountyRoute } from "@/app/api/counties/[slug]/route";
+import { GET as getCountyIncidentSummaryRoute } from "@/app/api/counties/[slug]/summary/route";
 import { POST as postReportRoute } from "@/app/api/reports/route";
 import { getIncidentsSnapshot, shiftIncidents } from "@/lib/incidents-source";
 import { MS_PER_HOUR } from "@/lib/constants";
@@ -75,6 +76,13 @@ describe("GET /api/incidents", () => {
     const body = await ok.json();
     for (const incident of body.results as Incident[]) {
       expect(incident.county).toBe("Nairobi");
+      expect(incident.title).toEqual(expect.any(String));
+      expect(incident.category).toEqual(expect.any(String));
+      expect(incident.severity).toEqual(expect.any(String));
+      expect(incident.reportedAt).toEqual(expect.any(String));
+      expect(incident.verificationStatus).toEqual(expect.any(String));
+      const sourceUrl = incident.sources[0]?.url;
+      if (sourceUrl) expect(sourceUrl).toMatch(/^https?:\/\//);
     }
     const bad = await getIncidentsRoute(incidentsRequest("?county=Atlantis"));
     expect(bad.status).toBe(400);
@@ -160,6 +168,35 @@ describe("GET /api/counties/[slug]", () => {
       slugParams("atlantis")
     );
     expect(res.status).toBe(404);
+  });
+});
+
+describe("GET /api/counties/[slug]/summary", () => {
+  function request(slug: string, query = "") {
+    return getCountyIncidentSummaryRoute(
+      new NextRequest(`http://localhost/api/counties/${slug}/summary${query}`),
+      slugParams(slug)
+    );
+  }
+
+  it("returns incident counts, comparison, category, severity and daily trend", async () => {
+    const res = await request("nairobi");
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.county).toBe("Nairobi");
+    expect(body.periodDays).toBe(30);
+    expect(body.unit).toBe("incidents");
+    expect(body.total).toEqual(expect.any(Number));
+    expect(body.previousTotal).toEqual(expect.any(Number));
+    expect(body.categories).toEqual(expect.any(Array));
+    expect(body.severities).toHaveLength(4);
+    expect(body.dailyTrend).toHaveLength(31);
+  });
+
+  it("supports a fixed set of comparison windows and rejects unknown counties", async () => {
+    expect((await request("nairobi", "?days=7")).status).toBe(200);
+    expect((await request("nairobi", "?days=14")).status).toBe(400);
+    expect((await request("atlantis")).status).toBe(404);
   });
 });
 

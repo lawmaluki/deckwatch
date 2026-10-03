@@ -42,6 +42,7 @@ server-side (no CORS, backend URL stays private).
 | GET    | `/incidents`        | `category, severity, county, verification, since, limit`; `{count, asOf, results}` |
 | GET    | `/incidents/{id}`   | full incident or 404                             |
 | GET    | `/counties/{slug}`  | `{name, slug, riskScore, activeLast24h, topCategory}` |
+| GET    | `/counties/{slug}/summary?days=30` | Real ingested incidents only; current/prior period totals, category and severity counts, and daily trend (`days`: 7, 30, or 90) |
 | POST   | `/reports`          | validated stateless echo → `201 {id, status}`    |
 | GET    | `/health`           | liveness                                         |
 

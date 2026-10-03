@@ -5,6 +5,23 @@ import type {
   VerificationStatus,
 } from "@/lib/types";
 import { hoursAgo } from "@/lib/stats";
+import { COUNTIES } from "@/lib/data/counties";
+
+export function countyHeadlineIsConsistent(
+  incident: Incident,
+  expectedCounty: string
+): boolean {
+  const mentioned = COUNTIES.filter((county) =>
+    new RegExp(`(?<!\\w)${escapeRegExp(county.name)}(?!\\w)`, "i").test(
+      incident.title
+    )
+  );
+  return mentioned.length !== 1 || mentioned[0].name === expectedCounty;
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 /**
  * Declarative filter criteria. Every field is optional; omitted or empty
@@ -52,6 +69,9 @@ export function filterIncidents(
     }
     if (filter.liveOnly && !incident.isLive) return false;
     if (filter.county && incident.county !== filter.county) return false;
+    if (filter.county && !countyHeadlineIsConsistent(incident, filter.county)) {
+      return false;
+    }
     if (filter.withinHours && hoursAgo(incident, nowMs) > filter.withinHours) return false;
     if (freeText) {
       const haystack =

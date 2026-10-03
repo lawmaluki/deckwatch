@@ -60,8 +60,18 @@ def _has_any(text: str, keywords) -> bool:
     return any(_has(text, k) for k in keywords)
 
 
+def _explicit_counties(text: str) -> List[str]:
+    return [
+        name
+        for name in _COUNTIES
+        if re.search(r"(?<!\w)" + re.escape(name) + r"(?!\w)", text, re.IGNORECASE)
+    ]
+
+
 def classify(item: Mapping[str, str], *args: Any, **kwargs: Any) -> Optional[Dict[str, Any]]:
-    text = f"{item.get('title', '')} {item.get('summary', '')}".lower()
+    title = item.get("title", "")
+    summary = item.get("summary", "")
+    text = f"{title} {summary}".lower()
 
     category = next(
         (cat for cat, kws in CATEGORY_KEYWORDS if _has_any(text, kws)), None
@@ -71,10 +81,17 @@ def classify(item: Mapping[str, str], *args: Any, **kwargs: Any) -> Optional[Dic
 
     county: Optional[str] = None
     location: Optional[str] = None
-    for h in _HOTSPOTS:  # prefer a specific place
-        if h["name"].lower() in text:
-            county, location = h["county"], h["name"]
-            break
+    # Prefer one unambiguous county named in the headline over incidental
+    # mentions in the feed summary (often the outlet's name or dateline).
+    headline_counties = _explicit_counties(title)
+    if len(headline_counties) == 1:
+        county = headline_counties[0]
+        location = county
+    else:
+        for h in _HOTSPOTS:  # prefer a specific place
+            if h["name"].lower() in text:
+                county, location = h["county"], h["name"]
+                break
     if county is None:
         for name in _COUNTIES:
             if name.lower() in text:
