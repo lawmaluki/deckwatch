@@ -21,6 +21,7 @@ rag = [
 ]
 dev = [
     "pytest>=8",
+    "numpy>=1.26",  # the RAG tests use a stub embedder but real numpy (tests/test_rag.py)
     "httpx>=0.27",
 ]
 

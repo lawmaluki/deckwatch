@@ -186,6 +186,15 @@ def test_build_report_counts_come_from_the_articles():
     json.dumps(r)  # stored as JSONB
 
 
+def test_build_report_keeps_the_articles_it_set_aside():
+    r = _report(RAW)
+    assert len(r["setAside"]) == r["contextArticles"] + r["offTopic"]
+    assert r["setAside"] == [
+        {"title": "Flood warning for Nairobi", "url": "https://news.example/c1", "reason": "Warnings"},
+        {"title": "Why can't I see TikTok captions?", "url": "https://news.example/x1", "reason": "Off-topic"},
+    ]
+
+
 def test_summary():
     s = m.summary(_report(RAW))
     assert s == {

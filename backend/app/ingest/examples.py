@@ -54,7 +54,16 @@ _TERROR = re.compile(r"shabaab|terroris[mt]|militant|grenade|\bbomb", re.IGNOREC
 # --- building ----------------------------------------------------------------
 
 def from_report(report: Mapping[str, Any]) -> List[Example]:
-    """One example per source article of every reviewed event."""
+    """Examples from one monthly report: an incident example per source article
+    of every event, and a not-an-incident example per article the review set
+    aside (context such as court cases and warnings, and off-topic items).
+
+    An "automatic" report was never reviewed, so its verdicts are only the
+    keyword classifier's own guesses; learning from them would teach the model
+    its own mistakes. Those reports contribute nothing."""
+    if report.get("method") == "automatic":
+        return []
+    origin = f"report:{report.get('month', '')}"
     out: List[Example] = []
     for event in report.get("events", []):
         category = REPORT_CATEGORY_MAP.get(event.get("category"))
@@ -74,9 +83,52 @@ def from_report(report: Mapping[str, Any]) -> List[Example]:
                 "is_incident": True,
                 "category": cat,
                 "county": event.get("county", ""),
-                "origin": f"report:{report.get('month', '')}",
+                "origin": origin,
             })
+    for item in report.get("setAside", []):
+        title = (item.get("title") or "").strip()
+        if not title:
+            continue
+        out.append({
+            "title": title,
+            "summary": "",
+            "url": item.get("url", ""),
+            "is_incident": False,
+            "category": "",
+            "county": "",
+            "note": item.get("reason", ""),
+            "origin": origin,
+        })
     return out
+
+
+def from_reports(reports: Sequence[Mapping[str, Any]]) -> List[Example]:
+    out: List[Example] = []
+    for r in sorted(reports, key=lambda r: r.get("month", "")):
+        out += from_report(r)
+    return out
+
+
+def reports_from_db() -> List[Dict[str, Any]]:
+    """Every stored monthly report, so each new month's review becomes examples
+    the moment it is stored, with no file to rebuild. Best effort: without a
+    reachable database (local runs, the eval harness) the file store is used
+    alone."""
+    try:
+        from .. import repository
+        from ..db import SessionLocal
+
+        with SessionLocal() as session:
+            return repository.list_monthly_reports(session)
+    except Exception as e:  # pragma: no cover - environment dependent
+        print(f"rag: monthly reports unavailable ({type(e).__name__}); using the example file only")
+        return []
+
+
+def collect(file_examples: Sequence[Example], reports: Sequence[Mapping[str, Any]]) -> List[Example]:
+    """The examples a run classifies with. File examples go last so a hand
+    label overrides what a report said about the same article."""
+    return dedupe(from_reports(reports) + list(file_examples))
 
 
 def from_labels(rows: Sequence[Mapping[str, str]]) -> List[Example]:
@@ -222,6 +274,7 @@ def main(argv: Optional[List[str]] = None) -> None:
     b = sub.add_parser("build", help="write the example store")
     b.add_argument("--report", action="append", default=[], help="monthly report JSON (repeatable)")
     b.add_argument("--labels", action="append", default=[], help="labelled eval CSV (repeatable)")
+    b.add_argument("--from-db", action="store_true", help="also include every reviewed monthly report in the database")
     b.add_argument("--out", default=str(DEFAULT_PATH))
     c = sub.add_parser("check", help="leave-one-out retrieval accuracy")
     c.add_argument("--examples", default=str(DEFAULT_PATH))
@@ -235,7 +288,7 @@ def main(argv: Optional[List[str]] = None) -> None:
         for p in args.labels:
             with Path(p).open(newline="", encoding="utf-8") as f:
                 examples += from_labels(list(csv.DictReader(f)))
-        examples = dedupe(examples)
+        examples = collect(examples, reports_from_db() if args.from_db else [])
         save(Path(args.out), examples)
         counts = Counter(e["category"] or "not_incident" for e in examples)
         print(f"wrote {len(examples)} examples -> {args.out}")

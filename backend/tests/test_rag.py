@@ -188,5 +188,62 @@ def test_build_classifier_selects_rag(monkeypatch):
     monkeypatch.setattr(classify.settings, "ingest_classifier", "rag")
     monkeypatch.setattr(anthropic, "Anthropic", lambda: RecordingClient())
     monkeypatch.setattr(examples, "default_embedder", lambda name: stub_embed)
+    monkeypatch.setattr(examples, "reports_from_db", lambda: [])
     fn = classify.build_classifier()
     assert fn(ITEM)["category"] == "traffic_accident"
+
+
+# --- examples from monthly reports --------------------------------------------
+
+def _report(month, method="claude"):
+    return {
+        "month": month,
+        "method": method,
+        "events": [{"category": "road", "county": "Nakuru", "title": "Kikopey crash",
+                    "sources": [{"title": f"Five killed at Kikopey ({month})", "url": f"https://x/{month}/1"}]}],
+        "setAside": [
+            {"title": "Court hears old robbery case", "url": f"https://x/{month}/2",
+             "reason": "Court cases and arrests over earlier incidents"},
+            {"title": "MP under fire over fuel deal", "url": f"https://x/{month}/3", "reason": "Off-topic"},
+        ],
+    }
+
+
+def test_report_set_aside_articles_become_negative_examples():
+    exs = examples.from_report(_report("2026-10"))
+    pos = [e for e in exs if e["is_incident"]]
+    neg = [e for e in exs if not e["is_incident"]]
+    assert [e["category"] for e in pos] == ["traffic_accident"]
+    assert [e["note"] for e in neg] == ["Court cases and arrests over earlier incidents", "Off-topic"]
+    assert all(e["origin"] == "report:2026-10" for e in exs)
+
+
+def test_unreviewed_automatic_reports_teach_nothing():
+    assert examples.from_report(_report("2026-10", method="automatic")) == []
+
+
+def test_collect_merges_every_report_and_lets_hand_labels_win():
+    hand = {"title": "Five killed at Kikopey (2026-10)", "summary": "", "url": "https://x/2026-10/1",
+            "is_incident": False, "category": "", "county": "", "origin": "labels"}
+    store = examples.collect([hand], [_report("2026-10"), _report("2026-11"), _report("2026-12", "automatic")])
+    assert len(store) == 6  # 3 per reviewed month; the automatic month adds none
+    overridden = next(e for e in store if e["url"] == "https://x/2026-10/1")
+    assert overridden["origin"] == "labels"
+
+
+def test_prompt_says_why_an_example_is_not_an_incident():
+    neg = examples.from_report(_report("2026-10"))[1]
+    text = rag.format_examples([(neg, 0.9)])
+    assert "not an incident (court cases and arrests over earlier incidents)" in text
+
+
+def test_build_classifier_reads_reports_from_the_database(monkeypatch, capsys):
+    import anthropic
+
+    monkeypatch.setattr(classify.settings, "ingest_classifier", "rag")
+    monkeypatch.setattr(anthropic, "Anthropic", lambda: RecordingClient())
+    monkeypatch.setattr(examples, "default_embedder", lambda name: stub_embed)
+    monkeypatch.setattr(examples, "load", lambda path: [])
+    monkeypatch.setattr(examples, "reports_from_db", lambda: [_report("2026-10"), _report("2026-11")])
+    classify.build_classifier()
+    assert "rag: 6 examples (2 monthly reports)" in capsys.readouterr().out

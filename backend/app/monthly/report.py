@@ -353,6 +353,7 @@ def build_report(
         "catAgree": round(100 * agree_cat / n) if n else 0,
         "countyAgree": round(100 * agree_county / n) if n else 0,
         "context": [{"key": g["key"], "label": g["label"], "count": len(g["article_ids"])} for g in consolidation.get("context", [])],
+        "setAside": set_aside(articles, consolidation),
         "events": events,
         "hotspots": consolidation.get("hotspots", []),
         "watch": consolidation.get("watch", []),
@@ -365,6 +366,34 @@ def build_report(
             "what": consolidation.get("what_headline", ""),
         }
     return report
+
+
+OFF_TOPIC = "Off-topic"
+
+
+def set_aside(articles: List[Article], consolidation: Consolidation) -> List[Dict[str, str]]:
+    """Every article that is NOT one of the report's incidents, with why.
+
+    The page only shows counts, but the articles themselves are the most useful
+    part for the ingest classifier: "court hears an old robbery case" or "MP
+    under fire over a fuel deal" marked as not-an-incident is exactly what it
+    gets wrong (app/ingest/examples.py reads these as negative examples)."""
+    by_id = {short_id(a): a for a in articles}
+    used = {i for e in consolidation["events"] for i in e["article_ids"]}
+    out: List[Dict[str, str]] = []
+    for g in consolidation.get("context", []):
+        for i in g["article_ids"]:
+            used.add(i)
+            out.append(_aside(by_id[i], g["label"]))
+    for a in sorted(articles, key=lambda a: a["reportedAt"]):
+        if short_id(a) not in used:
+            out.append(_aside(a, OFF_TOPIC))
+    return out
+
+
+def _aside(article: Article, reason: str) -> Dict[str, str]:
+    url = next((s.get("url", "") for s in article.get("sources") or [] if s.get("url")), "")
+    return {"title": article["title"], "url": url, "reason": reason}
 
 
 def summary(report: Mapping[str, Any]) -> Dict[str, Any]:

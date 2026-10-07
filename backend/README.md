@@ -132,7 +132,7 @@ The keyword rules pick the first category whose keywords appear; the plain LLM
 reads the article but has never seen how *this* project's editors file things.
 `rag` adds a retrieval step: the article is embedded with a small local model
 (`fastembed`, `BAAI/bge-small-en-v1.5` — no key, runs on CPU), the most similar
-**human-reviewed** articles are looked up in `fixtures/rag-examples.jsonl`, and
+**reviewed** articles are looked up, and
 Claude classifies with those verdicts in view (`app/ingest/rag.py`). Schema,
 validation and model are the plain LLM classifier's, so `--classifier llm` vs
 `--classifier rag` isolates what retrieval adds.
@@ -147,9 +147,22 @@ INGEST_CLASSIFIER=rag .venv/bin/python -m app.ingest
   --report ../src/lib/data/monthly-reports/2026-09.json --labels eval/labels.csv
 ```
 
-The store starts with the 223 articles of the hand-reviewed September 2026
-report. It has no non-incident examples and few floods until labelled rows are
-added. Examples below `RAG_MIN_SCORE` similarity are left out, and with nothing
+**Where the examples come from.** Each run builds the store from two sources:
+
+- **Every reviewed monthly report in the database** (`RAG_EXAMPLES_FROM_DB`,
+  on by default). Each report's incidents become incident examples, and every
+  article the review set aside (court cases over old crimes, warnings,
+  politics, off-topic items) becomes a *not an incident* example with the
+  reason attached. A new month counts as soon as its report is stored; no file
+  needs rebuilding. Reports marked `automatic` are skipped: they were never
+  reviewed, so their labels are only the keyword classifier's own guesses.
+- **`fixtures/rag-examples.jsonl`**: the offline fallback when the database
+  can't be reached, and the place for hand labels, which override what a report
+  said about the same article.
+
+The file currently holds the hand-reviewed September 2026 report: 380 examples,
+157 of them not-an-incident. Floods, terror and wildlife are still thin, and
+election violence has none, until labelled rows are added. Examples below `RAG_MIN_SCORE` similarity are left out, and with nothing
 to retrieve it behaves exactly like `llm`. An article never retrieves itself, but
 score `rag` on labels that were *not* used to build the store.
 

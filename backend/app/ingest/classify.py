@@ -36,10 +36,14 @@ def build_classifier() -> Classifier:
         client = Anthropic()
         # Built once per run: loading the model and embedding the store takes a
         # second or two, classifying each article then costs one small embed.
-        index = examples.ExampleIndex(
-            examples.load(examples.FIXTURES.parent / settings.rag_examples_path),
-            examples.default_embedder(settings.rag_embed_model),
+        # The store is the example file plus every reviewed monthly report in
+        # the database, so it grows by itself each month.
+        reports = examples.reports_from_db() if settings.rag_examples_from_db else []
+        store = examples.collect(
+            examples.load(examples.FIXTURES.parent / settings.rag_examples_path), reports
         )
+        print(f"rag: {len(store)} examples ({len(reports)} monthly reports)")
+        index = examples.ExampleIndex(store, examples.default_embedder(settings.rag_embed_model))
 
         def _rag(item: Mapping[str, str]) -> Optional[dict]:
             return rag.classify(item, client, index)

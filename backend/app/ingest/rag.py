@@ -35,6 +35,8 @@ def format_examples(hits: List[Tuple[Example, float]]) -> str:
                 verdict += f", county={ex['county']}"
         else:
             verdict = "not an incident"
+            if ex.get("note"):
+                verdict += f" ({ex['note'].lower()})"
         lines.append(f"{n}. {text_of(ex)}\n   Reviewed verdict: {verdict}")
     return "\n".join(lines)
 

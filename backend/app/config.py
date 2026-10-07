@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     # rag_min_score is the cosine-similarity floor below which a retrieved
     # example is treated as unrelated and left out of the prompt.
     rag_examples_path: str = "fixtures/rag-examples.jsonl"
+    # Also learn from every reviewed monthly report stored in the database.
+    rag_examples_from_db: bool = True
     rag_embed_model: str = "BAAI/bge-small-en-v1.5"
     rag_top_k: int = 5
     rag_min_score: float = 0.55

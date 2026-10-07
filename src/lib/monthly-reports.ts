@@ -80,6 +80,10 @@ export interface MonthlyReport {
   catAgree: number;
   countyAgree: number;
   context: { key: string; label: string; count: number }[];
+  /** Every article that is not one of the incidents, with the reason (a context
+   * group label or "Off-topic"). Not shown on the page; the ingest classifier
+   * learns from it (backend/app/ingest/examples.py). Absent on older reports. */
+  setAside?: { title: string; url: string; reason: string }[];
   events: ReportEvent[];
   hotspots: { key: string; title: string; summary: string }[];
   watch: { title: string; body: string; action: string }[];
