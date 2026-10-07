@@ -26,6 +26,11 @@ class Settings(BaseSettings):
     rag_top_k: int = 5
     rag_min_score: float = 0.55
 
+    # Duplicate detection by headline (ingest/dedup.py): "auto" uses the
+    # embedding model when the "rag" extra is installed, word overlap otherwise;
+    # "embedding" / "lexical" force one; "off" keeps only the location rule.
+    dedup_text: str = "auto"
+
     # Monthly report (python -m app.monthly). Consolidation is one long request
     # a month, so it uses the most capable model; without an API key the report
     # falls back to one incident per article, clearly marked as unreviewed.

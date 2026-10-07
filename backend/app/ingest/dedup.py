@@ -2,12 +2,16 @@
 real-world event as an existing incident, so multiple outlets covering one event
 merge (raising the verification score) instead of piling up duplicate map pins.
 
-Ports the heuristic from src/lib/geo.ts: same place (<= 8km) and either close in
-time (<= 72h) or the same category."""
+Two independent rules, tried in order:
+  1. same place: both pinned to a specific location within 8 km and 72 hours
+     (is_same_event);
+  2. same story: the headlines say the same thing, within 72 hours
+     (find_same_story), which also covers articles that only name a county."""
 
 import math
+import re
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Any, Callable, Dict, List, Optional, Sequence
 
 from ..domain import Incident, parse_iso_ms
 from .geocode import is_county_centroid
@@ -84,3 +88,146 @@ def find_duplicate(candidate: Incident, existing: list) -> Optional[Incident]:
 
 def now_iso() -> str:
     return datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z")
+
+
+# --- same story, by what the articles say ---------------------------------------
+#
+# The location rule above can only merge articles the geocoder pinned to a
+# specific place. Most Kenyan coverage names only a county, so in September
+# 2026 it merged 10 of the duplicates: the Kajiado aircraft crash was stored as
+# 23 separate incidents. These rules compare the headlines instead.
+#
+# Thresholds were chosen by replaying September's 212 incident articles in
+# publish order against the hand review of which article belongs to which
+# event (pairwise precision = merges that were right, recall = duplicates
+# caught; location rule alone: 100% / 0%):
+#
+#   embedding: >= 0.82 anywhere, or >= 0.75 in the same county   95% / 46%
+#   lexical:   >= 0.50 anywhere, or >= 0.25 in the same county   93% / 33%
+#
+# Precision comes first: a wrong merge welds two events into one record and
+# raises its verification score as if one outlet had confirmed the other.
+# Tuned and scored on the same month, on headlines alone, so re-check with
+# `python -m app.ingest.evaluate` (its dedup section) on fresh labels.
+
+STORY_WINDOW_HOURS = 72.0
+
+_STOPWORDS = frozenset("""a an the and or of in on at to for from by with as is are was were be been
+after before over into amid during against its it his her their this that these those who what how
+why when where says say said new more than not no up out off down about one two three four five six
+seven eight nine ten man woman men women people person kenya kenyan kenyans county police""".split())
+
+
+def _tokens(text: str) -> frozenset:
+    out = set()
+    for w in re.findall(r"[a-z0-9]+", text.lower()):
+        if w in _STOPWORDS or len(w) < 3:
+            continue
+        out.add(w[:-1] if w.endswith("s") and len(w) > 4 else w)
+    return frozenset(out)
+
+
+class LexicalSimilarity:
+    """Word overlap (Jaccard) between headlines. Free and dependency-free: the
+    fallback when the embedding model isn't installed."""
+
+    name = "lexical"
+    strong = 0.50
+    moderate = 0.25
+
+    def score(self, text: str, others: Sequence[str]) -> float:
+        a = _tokens(text)
+        best = 0.0
+        for o in others:
+            b = _tokens(o)
+            if a and b:
+                best = max(best, len(a & b) / len(a | b))
+        return best
+
+
+class EmbeddingSimilarity:
+    """Cosine similarity of sentence embeddings, the same local model the RAG
+    classifier uses. Catches rewordings word overlap misses ("aircraft crash
+    kills two" / "pilot and student killed near Ngong"). The model loads on
+    first use, so a run with nothing recent to compare never loads it."""
+
+    name = "embedding"
+    strong = 0.82
+    moderate = 0.75
+
+    def __init__(self, make_embedder: Callable[[], Callable[[Sequence[str]], Any]]):
+        self._make = make_embedder
+        self._embed = None
+        self._vectors: Dict[str, Any] = {}
+
+    def _vecs(self, texts: Sequence[str]):
+        import numpy as np
+
+        missing = [t for t in dict.fromkeys(texts) if t not in self._vectors]
+        if missing:
+            if self._embed is None:
+                self._embed = self._make()
+            m = np.asarray(self._embed(missing), dtype="float32")
+            m /= np.maximum(np.linalg.norm(m, axis=1, keepdims=True), 1e-9)
+            self._vectors.update(zip(missing, m))
+        return [self._vectors[t] for t in texts]
+
+    def score(self, text: str, others: Sequence[str]) -> float:
+        if not others:
+            return 0.0
+        q, *rest = self._vecs([text, *others])
+        return max(float(q @ v) for v in rest)
+
+
+Similarity = Any  # LexicalSimilarity | EmbeddingSimilarity
+
+
+def build_similarity(mode: str, embed_model: str) -> Optional[Similarity]:
+    """"auto" uses embeddings when fastembed is installed (the "rag" extra) and
+    word overlap otherwise; "embedding", "lexical" force one; "off" disables
+    story matching, leaving only the location rule."""
+    if mode == "off":
+        return None
+    if mode == "lexical":
+        return LexicalSimilarity()
+    try:
+        import fastembed  # noqa: F401
+    except ImportError:
+        if mode == "embedding":
+            raise RuntimeError('DEDUP_TEXT=embedding needs the embedding model: pip install ".[rag]"')
+        return LexicalSimilarity()
+    from .examples import default_embedder
+
+    return EmbeddingSimilarity(lambda: default_embedder(embed_model))
+
+
+def story_texts(incident: Incident) -> List[str]:
+    """Every headline on record for an incident: its own and each merged
+    source's (older sources stored no title)."""
+    return [incident["title"]] + [s["title"] for s in incident.get("sources", []) if s.get("title")]
+
+
+def _story_times_ms(incident: Incident) -> List[int]:
+    times = [parse_iso_ms(incident["reportedAt"])]
+    times += [parse_iso_ms(s["publishedAt"]) for s in incident.get("sources", []) if s.get("publishedAt")]
+    return times
+
+
+def find_same_story(candidate: Incident, existing: Sequence[Incident], similarity: Similarity) -> Optional[Incident]:
+    """The existing incident whose coverage tells the same story, or None.
+
+    Compared against every headline already merged into an incident, and timed
+    against its latest article, so a story followed for days keeps absorbing
+    its follow-ups ("death toll rises", "victims named")."""
+    t = parse_iso_ms(candidate["reportedAt"])
+    window_ms = STORY_WINDOW_HOURS * MS_PER_HOUR
+    best: Optional[Incident] = None
+    best_score = 0.0
+    for e in existing:
+        if not any(abs(t - u) <= window_ms for u in _story_times_ms(e)):
+            continue
+        s = similarity.score(candidate["title"], story_texts(e))
+        same_county = e["county"] == candidate["county"]
+        if (s >= similarity.strong or (s >= similarity.moderate and same_county)) and s > best_score:
+            best, best_score = e, s
+    return best

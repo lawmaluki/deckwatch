@@ -126,6 +126,28 @@ drops can be found. Each stage (pre-filter, incident detection, category,
 severity, location, dedup) is reported separately; `--skip-prefilter` isolates
 the classifier. Hold back ~30% of labels untouched when tuning prompts.
 
+### Merging duplicate coverage
+
+Several outlets often report the same incident. Ingestion merges a new article
+into an existing incident, as an extra source that raises its verification
+score, when either rule matches (`app/ingest/dedup.py`):
+
+1. **Same place:** both are pinned to a specific location within 8 km and
+   72 hours. Articles that only name a county are never merged this way, since
+   every vague report in a county shares its centre point.
+2. **Same story:** the headlines say the same thing, within 72 hours of the
+   story's latest article. A new headline is compared with every headline
+   already merged into an incident, so follow-ups ("death toll rises",
+   "victims named") keep joining the story. It merges on a very similar
+   headline anywhere, or a moderately similar one in the same county.
+
+Story matching uses the embedding model when the `rag` extra is installed and
+word overlap otherwise (`DEDUP_TEXT`: `auto`, `embedding`, `lexical`, `off`).
+Replayed against September 2026's hand review it caught 46% of duplicate pairs
+with 95% of merges correct (word overlap: 33% and 93%), where the location rule
+alone caught almost none. Precision is favoured on purpose: a wrong merge welds
+two events into one record. Each run reports `merged_by_story`.
+
 ### RAG classifier (`INGEST_CLASSIFIER=rag`)
 
 The keyword rules pick the first category whose keywords appear; the plain LLM

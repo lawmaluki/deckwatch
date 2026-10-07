@@ -58,14 +58,12 @@ jobs:
           cache-dependency-path: backend/pyproject.toml
 
       - name: Install backend
-        run: |
-          case "$INGEST_CLASSIFIER" in
-            rag|hybrid) pip install ".[rag]" ;;
-            *) pip install . ;;
-          esac
+        # The "rag" extra is the embedding model: the rag and hybrid
+        # classifiers use it, and so does duplicate merging (dedup.py) with any
+        # classifier. Without it dedup falls back to word overlap.
+        run: pip install ".[rag]"
 
       - name: Restore embedding model
-        if: env.INGEST_CLASSIFIER == 'rag' || env.INGEST_CLASSIFIER == 'hybrid'
         uses: actions/cache@v4
         with:
           path: .fastembed-cache

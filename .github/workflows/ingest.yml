@@ -20,8 +20,8 @@ jobs:
     env:
       # rule (default, free) | llm | rag | hybrid. Set the repo variable to switch.
       INGEST_CLASSIFIER: ${{ vars.INGEST_CLASSIFIER || 'rule' }}
-      # Where fastembed keeps the embedding model rag and hybrid use, so the
-      # cache step below can restore it instead of downloading it every run.
+      # Where fastembed keeps the embedding model (classifier and dedup), so
+      # the cache step below can restore it instead of downloading it each run.
       FASTEMBED_CACHE_PATH: ${{ github.workspace }}/.fastembed-cache
     steps:
       - uses: actions/checkout@v4
@@ -33,14 +33,12 @@ jobs:
           cache-dependency-path: backend/pyproject.toml
 
       - name: Install backend
-        run: |
-          case "$INGEST_CLASSIFIER" in
-            rag|hybrid) pip install ".[rag]" ;;
-            *) pip install . ;;
-          esac
+        # The "rag" extra is the embedding model: the rag and hybrid
+        # classifiers use it, and so does duplicate merging (dedup.py) with any
+        # classifier. Without it dedup falls back to word overlap.
+        run: pip install ".[rag]"
 
       - name: Restore embedding model
-        if: env.INGEST_CLASSIFIER == 'rag' || env.INGEST_CLASSIFIER == 'hybrid'
         uses: actions/cache@v4
         with:
           path: .fastembed-cache
