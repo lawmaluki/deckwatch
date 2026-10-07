@@ -26,6 +26,7 @@ async function refresh(): Promise<void> {
     replaceClientSnapshot({
       incidents: body.results,
       referenceTime: new Date(body.asOf),
+      polled: true,
     });
     listeners.forEach((l) => l());
   } catch {
@@ -54,6 +55,7 @@ function subscribe(listener: () => void): () => void {
 export interface IncidentsResult {
   incidents: Incident[];
   referenceTime: Date;
+  polled: boolean;
 }
 
 // Client adapter over the incidents-source seam. Mock mode returns the fixed

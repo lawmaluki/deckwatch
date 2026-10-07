@@ -19,6 +19,11 @@ const IS_SERVER = typeof window === "undefined";
 export interface DataSnapshot {
   incidents: Incident[];
   referenceTime: Date;
+  /** True once the data came from a poll of /api/incidents. In api mode the
+   * first client snapshot is the sample dataset, kept only so hydration
+   * matches the server render; anything that tracks "what was already here"
+   * (the alert watcher) must wait for real data. */
+  polled: boolean;
 }
 
 // Pure: re-anchor the seeded dataset so its newest activity sits at nowMs.
@@ -54,10 +59,11 @@ export function getLiveIncidents(nowMs: number): Incident[] {
 const MOCK_SNAPSHOT: DataSnapshot = {
   incidents: sortNewestFirst(MOCK_INCIDENTS),
   referenceTime: DATA_REFERENCE_TIME,
+  polled: false,
 };
 
 function liveSnapshot(nowMs: number): DataSnapshot {
-  return { incidents: getLiveIncidents(nowMs), referenceTime: new Date(nowMs) };
+  return { incidents: getLiveIncidents(nowMs), referenceTime: new Date(nowMs), polled: false };
 }
 
 // Client (api mode): the one mutable snapshot. Seeded from the page-load

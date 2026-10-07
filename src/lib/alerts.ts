@@ -48,6 +48,23 @@ export function hasActiveSubscription(sub: NotificationSubscription): boolean {
   return sub.counties.length > 0 || sub.categories.length > 0 || sub.useLocation;
 }
 
+/** An incident older than this never raises an alert, however it reaches the
+ * browser. "New to this session" should already rule old ones out; this is
+ * the backstop for when the session's idea of "already seen" is incomplete,
+ * which is how two-month-old incidents once popped up as fresh alerts. */
+export const ALERT_MAX_AGE_HOURS = 24;
+
+export function recentEnoughToAlert(incident: Incident, nowMs: number): boolean {
+  return nowMs - Date.parse(incident.reportedAt) <= ALERT_MAX_AGE_HOURS * 3_600_000;
+}
+
+/** Whether a snapshot can define "what was already here" for alerts. In api
+ * mode the first snapshot is sample data used only for hydration: remembering
+ * it would make every real incident look new when the first poll lands. */
+export function canSeedAlerts(snapshot: { polled: boolean }, usingApi: boolean): boolean {
+  return snapshot.polled || !usingApi;
+}
+
 /** Ids present in `next` that weren't in `seen`.
  *
  * Kept separate from the watcher so "what is new" stays decidable without a

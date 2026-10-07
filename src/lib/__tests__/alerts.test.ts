@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { matchesSubscription, newIncidents } from "@/lib/alerts";
+import {
+  ALERT_MAX_AGE_HOURS,
+  canSeedAlerts,
+  matchesSubscription,
+  newIncidents,
+  recentEnoughToAlert,
+} from "@/lib/alerts";
 import type { NotificationSubscription } from "@/store/useAppStore";
 import type { Incident } from "@/lib/types";
 
@@ -101,5 +107,44 @@ describe("newIncidents", () => {
     const b = incident({ id: "b" });
     expect(newIncidents([a, b], new Set(["a"]))).toEqual([b]);
     expect(newIncidents([a, b], new Set(["a", "b"]))).toEqual([]);
+  });
+});
+
+
+describe("which incidents may alert", () => {
+  const NOW = Date.parse("2026-10-07T20:00:00Z");
+  const hoursAgo = (h: number) => new Date(NOW - h * 3_600_000).toISOString();
+
+  it("never alerts about an incident older than a day", () => {
+    expect(recentEnoughToAlert(incident({ reportedAt: hoursAgo(2) }), NOW)).toBe(true);
+    expect(recentEnoughToAlert(incident({ reportedAt: hoursAgo(ALERT_MAX_AGE_HOURS) }), NOW)).toBe(true);
+    expect(recentEnoughToAlert(incident({ reportedAt: hoursAgo(24 * 60) }), NOW)).toBe(false);
+  });
+
+  it("in api mode, waits for polled data before remembering what is there", () => {
+    expect(canSeedAlerts({ polled: false }, true)).toBe(false);
+    expect(canSeedAlerts({ polled: true }, true)).toBe(true);
+    // mock mode never polls; its one snapshot is the real (sample) data
+    expect(canSeedAlerts({ polled: false }, false)).toBe(true);
+  });
+
+  it("replays the bug: sample data first, then real data, raises nothing", () => {
+    const sample = { polled: false, incidents: [incident({ id: "ow-1" }), incident({ id: "ow-2" })] };
+    const real = {
+      polled: true,
+      incidents: [incident({ id: "ing-old", reportedAt: hoursAgo(24 * 60) }), incident({ id: "ing-new", reportedAt: hoursAgo(1) })],
+    };
+    let seen: Set<string> | null = null;
+    const alerts: string[] = [];
+    for (const snap of [sample, real]) {
+      if (!canSeedAlerts(snap, true)) continue;
+      if (seen === null) {
+        seen = new Set(snap.incidents.map((i) => i.id));
+        continue;
+      }
+      alerts.push(...newIncidents(snap.incidents, seen).map((i) => i.id));
+    }
+    expect(alerts).toEqual([]);
+    expect(seen).toEqual(new Set(["ing-old", "ing-new"]));
   });
 });
