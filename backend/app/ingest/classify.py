@@ -3,6 +3,8 @@
   - "llm": Claude Haiku 4.5 (classifier.classify) — needs ANTHROPIC_API_KEY
   - "rag": the same model, shown similar human-reviewed articles first
     (rag.classify) — needs ANTHROPIC_API_KEY and the "rag" extra (fastembed)
+  - "hybrid": the rules decide clear cases, everything else goes to rag
+    (hybrid.HybridClassifier) — same needs as rag, fewer API calls
 
 Returns a plain callable `item -> Optional[candidate]`, so the pipeline neither
 knows nor cares which one is active, and rule mode never imports/constructs the
@@ -29,26 +31,12 @@ def build_classifier() -> Classifier:
         return _llm
 
     if settings.ingest_classifier == "rag":
-        from anthropic import Anthropic
+        return _build_rag()
 
-        from . import examples, rag
+    if settings.ingest_classifier == "hybrid":
+        from .hybrid import HybridClassifier
 
-        client = Anthropic()
-        # Built once per run: loading the model and embedding the store takes a
-        # second or two, classifying each article then costs one small embed.
-        # The store is the example file plus every reviewed monthly report in
-        # the database, so it grows by itself each month.
-        reports = examples.reports_from_db() if settings.rag_examples_from_db else []
-        store = examples.collect(
-            examples.load(examples.FIXTURES.parent / settings.rag_examples_path), reports
-        )
-        print(f"rag: {len(store)} examples ({len(reports)} monthly reports)")
-        index = examples.ExampleIndex(store, examples.default_embedder(settings.rag_embed_model))
-
-        def _rag(item: Mapping[str, str]) -> Optional[dict]:
-            return rag.classify(item, client, index)
-
-        return _rag
+        return HybridClassifier(_build_rag())
 
     from . import rules
 
@@ -56,3 +44,26 @@ def build_classifier() -> Classifier:
         return rules.classify(item)
 
     return _rule
+
+
+def _build_rag() -> Classifier:
+    from anthropic import Anthropic
+
+    from . import examples, rag
+
+    client = Anthropic()
+    # Built once per run: loading the model and embedding the store takes a
+    # second or two, classifying each article then costs one small embed.
+    # The store is the example file plus every reviewed monthly report in
+    # the database, so it grows by itself each month.
+    reports = examples.reports_from_db() if settings.rag_examples_from_db else []
+    store = examples.collect(
+        examples.load(examples.FIXTURES.parent / settings.rag_examples_path), reports
+    )
+    print(f"rag: {len(store)} examples ({len(reports)} monthly reports)")
+    index = examples.ExampleIndex(store, examples.default_embedder(settings.rag_embed_model))
+
+    def _rag(item: Mapping[str, str]) -> Optional[dict]:
+        return rag.classify(item, client, index)
+
+    return _rag

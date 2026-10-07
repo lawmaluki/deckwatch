@@ -28,7 +28,9 @@ CATEGORY_KEYWORDS = [
     ("unrest", ["protest", "protests", "demonstration", "riot", "riots", "clashes", "teargas", "looting"]),
     ("missing_person", ["missing", "disappeared", "abducted", "kidnapped", "kidnap"]),
     ("infrastructure", ["collapse", "collapsed", "power outage", "blackout", "burst pipe"]),
-    ("traffic_accident", ["crash", "collision", "accident", "matatu", "lorry", "overturned", "hit-and-run", "pedestrian"]),
+    # Vehicles alone ("bus", "truck") only after the specific categories above,
+    # and never "motorcycle": "armed motorcycle gang" is a crime, not a crash.
+    ("traffic_accident", ["crash", "collision", "collided", "accident", "matatu", "lorry", "bus", "truck", "trailer", "overturned", "hit-and-run", "pedestrian", "knocked down", "ploughs into", "ploughed into", "head-on", "aircraft", "chopper", "helicopter", "capsize", "capsized"]),
     ("crime", ["robbery", "robbed", "mugging", "stabbed", "shot", "shooting", "killed", "murder", "murdered", "gang", "burglary", "rape", "raped", "assault", "carjacking", "gunman", "gunmen"]),
 ]
 
@@ -52,8 +54,10 @@ _INJURY = ("injured", "hurt", "wounded")
 
 
 def _has(text: str, keyword: str) -> bool:
-    """Whole-word (phrase) match, so short tokens don't hit inside longer words."""
-    return re.search(r"\b" + re.escape(keyword) + r"\b", text) is not None
+    """Whole-word (phrase) match, so short tokens don't hit inside longer words,
+    plus a plural ending: "crash" must match "crashes" and "accident"
+    "accidents", or multi-vehicle headlines fall through to crime on "killed"."""
+    return re.search(r"\b" + re.escape(keyword) + r"(?:e?s)?\b", text) is not None
 
 
 def _has_any(text: str, keywords) -> bool:
@@ -115,3 +119,19 @@ def classify(item: Mapping[str, str], *args: Any, **kwargs: Any) -> Optional[Dic
         "summary": (item.get("summary") or item.get("title") or "").strip()[:400],
         "recommended_actions": ACTIONS.get(category, DEFAULT_ACTIONS),
     }
+
+
+def matched_categories(text: str) -> List[str]:
+    """Every category with a keyword in the (lower-cased) text, in priority
+    order. classify() takes the first; the hybrid classifier treats more than
+    one as a sign the rules can't be trusted on this article."""
+    return [cat for cat, kws in CATEGORY_KEYWORDS if _has_any(text, kws)]
+
+
+def analyse(item: Mapping[str, str]) -> Dict[str, Any]:
+    """What the rules see in an article: every matching category and the
+    candidate classify() returns (None without a category or a county). Lets
+    the hybrid classifier judge the rules' confidence without re-implementing
+    them."""
+    text = f"{item.get('title', '')} {item.get('summary', '')}".lower()
+    return {"text": text, "categories": matched_categories(text), "candidate": classify(item)}

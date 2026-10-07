@@ -18,6 +18,8 @@ def main() -> None:
         stats = pipeline.run(session, classify_fn)
     summary = ", ".join(f"{k}={v}" for k, v in stats.items())
     print(f"ingest complete: {summary}")
+    if hasattr(classify_fn, "summary"):
+        print(classify_fn.summary())
     if stats.get("aborted"):
         # Non-zero exit turns the scheduled run red, so a dead key or empty
         # balance is noticed instead of quietly ingesting nothing.

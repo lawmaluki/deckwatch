@@ -9,7 +9,8 @@ class Settings(BaseSettings):
 
     # Ingestion pipeline (python -m app.ingest).
     #   ingest_classifier: "rule" (free, no key), "llm" (Claude Haiku 4.5) or
-    #   "rag" (the same model, shown similar human-reviewed articles first).
+    #   "rag" (the same model, shown similar human-reviewed articles first) or
+    #   "hybrid" (the rules decide clear cases, everything else goes to rag).
     # ANTHROPIC_API_KEY is read by the anthropic SDK's zero-arg client.
     ingest_classifier: str = "rule"
     ingest_model: str = "claude-haiku-4-5"

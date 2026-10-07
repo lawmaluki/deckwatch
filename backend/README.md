@@ -166,6 +166,22 @@ election violence has none, until labelled rows are added. Examples below `RAG_M
 to retrieve it behaves exactly like `llm`. An article never retrieves itself, but
 score `rag` on labels that were *not* used to build the store.
 
+### Hybrid classifier (`INGEST_CLASSIFIER=hybrid`)
+
+The keyword rules decide the articles they can be trusted on, for free, and
+send everything else to `rag` (`app/ingest/hybrid.py`). An article goes to
+`rag` when the rules find no category or no county, when several categories
+match, when the category is one metaphors and politics often trigger (fire,
+missing person, collapse, unrest, terror, flood, wildlife, health), or when it
+reads like a follow-up (court, burial, autopsy, "months after", a rally).
+
+Replayed against September 2026's hand review, the rules decided 16% of
+articles and were right on 92% of them; the other 84% went to `rag`. Those
+triggers were tuned on that same month, so re-check with
+`evaluate --classifier hybrid` on fresh labels. If Claude is unavailable, the
+rule answer is used where there is one, so ingestion keeps going; each run
+prints how many articles each path decided. Same setup as `rag`.
+
 ## Monthly safety report
 
 `python -m app.monthly` builds the month's safety report (shown at

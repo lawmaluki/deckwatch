@@ -267,7 +267,7 @@ def write_errors(path: Path, errors: List[Dict[str, str]]) -> None:
 def main(argv: Optional[List[str]] = None) -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     ap.add_argument("--labels", default="eval/labels.csv")
-    ap.add_argument("--classifier", choices=["rule", "llm", "rag"], default="rule")
+    ap.add_argument("--classifier", choices=["rule", "llm", "rag", "hybrid"], default="rule")
     ap.add_argument("--skip-prefilter", action="store_true",
                     help="show every article to the classifier (isolates it from the pre-filter)")
     ap.add_argument("--errors", help="write every miss to this CSV for review")
@@ -281,8 +281,11 @@ def main(argv: Optional[List[str]] = None) -> None:
     if not rows:
         raise SystemExit(f"no labelled rows in {args.labels} (fill in the is_incident column)")
 
-    report = score(rows, build_classifier(), use_prefilter=not args.skip_prefilter)
+    classify_fn = build_classifier()
+    report = score(rows, classify_fn, use_prefilter=not args.skip_prefilter)
     print(render(report))
+    if hasattr(classify_fn, "summary"):
+        print(classify_fn.summary())
     if args.errors:
         write_errors(Path(args.errors), report["errors"])
         print(f"\nwrote {len(report['errors'])} errors -> {args.errors}")
