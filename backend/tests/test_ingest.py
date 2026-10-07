@@ -628,3 +628,43 @@ def test_run_survives_a_single_classifier_blip(monkeypatch):
     assert len(inserted) == 1
     # the failed article was not recorded, so the next run will try it again
     assert inserted[0]["id"] == pipeline.article_id("https://example.co.ke/a/1")
+
+
+# --- severity ----------------------------------------------------------------
+
+@pytest.mark.parametrize(
+    "headline, expected",
+    [
+        ("17 killed in Salama road accident", "critical"),  # digits count
+        ("Five killed as bus and saloon car collide at Kikopey", "critical"),
+        ("Death toll rises to 3 as governor appeals for blood donations", "critical"),
+        ("Accident claims five lives on Kisii road", "critical"),
+        ("Several feared dead after matatu crash at Kisima", "critical"),
+        ("Herdsman shot dead as bandits steal more than 120 cattle", "high"),  # 120 cattle is not a toll
+        ("Form 3 student collapses, dies on her way to school", "high"),  # nor is Form 3
+        ("Trapped passenger in bus crash dies", "high"),
+        ("Gunmen shoot trader in Eastleigh", "high"),  # violence, nobody killed
+        ("Eight injured as building collapses in Kisumu", "medium"),
+        ("Kisumu man jailed 12 years for killing wife", "low"),  # past event
+        ("Suspect arrested over murder of lawyer", "low"),
+        ("More than 1,470 pigs die in swine fever outbreak", "low"),  # animals
+        ("Fire destroys busy market in Mandera", "low"),
+    ],
+)
+def test_severity_follows_the_rubric(headline, expected):
+    assert rules.severity_of(headline.lower(), None) == expected
+
+
+def test_missing_person_is_at_least_medium():
+    assert rules.severity_of("family searches for girl last seen at church", "missing_person") == "medium"
+
+
+def test_death_count_ignores_numbers_that_are_not_tolls():
+    assert rules.death_count("ksh 600,000 stolen as 3 robbers flee") == 0
+    assert rules.death_count("two police officers among 5 killed by bandits") == 5
+    assert rules.death_count("man devastated after losing 5 family members") == 5
+
+
+def test_claude_is_given_the_same_scale():
+    assert "three or more people killed" in classifier.SYSTEM_PROMPT
+    assert "court cases" in classifier.SYSTEM_PROMPT

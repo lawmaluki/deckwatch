@@ -39,6 +39,22 @@ SYSTEM_PROMPT = (
     "recommended safety actions for people nearby."
 )
 
+# Severity, shared with the keyword rules (rules.py severity_of) so every
+# classifier rates on one scale. Without it the model chose a level by its own
+# sense of "high", and the hybrid mixed two standards on one map.
+SEVERITY_RUBRIC = (
+    " Rate severity by what this article reports happened, using exactly this "
+    "scale. critical: three or more people killed, a mass-casualty or terror "
+    "attack, or a disaster forcing large evacuations. high: one or two people "
+    "killed, or a shooting, stabbing or kidnapping. medium: people injured but "
+    "no one killed, a missing person, or serious disruption such as a major road "
+    "closed or a violent protest. low: no one hurt, such as arrests, property "
+    "damage, minor disruption or warnings; and coverage of past events (court "
+    "cases, arrests over an earlier crime, anniversaries), whatever happened "
+    "originally. Deaths of animals do not count as deaths."
+)
+SYSTEM_PROMPT += SEVERITY_RUBRIC
+
 
 def _schema() -> Dict[str, Any]:
     return {

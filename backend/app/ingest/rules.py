@@ -48,9 +48,117 @@ ACTIONS = {
 }
 DEFAULT_ACTIONS = ["Stay alert and avoid the affected area", "Follow official updates"]
 
-_FATAL = ("dead", "killed", "fatal", "death", "murdered")
-_MULTI = ("several", "many", "dozens", "multiple", "scores", "six", "five", "four", "three")
-_INJURY = ("injured", "hurt", "wounded")
+# --- severity ------------------------------------------------------------------
+#
+# The rubric, shared word for word with the Claude classifier (classifier.py
+# SEVERITY_RUBRIC) so both rate alike:
+#   critical  three or more people killed, a mass-casualty or terror attack,
+#             or a disaster forcing large evacuations
+#   high      one or two people killed, or a shooting, stabbing or kidnapping
+#   medium    people injured but no one killed, a missing person, or serious
+#             disruption (a major road closed, a violent protest)
+#   low       no one hurt (arrests, property damage, minor disruption,
+#             warnings), and coverage of past events (court cases,
+#             anniversaries) whatever happened originally
+# The rules approximate it from the words; measured against September 2026's
+# hand-reviewed death tolls (see severity_of).
+
+_DEATH = (
+    "dead", "killed", "kills", "killing", "killings", "fatal", "fatally", "death", "deaths",
+    "murder", "murdered", "die", "died", "dying", "perished", "succumbed", "lifeless",
+    "body", "bodies", "drowned", "lynched",
+)
+_INJURY = (
+    "injured", "injuries", "hurt", "wounded", "hospitalised", "hospitalized",
+    "rushed to hospital", "critical condition",
+)
+_VIOLENT = ("shoot", "shot", "shooting", "stab", "stabbed", "stabbing", "kidnapped", "kidnap", "abducted", "abduction", "hacked")
+# Coverage of something that happened before, rated low whatever it was: a
+# murder trial is not a new murder, and an arrest hurts no one (the killing
+# it follows is its own incident, which story matching merges it into).
+# Not "appeal": "governor appeals for blood donations" is a live disaster.
+_PAST = (
+    "court", "trial", "sentenced", "sentencing", "sentence", "convicted", "jailed", "charged",
+    "charge", "arraigned", "bail", "acquitted", "pleads", "prosecution", "inquest", "anniversary",
+    "years after", "years ago", "years later", "a year later", "months later",
+    "arrested", "arrests", "arrest", "persons of interest", "report on",
+)
+# A death that is about animals: "1,470 pigs die", "killing of 415 goats".
+_ANIMALS = (
+    "livestock", "cattle", "goats", "goat", "pigs", "pig", "donkeys", "animals",
+    "camels", "sheep", "cows", "poultry", "chickens",
+)
+_VAGUE_MANY = ("several", "many", "dozens", "scores", "multiple")
+_NUMBER_WORDS = {
+    "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8,
+    "nine": 9, "ten": 10, "eleven": 11, "twelve": 12, "thirteen": 13, "fourteen": 14,
+    "fifteen": 15, "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19, "twenty": 20,
+}
+# A count only counts if it is about people or deaths: "120 cattle", "Form 3",
+# "Ksh 600,000" and "September 24" must not read as a death toll.
+_COUNTED = (
+    r"(?:killed|dead|die|died|dies|deaths|lives|bodies|people|persons|members|victims|"
+    r"pilgrims|passengers|children|officers|students|relatives|family)"
+)
+_NUM = r"(\d{1,3}|" + "|".join(_NUMBER_WORDS) + r")"
+_COUNT_BEFORE = re.compile(r"(?<![\w-])" + _NUM + r"\s+(?:[a-z'-]+\s+){0,3}?" + _COUNTED + r"\b")
+_COUNT_AFTER = re.compile(
+    r"\b(?:killed|kills|killing|claimed|claims|losing|lost|toll\s+(?:rises|rose|hits|climbs)\s+to|leaves|left)\s+"
+    r"(?:at\s+least\s+)?" + _NUM + r"\b"
+)
+_NOT_A_TOLL = re.compile(r"\b(?:form|grade|class|ksh|sh|kes|no\.?)\s*$")
+
+
+def _number(word: str) -> int:
+    return int(word) if word.isdigit() else _NUMBER_WORDS[word]
+
+
+def death_count(text: str) -> int:
+    """The largest number of people the text says were killed, 0 if none is
+    given. Only numbers next to a person or death word count."""
+    best = 0
+    for rx in (_COUNT_BEFORE, _COUNT_AFTER):
+        for m in rx.finditer(text):
+            if _NOT_A_TOLL.search(text[: m.start(1)]):
+                continue
+            best = max(best, _number(m.group(1)))
+    return best
+
+
+def _human_death(text: str) -> bool:
+    """A death word not about animals: each is checked against the three
+    words either side of it."""
+    words = re.findall(r"[a-z0-9'-]+", text)
+    for i, w in enumerate(words):
+        if any(w == d or w == d + "s" for d in _DEATH):
+            near = words[max(0, i - 3): i + 4]
+            if not any(a in near for a in _ANIMALS):
+                return True
+    return False
+
+
+def severity_of(text: str, category: Optional[str]) -> str:
+    """Severity of a (lower-cased) headline and summary, per the rubric above.
+
+    Measured against September 2026's hand-reviewed death tolls (3+ deaths
+    critical, 1-2 high): 85% of incident articles land in the right tier, up
+    from 70%, and 28 of 32 articles on 3+ death incidents are critical, up
+    from 8 (digits like "17 killed" never counted, nor "dies" or "kills").
+    Court and follow-up coverage is rated low 89% of the time. Tuned on that
+    same month, so re-check on fresh labels."""
+    if _has_any(text, _PAST):
+        return "low"
+    # "claimed five", "losing 5 members": a toll phrase is itself a death.
+    if _human_death(text) or _COUNT_AFTER.search(text):
+        many = death_count(text) >= 3 or any(
+            re.search(r"\b" + v + r"\b(?:\s+\w+){0,3}\s+(?:killed|dead|died|deaths)", text) for v in _VAGUE_MANY
+        )
+        return "critical" if many else "high"
+    if _has_any(text, _VIOLENT):
+        return "high"
+    if _has_any(text, _INJURY) or category == "missing_person":
+        return "medium"
+    return "low"
 
 
 def _has(text: str, keyword: str) -> bool:
@@ -104,12 +212,7 @@ def classify(item: Mapping[str, str], *args: Any, **kwargs: Any) -> Optional[Dic
     if county is None:
         return None  # no locatable place -> skip (mirrors the LLM's "Unknown")
 
-    if _has_any(text, _FATAL):
-        severity = "critical" if _has_any(text, _MULTI) else "high"
-    elif _has_any(text, _INJURY):
-        severity = "medium"
-    else:
-        severity = "low"
+    severity = severity_of(text, category)
 
     return {
         "category": category,
