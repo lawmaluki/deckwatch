@@ -1,0 +1,86 @@
+name: Dev ingestion (manual)
+
+# Runs the ingest from the `dev` branch into the DEV database, on demand only.
+# No schedule: every classifier but rule spends Claude credit, so a person
+# decides when it runs.
+#
+# GitHub only shows a "Run workflow" button for workflows that exist on the
+# default branch, so this file has to be on `main` as well as `dev`. It is
+# harmless there: it never runs by itself and always checks out `dev`.
+#
+# It reads DEV_DATABASE_URL, a differently named secret from production's
+# DATABASE_URL on purpose: if the dev secret is missing the run fails instead
+# of quietly falling back to the production database.
+
+on:
+  workflow_dispatch:
+    inputs:
+      classifier:
+        description: Classifier to use
+        type: choice
+        options: [hybrid, rag, llm, rule]
+        default: hybrid
+
+concurrency:
+  group: ingest-dev
+  cancel-in-progress: false
+
+jobs:
+  ingest-dev:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      INGEST_CLASSIFIER: ${{ inputs.classifier }}
+      FASTEMBED_CACHE_PATH: ${{ github.workspace }}/.fastembed-cache
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+
+      - name: Refuse to run without a dev database
+        env:
+          DEV_DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }}
+          PROD_DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "$DEV_DATABASE_URL" ]; then
+            echo "::error::DEV_DATABASE_URL secret is not set"; exit 1
+          fi
+          if [ "$DEV_DATABASE_URL" = "$PROD_DATABASE_URL" ]; then
+            echo "::error::DEV_DATABASE_URL is the production database"; exit 1
+          fi
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+
+      - name: Install backend
+        run: |
+          case "$INGEST_CLASSIFIER" in
+            rag|hybrid) pip install ".[rag]" ;;
+            *) pip install . ;;
+          esac
+
+      - name: Restore embedding model
+        if: env.INGEST_CLASSIFIER == 'rag' || env.INGEST_CLASSIFIER == 'hybrid'
+        uses: actions/cache@v4
+        with:
+          path: .fastembed-cache
+          key: fastembed-${{ vars.RAG_EMBED_MODEL || 'BAAI/bge-small-en-v1.5' }}
+
+      # A fresh dev database has no tables, and ingestion doesn't create them.
+      # Idempotent: creates only what is missing.
+      - name: Create tables in the dev database
+        env:
+          DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }}
+        run: python -m app.init_db
+
+      - name: Run ingest against dev
+        env:
+          DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          RAG_EMBED_MODEL: ${{ vars.RAG_EMBED_MODEL || 'BAAI/bge-small-en-v1.5' }}
+        run: python -m app.ingest
