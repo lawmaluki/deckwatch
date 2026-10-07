@@ -10,7 +10,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { useIncidents } from "@/hooks/useIncidents";
 import { COUNTIES } from "@/lib/data/counties";
 import { CATEGORIES, VERIFICATION_CONFIG } from "@/lib/data/categories";
-import { hoursAgo } from "@/lib/stats";
+import { hoursAgo, showsLiveTag } from "@/lib/stats";
 import { relativeTime } from "@/lib/format";
 
 const RANGE_OPTIONS: { label: string; hours: number | null }[] = [
@@ -160,7 +160,7 @@ export function IntelFeedPanel() {
                       >
                         <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: cat.color }} />
                         {cat.label}
-                        {incident.isLive && (
+                        {showsLiveTag(incident) && (
                           <span className="rounded-full bg-brand/15 px-1.5 py-0.5 text-[9px] text-brand">
                             LIVE
                           </span>

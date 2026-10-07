@@ -25,6 +25,7 @@ import { IncidentListItem } from "@/components/incidents/IncidentListItem";
 import { useIncidentDetail } from "@/hooks/useIncidentDetail";
 import { formatDateTime, relativeTime, stripHtml } from "@/lib/format";
 import { findSimilarIncidents } from "@/lib/geo";
+import { showsLiveTag } from "@/lib/stats";
 
 const SOURCE_TYPE_LABEL: Record<string, string> = {
   news: "News",
@@ -91,7 +92,7 @@ export function IncidentDetailPanel() {
             <div className="flex flex-wrap items-center gap-1.5">
               <CategoryBadge category={incident.category} />
               <SeverityBadge severity={incident.severity} />
-              {incident.isLive && (
+              {showsLiveTag(incident) && (
                 <span className="flex items-center gap-1 rounded-full bg-brand/15 px-2 py-1 text-[11px] font-medium text-brand">
                   <Radio className="h-3 w-3" /> LIVE
                 </span>

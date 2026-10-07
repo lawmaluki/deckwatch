@@ -3,6 +3,7 @@
 import { CATEGORIES } from "@/lib/data/categories";
 import { SeverityDot } from "@/components/incidents/SeverityBadge";
 import { relativeTime } from "@/lib/format";
+import { showsLiveTag } from "@/lib/stats";
 import type { Incident } from "@/lib/types";
 import clsx from "clsx";
 
@@ -37,7 +38,7 @@ export function IncidentListItem({
         <div className="flex items-center gap-1.5">
           <SeverityDot severity={incident.severity} />
           <p className="truncate text-sm font-medium text-foreground">{incident.title}</p>
-          {incident.isLive && (
+          {showsLiveTag(incident) && (
             <span className="shrink-0 rounded-full bg-brand/15 px-1.5 py-0.5 text-[9px] font-semibold text-brand">
               LIVE
             </span>

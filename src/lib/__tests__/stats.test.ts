@@ -4,7 +4,9 @@ import {
   countyRiskScore,
   dailyTrend,
   hoursAgo,
+  LIVE_TAG_HOURS,
   riskLabel,
+  showsLiveTag,
   summarizeByCounty,
   withinHours,
 } from "@/lib/stats";
@@ -20,6 +22,23 @@ describe("hoursAgo / withinHours", () => {
     const incident = makeIncident({ reportedAt: hoursBeforeReference(24) });
     expect(withinHours(incident, 24)).toBe(true);
     expect(withinHours(incident, 23)).toBe(false);
+  });
+});
+
+describe("showsLiveTag", () => {
+  it("tags real incidents from the last hour", () => {
+    expect(showsLiveTag(makeIncident({ isLive: true, reportedAt: hoursBeforeReference(0) }))).toBe(true);
+    expect(showsLiveTag(makeIncident({ isLive: true, reportedAt: hoursBeforeReference(0.5) }))).toBe(true);
+    expect(showsLiveTag(makeIncident({ isLive: true, reportedAt: hoursBeforeReference(LIVE_TAG_HOURS) }))).toBe(true);
+  });
+
+  it("drops the tag once an incident is over an hour old", () => {
+    expect(showsLiveTag(makeIncident({ isLive: true, reportedAt: hoursBeforeReference(1.05) }))).toBe(false);
+    expect(showsLiveTag(makeIncident({ isLive: true, reportedAt: hoursBeforeReference(30) }))).toBe(false);
+  });
+
+  it("never tags sample data, however recent", () => {
+    expect(showsLiveTag(makeIncident({ isLive: false, reportedAt: hoursBeforeReference(0.1) }))).toBe(false);
   });
 });
 

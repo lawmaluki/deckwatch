@@ -17,6 +17,19 @@ export function hoursAgo(
   return (nowMs - new Date(incident.reportedAt).getTime()) / MS_PER_HOUR;
 }
 
+/** How long a real incident keeps its LIVE tag after it was reported. */
+export const LIVE_TAG_HOURS = 1;
+
+/** Whether to show the LIVE tag: real reporting (not sample data) from the
+ * last hour. Distinct from `incident.isLive`, which only says the incident is
+ * real and stays true forever; the tag is about it happening now. */
+export function showsLiveTag(
+  incident: Incident,
+  nowMs: number = getReferenceTime().getTime()
+): boolean {
+  return incident.isLive && hoursAgo(incident, nowMs) <= LIVE_TAG_HOURS;
+}
+
 export function withinHours(
   incident: Incident,
   hours: number,
