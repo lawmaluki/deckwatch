@@ -10,6 +10,8 @@ import { useIncidents } from "@/hooks/useIncidents";
 import { hasActiveSubscription } from "@/lib/alerts";
 import { withinHours } from "@/lib/stats";
 import { LiveClock } from "@/components/layout/LiveClock";
+import { ABOUT_LINKS, MoreMenu } from "@/components/layout/MoreMenu";
+import { Fragment } from "react";
 
 const NAV_LINKS = [
   { href: "/", label: "Live Map", icon: Map },
@@ -77,26 +79,17 @@ export function Header() {
           )}
         </div>
         <div className="hidden items-center gap-1 rounded-full border border-border bg-surface px-1 py-1 text-xs font-medium text-muted lg:flex">
-          <Link
-            href="/why"
-            className="rounded-full px-2 py-1 transition-colors hover:bg-surface-raised hover:text-foreground"
-          >
-            Why Deckwatch
-          </Link>
-          <span className="text-border">|</span>
-          <Link
-            href="/whats-new"
-            className="rounded-full px-2 py-1 transition-colors hover:bg-surface-raised hover:text-foreground"
-          >
-            What&rsquo;s new
-          </Link>
-          <span className="text-border">|</span>
-          <Link
-            href="/api-docs"
-            className="rounded-full px-2 py-1 transition-colors hover:bg-surface-raised hover:text-foreground"
-          >
-            API
-          </Link>
+          {ABOUT_LINKS.map((link, i) => (
+            <Fragment key={link.href}>
+              {i > 0 && <span className="text-border">|</span>}
+              <Link
+                href={link.href}
+                className="rounded-full px-2 py-1 transition-colors hover:bg-surface-raised hover:text-foreground"
+              >
+                {link.label}
+              </Link>
+            </Fragment>
+          ))}
         </div>
         <LiveClock />
         <button
@@ -123,6 +116,7 @@ export function Header() {
             <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-brand" />
           )}
         </button>
+        <MoreMenu />
       </div>
     </header>
   );
