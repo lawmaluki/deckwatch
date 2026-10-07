@@ -158,6 +158,14 @@ def merge_incident(
     obj.verification_status = verification_status
 
 
+def delete_incident(session: Session, incident_id: str) -> None:
+    """Remove an incident whose sources have been merged elsewhere
+    (ingest/merge_duplicates.py). Never called by live ingestion."""
+    obj = session.get(Incident, incident_id)
+    if obj is not None:
+        session.delete(obj)
+
+
 # --- monthly reports -----------------------------------------------------------
 
 def get_live_incidents_between(
