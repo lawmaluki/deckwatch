@@ -8,11 +8,20 @@ class Settings(BaseSettings):
     )
 
     # Ingestion pipeline (python -m app.ingest).
-    #   ingest_classifier: "rule" (free, no key) or "llm" (Claude Haiku 4.5).
+    #   ingest_classifier: "rule" (free, no key), "llm" (Claude Haiku 4.5) or
+    #   "rag" (the same model, shown similar human-reviewed articles first).
     # ANTHROPIC_API_KEY is read by the anthropic SDK's zero-arg client.
     ingest_classifier: str = "rule"
     ingest_model: str = "claude-haiku-4-5"
     anthropic_api_key: str = ""
+
+    # RAG classifier. Examples are embedded locally (fastembed), no extra key.
+    # rag_min_score is the cosine-similarity floor below which a retrieved
+    # example is treated as unrelated and left out of the prompt.
+    rag_examples_path: str = "fixtures/rag-examples.jsonl"
+    rag_embed_model: str = "BAAI/bge-small-en-v1.5"
+    rag_top_k: int = 5
+    rag_min_score: float = 0.55
 
     # Monthly report (python -m app.monthly). Consolidation is one long request
     # a month, so it uses the most capable model; without an API key the report

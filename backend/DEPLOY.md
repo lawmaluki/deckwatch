@@ -87,6 +87,45 @@ On the **Vercel** project (already linked — `.vercel/project.json`):
   CORS config is needed. The deployed site now serves real, ingested
   incidents.
 
+## Dev environment (branch `dev`)
+A second, isolated copy of the stack for testing before merging to `main`:
+its own database, its own API service, its own frontend URL. Production is
+untouched by anything below.
+
+| Piece | Production | Dev |
+|---|---|---|
+| Branch | `main` | `dev` |
+| Database | Supabase project (prod) | a second Supabase project |
+| API | Render `deckwatch-api` | Render `deckwatch-api-dev` |
+| Frontend | Vercel production | Vercel preview for branch `dev` |
+| Ingestion | scheduled, every 15 min | manual, "Dev ingestion (manual)" workflow |
+
+1. **Supabase.** Create a second project and repeat step 1 (enable `postgis`,
+   copy the Transaction pooler string). Never reuse the production string.
+2. **Render.** New → Web Service → this repo, **Branch:** `dev`, **Root
+   Directory:** `backend`, name `deckwatch-api-dev`, plan Free, health check
+   `/health`. Env vars: `DATABASE_URL` = the dev pooler string,
+   `SEED_ON_START=false`. Create it by hand rather than through the Blueprint:
+   `render.yaml` is read from `main` and describes production only. It
+   redeploys on every push to `dev`.
+3. **GitHub.** Settings → Secrets and variables → Actions → add secret
+   `DEV_DATABASE_URL` = the dev pooler string (and `ANTHROPIC_API_KEY` if not
+   already there). Then Actions → **Dev ingestion (manual)** → Run workflow,
+   choosing `llm` or `rule`. The button only appears once
+   `.github/workflows/ingest-dev.yml` is on `main`.
+4. **Vercel.** Settings → Environment Variables → add, for the **Preview**
+   environment restricted to branch `dev`: `API_BASE_URL` = the dev Render URL
+   (no trailing slash) and `NEXT_PUBLIC_DATA_SOURCE=api`. Push to `dev`; the
+   deployment gets a stable branch URL (shown under Deployments). Preview
+   deployments may sit behind Vercel's login protection; turn that off under
+   Settings → Deployment Protection to share the link.
+5. **Check.** `curl https://<dev-service>.onrender.com/health`, run the dev
+   ingestion once, then open the Vercel `dev` URL: it should show only what
+   that run ingested.
+
+To ingest into dev from your own machine instead of Actions, set
+`DATABASE_URL` to the dev string locally and run `python -m app.ingest`.
+
 ## Upgrading to Claude classification
 The rule-based classifier is free but coarse (keyword-driven, no context
 reasoning). To use Claude Haiku 4.5 instead, in the GitHub repo's Actions

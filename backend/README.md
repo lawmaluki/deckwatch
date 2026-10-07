@@ -90,6 +90,11 @@ drops obviously-irrelevant items before the paid LLM call. New incidents are
 stored re-anchored to the seed's reference time, so the API's time-shift renders
 them as "N hours ago" consistently with the seed.
 
+If the Claude API can't be reached (bad or missing key, no credit, outage) the
+article is counted under `errors` and left for the next run rather than dropped
+as "not an incident". Three failures in a row abort the run with a non-zero
+exit, so the scheduled job shows as failed.
+
 Run it on a schedule with cron (every 15 minutes):
 
 ```cron
@@ -101,6 +106,52 @@ Run it on a schedule with cron (every 15 minutes):
 Feed URLs are in `app/ingest/sources.py` — outlets change RSS paths over time; a
 dead feed is skipped, not fatal. The pure stages and classifier mapping are
 covered DB-free in `tests/test_ingest.py` (the Anthropic client is stubbed).
+
+### Measuring ingestion accuracy
+
+`app/ingest/snapshot.py` and `app/ingest/evaluate.py` score the classifier
+against a hand-labelled sample, so the keyword rules, the LLM and any later RAG
+variant are compared on identical data.
+
+```bash
+.venv/bin/python -m app.ingest.snapshot --out eval/labels.csv   # run daily; appends new links
+# fill in is_incident / category / severity / county / location_name / event_id
+.venv/bin/python -m app.ingest.evaluate --labels eval/labels.csv --errors errors.csv
+.venv/bin/python -m app.ingest.evaluate --labels eval/labels.csv --classifier llm
+.venv/bin/python -m app.ingest.evaluate --labels eval/labels.csv --classifier rag
+```
+
+The snapshot keeps items *before* the keyword pre-filter, so articles it wrongly
+drops can be found. Each stage (pre-filter, incident detection, category,
+severity, location, dedup) is reported separately; `--skip-prefilter` isolates
+the classifier. Hold back ~30% of labels untouched when tuning prompts.
+
+### RAG classifier (`INGEST_CLASSIFIER=rag`)
+
+The keyword rules pick the first category whose keywords appear; the plain LLM
+reads the article but has never seen how *this* project's editors file things.
+`rag` adds a retrieval step: the article is embedded with a small local model
+(`fastembed`, `BAAI/bge-small-en-v1.5` — no key, runs on CPU), the most similar
+**human-reviewed** articles are looked up in `fixtures/rag-examples.jsonl`, and
+Claude classifies with those verdicts in view (`app/ingest/rag.py`). Schema,
+validation and model are the plain LLM classifier's, so `--classifier llm` vs
+`--classifier rag` isolates what retrieval adds.
+
+```bash
+.venv/bin/pip install -e ".[rag]"          # adds fastembed; first run downloads the model (~130 MB)
+.venv/bin/python -m app.ingest.examples check    # retrieval-only sanity check, no API key
+INGEST_CLASSIFIER=rag .venv/bin/python -m app.ingest
+
+# grow the store as you label more (hand labels override the report):
+.venv/bin/python -m app.ingest.examples build \
+  --report ../src/lib/data/monthly-reports/2026-09.json --labels eval/labels.csv
+```
+
+The store starts with the 223 articles of the hand-reviewed September 2026
+report. It has no non-incident examples and few floods until labelled rows are
+added. Examples below `RAG_MIN_SCORE` similarity are left out, and with nothing
+to retrieve it behaves exactly like `llm`. An article never retrieves itself, but
+score `rag` on labels that were *not* used to build the store.
 
 ## Monthly safety report
 

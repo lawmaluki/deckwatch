@@ -575,3 +575,56 @@ def test_pipeline_rule_mode_inserts_real_headlines():
     # and an Eastleigh robbery — all locatable, distinct events.
     assert stats["inserted"] >= 2
     assert all(r["id"].startswith("ing-") for r in rows)
+
+
+# --- classifier failures are loud, not silent --------------------------------
+
+class _FailingClient:
+    @property
+    def messages(self):
+        return self
+
+    def create(self, **kwargs):
+        raise RuntimeError("401 invalid x-api-key")
+
+
+def test_classify_raises_when_the_api_call_fails():
+    with pytest.raises(classifier.ClassifierError, match="401"):
+        classifier.classify(ITEM, _FailingClient())
+
+
+def _items(n):
+    return [{**ITEM, "link": f"https://example.co.ke/a/{i}"} for i in range(n)]
+
+
+def test_run_aborts_after_repeated_classifier_errors(monkeypatch):
+    monkeypatch.setattr(pipeline.repository, "get_all_incidents", lambda s: [])
+    monkeypatch.setattr(pipeline.repository, "next_ordinal", lambda s: 1)
+    calls = []
+
+    def dead(item):
+        calls.append(item["link"])
+        raise classifier.ClassifierError("401 invalid x-api-key")
+
+    stats = pipeline.run(_FakeSession(), dead, items=_items(10))
+    assert stats["aborted"] == 1
+    assert stats["errors"] == len(calls) == pipeline.MAX_CONSECUTIVE_ERRORS
+    assert stats["inserted"] == 0 and stats["skipped"] == 0
+
+
+def test_run_survives_a_single_classifier_blip(monkeypatch):
+    inserted = []
+    monkeypatch.setattr(pipeline.repository, "get_all_incidents", lambda s: [])
+    monkeypatch.setattr(pipeline.repository, "next_ordinal", lambda s: 1)
+    monkeypatch.setattr(pipeline.repository, "insert_incident", lambda s, inc: inserted.append(inc))
+
+    def flaky(item):
+        if item["link"].endswith("/0"):
+            raise classifier.ClassifierError("529 overloaded")
+        return rules.classify(item)
+
+    stats = pipeline.run(_FakeSession(), flaky, items=_items(2))
+    assert stats["errors"] == 1 and stats["aborted"] == 0
+    assert len(inserted) == 1
+    # the failed article was not recorded, so the next run will try it again
+    assert inserted[0]["id"] == pipeline.article_id("https://example.co.ke/a/1")

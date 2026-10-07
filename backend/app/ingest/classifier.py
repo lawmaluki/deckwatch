@@ -18,6 +18,14 @@ _COUNTY_NAMES: List[str] = [
     c["name"] for c in json.loads((FIXTURES / "counties.json").read_text())
 ]
 
+class ClassifierError(Exception):
+    """The classifier could not be reached or refused the request (bad or
+    missing API key, no credit, rate limit, outage). Distinct from "this is not
+    an incident": the article was never judged, so it must not be silently
+    dropped — the pipeline counts it, retries it next run and fails loudly if
+    the service is down."""
+
+
 SYSTEM_PROMPT = (
     "You are a public-safety news analyst for Kenya. You read a single news "
     "item and decide whether it describes a specific, real public-safety "
@@ -66,18 +74,30 @@ def _user_prompt(item: Mapping[str, str]) -> str:
 
 
 def classify(
-    item: Mapping[str, str], client: Any, model: Optional[str] = None
+    item: Mapping[str, str],
+    client: Any,
+    model: Optional[str] = None,
+    system: Optional[str] = None,
+    user_prompt: Optional[str] = None,
 ) -> Optional[Dict[str, Any]]:
     """Return an extracted incident dict, or None if this item isn't a usable
-    incident (not an incident, unknown county, or an API/parse failure)."""
+    incident (not an incident, unknown county, or an unparseable reply).
+    Raises ClassifierError if the API call itself fails.
+
+    `system` / `user_prompt` let the RAG classifier (rag.py) add retrieved
+    examples while sharing this schema, request and validation."""
     try:
         response = client.messages.create(
             model=model or settings.ingest_model,
             max_tokens=1024,
-            system=SYSTEM_PROMPT,
+            system=system or SYSTEM_PROMPT,
             output_config={"format": {"type": "json_schema", "schema": _schema()}},
-            messages=[{"role": "user", "content": _user_prompt(item)}],
+            messages=[{"role": "user", "content": user_prompt or _user_prompt(item)}],
         )
+    except Exception as e:
+        raise ClassifierError(f"{type(e).__name__}: {e}") from e
+
+    try:
         text = next(
             (b.text for b in response.content if getattr(b, "type", None) == "text"),
             None,

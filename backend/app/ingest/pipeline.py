@@ -10,9 +10,15 @@ from sqlalchemy.orm import Session
 from .. import repository
 from ..domain import now_ms, parse_iso_ms, to_iso_z
 from . import dedup, prefilter, sources
+from .classifier import ClassifierError
 from .verification import score_verification
 
 Classifier = Callable[[Mapping[str, str]], Optional[dict]]
+
+# Consecutive classifier failures before the run gives up. One failure is a
+# blip; several in a row means the key, the credit or the service is gone, and
+# sending the rest of the feed at it only wastes time.
+MAX_CONSECUTIVE_ERRORS = 3
 
 
 def article_id(link: str) -> str:
@@ -141,7 +147,11 @@ def run(
         "merged": 0,
         "skipped": 0,
         "already_ingested": 0,
+        "errors": 0,
+        "aborted": 0,
     }
+    consecutive_errors = 0
+    last_error = ""
 
     raw = items if items is not None else sources.fetch_items(feeds)
     stats["fetched"] = len(raw)
@@ -159,7 +169,19 @@ def run(
             stats["already_ingested"] += 1
             continue
 
-        candidate = classify_fn(item)
+        try:
+            candidate = classify_fn(item)
+        except ClassifierError as e:
+            # Not judged, so not recorded: the article stays unseen and is
+            # retried on the next run instead of being lost as "not an incident".
+            stats["errors"] += 1
+            consecutive_errors += 1
+            last_error = str(e)
+            if consecutive_errors >= MAX_CONSECUTIVE_ERRORS:
+                stats["aborted"] = 1
+                break
+            continue
+        consecutive_errors = 0
         if candidate is None:
             stats["skipped"] += 1
             continue
@@ -193,4 +215,6 @@ def run(
             stats["inserted"] += 1
 
     session.commit()
+    if last_error:
+        print(f"classifier error ({stats['errors']} this run): {last_error}")
     return stats
