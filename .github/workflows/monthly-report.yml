@@ -36,23 +36,41 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    env:
+      INGEST_CLASSIFIER: ${{ vars.INGEST_CLASSIFIER || 'rule' }}
+      FASTEMBED_CACHE_PATH: ${{ github.workspace }}/.fastembed-cache
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
 
+      # Same install as the ingest workflow: its classifier may need the
+      # embedding model (rag, hybrid).
       - name: Install backend
-        run: pip install .
+        run: |
+          case "$INGEST_CLASSIFIER" in
+            rag|hybrid) pip install ".[rag]" ;;
+            *) pip install . ;;
+          esac
+
+      - name: Restore embedding model
+        if: github.event_name == 'schedule' && (env.INGEST_CLASSIFIER == 'rag' || env.INGEST_CLASSIFIER == 'hybrid')
+        uses: actions/cache@v4
+        with:
+          path: .fastembed-cache
+          key: fastembed-${{ vars.RAG_EMBED_MODEL || 'BAAI/bge-small-en-v1.5' }}
 
       # Pick up the day's last articles before the month is cut.
       - name: Run ingest
         if: github.event_name == 'schedule'
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          INGEST_CLASSIFIER: ${{ vars.INGEST_CLASSIFIER || 'rule' }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          RAG_EMBED_MODEL: ${{ vars.RAG_EMBED_MODEL || 'BAAI/bge-small-en-v1.5' }}
         run: python -m app.ingest
 
       - name: Generate report

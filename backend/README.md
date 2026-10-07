@@ -138,7 +138,7 @@ validation and model are the plain LLM classifier's, so `--classifier llm` vs
 `--classifier rag` isolates what retrieval adds.
 
 ```bash
-.venv/bin/pip install -e ".[rag]"          # adds fastembed; first run downloads the model (~130 MB)
+.venv/bin/pip install -e ".[rag]"          # adds fastembed; first run downloads the model (~65 MB)
 .venv/bin/python -m app.ingest.examples check    # retrieval-only sanity check, no API key
 INGEST_CLASSIFIER=rag .venv/bin/python -m app.ingest
 
@@ -181,6 +181,11 @@ triggers were tuned on that same month, so re-check with
 `evaluate --classifier hybrid` on fresh labels. If Claude is unavailable, the
 rule answer is used where there is one, so ingestion keeps going; each run
 prints how many articles each path decided. Same setup as `rag`.
+
+To run either on the scheduled ingest, set the repository variable
+`INGEST_CLASSIFIER` to `hybrid` (or `rag`). The workflow then installs the
+`rag` extra and restores the embedding model from the Actions cache, so only
+the first run downloads it.
 
 ## Monthly safety report
 

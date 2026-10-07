@@ -5,25 +5,50 @@ on:
     - cron: "*/15 * * * *"
   workflow_dispatch: {} # allows a manual run from the Actions tab
 
+# A run that calls Claude for many articles can outlast the 15-minute
+# interval; queue the next one instead of classifying the same feed twice.
+concurrency:
+  group: ingest
+  cancel-in-progress: false
+
 jobs:
   ingest:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: backend
+    env:
+      # rule (default, free) | llm | rag | hybrid. Set the repo variable to switch.
+      INGEST_CLASSIFIER: ${{ vars.INGEST_CLASSIFIER || 'rule' }}
+      # Where fastembed keeps the embedding model rag and hybrid use, so the
+      # cache step below can restore it instead of downloading it every run.
+      FASTEMBED_CACHE_PATH: ${{ github.workspace }}/.fastembed-cache
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
 
       - name: Install backend
-        run: pip install .
+        run: |
+          case "$INGEST_CLASSIFIER" in
+            rag|hybrid) pip install ".[rag]" ;;
+            *) pip install . ;;
+          esac
+
+      - name: Restore embedding model
+        if: env.INGEST_CLASSIFIER == 'rag' || env.INGEST_CLASSIFIER == 'hybrid'
+        uses: actions/cache@v4
+        with:
+          path: .fastembed-cache
+          key: fastembed-${{ vars.RAG_EMBED_MODEL || 'BAAI/bge-small-en-v1.5' }}
 
       - name: Run ingest
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          INGEST_CLASSIFIER: ${{ vars.INGEST_CLASSIFIER || 'rule' }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          RAG_EMBED_MODEL: ${{ vars.RAG_EMBED_MODEL || 'BAAI/bge-small-en-v1.5' }}
         run: python -m app.ingest
