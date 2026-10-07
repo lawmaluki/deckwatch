@@ -5,6 +5,7 @@ classifier.classify(), so the pipeline treats them interchangeably.
 Much coarser than the LLM (it can't reason about context or ambiguity), but it
 lets ingestion run live with no credits. Selected via INGEST_CLASSIFIER=rule."""
 
+import functools
 import json
 import re
 from pathlib import Path
@@ -161,11 +162,16 @@ def severity_of(text: str, category: Optional[str]) -> str:
     return "low"
 
 
+@functools.lru_cache(maxsize=None)
+def _word_re(keyword: str) -> "re.Pattern[str]":
+    return re.compile(r"\b" + re.escape(keyword) + r"(?:e?s)?\b")
+
+
 def _has(text: str, keyword: str) -> bool:
     """Whole-word (phrase) match, so short tokens don't hit inside longer words,
     plus a plural ending: "crash" must match "crashes" and "accident"
     "accidents", or multi-vehicle headlines fall through to crime on "killed"."""
-    return re.search(r"\b" + re.escape(keyword) + r"(?:e?s)?\b", text) is not None
+    return _word_re(keyword).search(text) is not None
 
 
 def _has_any(text: str, keywords) -> bool:
@@ -181,15 +187,19 @@ def _explicit_counties(text: str) -> List[str]:
 
 
 def classify(item: Mapping[str, str], *args: Any, **kwargs: Any) -> Optional[Dict[str, Any]]:
-    title = item.get("title", "")
-    summary = item.get("summary", "")
-    text = f"{title} {summary}".lower()
+    text = _text(item)
+    return _classify(item, text, matched_categories(text))
 
-    category = next(
-        (cat for cat, kws in CATEGORY_KEYWORDS if _has_any(text, kws)), None
-    )
-    if category is None:
+
+def _text(item: Mapping[str, str]) -> str:
+    return f"{item.get('title', '')} {item.get('summary', '')}".lower()
+
+
+def _classify(item: Mapping[str, str], text: str, categories: List[str]) -> Optional[Dict[str, Any]]:
+    title = item.get("title", "")
+    if not categories:
         return None
+    category = categories[0]
 
     county: Optional[str] = None
     location: Optional[str] = None
@@ -236,5 +246,6 @@ def analyse(item: Mapping[str, str]) -> Dict[str, Any]:
     candidate classify() returns (None without a category or a county). Lets
     the hybrid classifier judge the rules' confidence without re-implementing
     them."""
-    text = f"{item.get('title', '')} {item.get('summary', '')}".lower()
-    return {"text": text, "categories": matched_categories(text), "candidate": classify(item)}
+    text = _text(item)
+    categories = matched_categories(text)
+    return {"text": text, "categories": categories, "candidate": _classify(item, text, categories)}

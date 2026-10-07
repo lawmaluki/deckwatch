@@ -60,9 +60,7 @@ def plan(
         key=lambda i: (parse_iso_ms(i["reportedAt"]), i["id"]),
     )
     for inc in ordered:
-        target = dedup.find_duplicate(inc, kept)
-        if target is None and similarity is not None:
-            target = dedup.find_same_story(inc, kept, similarity)
+        target, _rule = dedup.find_match(inc, kept, similarity)
         if target is None:
             kept.append(copy.deepcopy(inc))
             continue

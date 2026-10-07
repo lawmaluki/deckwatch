@@ -19,7 +19,6 @@ import type { Incident } from "@/lib/types";
  * within a minute — and never retroactive. */
 export function useAlertWatcher(): void {
   const snapshot = useIncidents();
-  const { incidents } = snapshot;
   const subscription = useAppStore((s) => s.notifications);
   const location = useAppStore((s) => s.userLocation);
   const raise = useAlertStore((s) => s.raise);
@@ -31,11 +30,11 @@ export function useAlertWatcher(): void {
     // Wait for real data before remembering anything: see canSeedAlerts.
     if (!canSeedAlerts(snapshot, USE_API)) return;
     if (seen.current === null) {
-      seen.current = new Set(incidents.map((i) => i.id));
+      seen.current = new Set(snapshot.incidents.map((i) => i.id));
       return;
     }
 
-    const arrived = newIncidents(incidents, seen.current);
+    const arrived = newIncidents(snapshot.incidents, seen.current);
     if (arrived.length === 0) return;
     for (const incident of arrived) seen.current.add(incident.id);
 
@@ -51,7 +50,7 @@ export function useAlertWatcher(): void {
         notifyOs(incident, () => focus({ kind: "incident", value: incident.id }))
       );
     }
-  }, [snapshot, incidents, subscription, location, raise, focus]);
+  }, [snapshot, subscription, location, raise, focus]);
 }
 
 /** Best-effort OS notification. Silent when unsupported or not granted — the

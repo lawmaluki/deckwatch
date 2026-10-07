@@ -73,7 +73,6 @@ def classify(
     index: Optional[ExampleIndex],
     k: Optional[int] = None,
     min_score: Optional[float] = None,
-    model: Optional[str] = None,
 ) -> Optional[Dict[str, Any]]:
     hits = retrieve(
         item,
@@ -84,7 +83,6 @@ def classify(
     return classifier.classify(
         item,
         client,
-        model=model,
         system=classifier.SYSTEM_PROMPT + RAG_GUIDANCE if hits else None,
         user_prompt=build_prompt(item, hits),
     )

@@ -62,6 +62,20 @@ FROM_INCIDENT_CATEGORY: Dict[str, str] = {
     "public_health": "health",
     "wildlife": "wildlife",
 }
+# The reverse, for turning reviewed report incidents into classifier examples
+# (ingest/examples.py). Lossy where the report merges categories: security
+# covers terror and unrest covers election violence.
+TO_INCIDENT_CATEGORY: Dict[str, str] = {
+    "security": "crime",
+    "road": "traffic_accident",
+    "unrest": "unrest",
+    "missing": "missing_person",
+    "fire": "fire",
+    "collapse": "infrastructure",
+    "health": "public_health",
+    "wildlife": "wildlife",
+    "weather": "flood",
+}
 MISSING_STATUSES: Tuple[str, ...] = ("", "Open", "Found", "Found alive", "Found dead")
 
 Article = Dict[str, Any]  # an incident dict as returned by repository._to_dict

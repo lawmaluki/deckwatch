@@ -19,6 +19,7 @@ rebuilt at start-up; no vector database is involved.
 """
 
 import argparse
+import functools
 import csv
 import json
 import re
@@ -35,18 +36,9 @@ Embedder = Callable[[Sequence[str]], Any]
 FIXTURES = Path(__file__).resolve().parent.parent.parent / "fixtures"
 DEFAULT_PATH = FIXTURES / "rag-examples.jsonl"
 
-# The monthly report uses an editorial taxonomy; map it onto the app's categories.
-REPORT_CATEGORY_MAP = {
-    "security": "crime",
-    "road": "traffic_accident",
-    "unrest": "unrest",
-    "missing": "missing_person",
-    "fire": "fire",
-    "collapse": "infrastructure",
-    "health": "public_health",
-    "wildlife": "wildlife",
-    "weather": "flood",
-}
+# The monthly report uses an editorial taxonomy; report.py maps it back onto
+# the app's categories.
+from ..monthly.report import TO_INCIDENT_CATEGORY as REPORT_CATEGORY_MAP  # noqa: E402
 # "security" in the report also covers terror attacks, which the app separates.
 _TERROR = re.compile(r"shabaab|terroris[mt]|militant|grenade|\bbomb", re.IGNORECASE)
 
@@ -183,9 +175,11 @@ def text_of(item: Mapping[str, Any]) -> str:
     return f"{item.get('title', '')}. {item.get('summary', '')}".strip(" .")
 
 
+@functools.lru_cache(maxsize=None)
 def default_embedder(model_name: str) -> Embedder:
     """Local sentence-embedding model. Imported lazily so the rule and plain-llm
-    classifiers never need fastembed installed."""
+    classifiers never need fastembed installed. Cached per model: the RAG
+    classifier and story matching (dedup.py) share one loaded model."""
     try:
         from fastembed import TextEmbedding
     except ImportError as e:  # pragma: no cover - environment dependent
@@ -194,6 +188,17 @@ def default_embedder(model_name: str) -> Embedder:
         ) from e
     model = TextEmbedding(model_name)
     return lambda texts: list(model.embed(list(texts)))
+
+
+def unit_vectors(vectors: Any):
+    """Rows as float32 unit vectors (zero rows stay zero), so a dot product is
+    cosine similarity. Shared with dedup.EmbeddingSimilarity."""
+    import numpy as np
+
+    m = np.asarray(vectors, dtype="float32")
+    norms = np.linalg.norm(m, axis=1, keepdims=True)
+    norms[norms == 0] = 1.0
+    return m / norms
 
 
 class ExampleIndex:
@@ -211,11 +216,7 @@ class ExampleIndex:
             self._matrix = np.zeros((0, 0), dtype="float32")
 
     def _unit(self, vectors: Any):
-        np = self._np
-        m = np.asarray(vectors, dtype="float32")
-        norms = np.linalg.norm(m, axis=1, keepdims=True)
-        norms[norms == 0] = 1.0
-        return m / norms
+        return unit_vectors(vectors)
 
     def __len__(self) -> int:
         return len(self.examples)

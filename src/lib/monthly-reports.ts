@@ -290,11 +290,20 @@ export interface WeekRow {
   top: ReportEvent[];
 }
 
+/** Rows the report's county table shows; its "Top N shown" note reads it too.
+ * Lives here, not in the client component, so the server page gets the value. */
+export const COUNTY_TABLE_LIMIT = 12;
+
+/** Day of the month full coverage starts (1 when it was complete). */
+export function coverageStartDay(report: MonthlyReport): number {
+  return report.coverageFrom ? Number(report.coverageFrom.slice(8, 10)) : 1;
+}
+
 /** Seven-day blocks from the start of full coverage; the last block holds
- * whatever days remain, so compare weeks per day, not in total. */
-export function byWeek(report: MonthlyReport): WeekRow[] {
-  const days = byDay(report);
-  const from = report.coverageFrom ? Number(report.coverageFrom.slice(8, 10)) : 1;
+ * whatever days remain, so compare weeks per day, not in total. Pass `days`
+ * when byDay has already run. */
+export function byWeek(report: MonthlyReport, days: DayRow[] = byDay(report)): WeekRow[] {
+  const from = coverageStartDay(report);
   const weeks: WeekRow[] = [];
   for (let start = from; start <= days.length; start += 7) {
     const block = days.slice(start - 1, Math.min(start + 6, days.length));

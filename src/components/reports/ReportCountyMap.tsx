@@ -34,7 +34,7 @@ function ringPath(ring: Ring): string {
 }
 
 // Shade steps: 0, 1, 2, 3-4, 5-9, 10+ incidents.
-export const SHADE_STEPS: { label: string; min: number }[] = [
+const SHADE_STEPS: { label: string; min: number }[] = [
   { label: "0", min: 0 },
   { label: "1", min: 1 },
   { label: "2", min: 2 },
@@ -44,7 +44,7 @@ export const SHADE_STEPS: { label: string; min: number }[] = [
 ];
 const MIX = [0, 22, 38, 56, 76, 100];
 
-export function shade(n: number): string {
+function shade(n: number): string {
   let step = 0;
   SHADE_STEPS.forEach((s, i) => {
     if (n >= s.min) step = i;

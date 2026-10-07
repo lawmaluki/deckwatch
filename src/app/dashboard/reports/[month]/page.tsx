@@ -9,6 +9,8 @@ import {
   byCounty,
   byDay,
   byWeek,
+  COUNTY_TABLE_LIMIT,
+  coverageStartDay,
   changeFromPrevious,
   confidenceLabel,
   countyCode,
@@ -44,6 +46,7 @@ export async function generateMetadata({ params }: { params: Promise<{ month: st
 }
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+const CATEGORY_GRID = "grid grid-cols-[minmax(110px,200px)_1fr_76px] gap-3";
 
 export default async function MonthlyReportPage({ params }: { params: Promise<{ month: string }> }) {
   const { month } = await params;
@@ -62,16 +65,19 @@ export default async function MonthlyReportPage({ params }: { params: Promise<{ 
   const cats = byCategory(events);
   const counties = byCounty(events);
   const days = byDay(report);
-  const weeks = byWeek(report);
+  const weeks = byWeek(report, days);
   const multi = events.filter((e) => e.outlets.length > 1).length;
   const defining = events.filter((e) => e.defining);
-  const coverageDay = report.coverageFrom ? Number(report.coverageFrom.slice(8, 10)) : 1;
+  const coverageDay = coverageStartDay(report);
+  const conflicts = events.filter((e) => e.conflict);
+  const openCases = events.filter((e) => e.status === "Open");
+  const hotspotEvents = new Map(report.hotspots.map((h) => [h.key, events.filter((e) => e.hotspot === h.key)]));
   const quiet = COUNTIES.map((c) => c.name).filter((n) => !counties.some((c) => c.county === n)).sort();
   const deadliestCat = [...cats].sort((a, b) => b.deaths - a.deaths)[0];
   const deadliestCounty = [...counties].sort((a, b) => b.deaths - a.deaths)[0];
   const mostReported = [...events].sort((a, b) => b.articles - a.articles)[0];
   const deadliestSpot = report.hotspots
-    .map((h) => ({ h, evs: events.filter((e) => e.hotspot === h.key) }))
+    .map((h) => ({ h, evs: hotspotEvents.get(h.key) ?? [] }))
     .sort((a, b) => totalDeaths(b.evs) - totalDeaths(a.evs))[0];
 
   return (
@@ -122,16 +128,16 @@ export default async function MonthlyReportPage({ params }: { params: Promise<{ 
               </span>
             </div>
             {report.method === "automatic" && (
-              <Notice tone="warn">
-                <b className="font-medium text-foreground">This report was not reviewed.</b> It was generated without the editorial
+              <Notice>
+                <B>This report was not reviewed.</B> It was generated without the editorial
                 step, so each captured article is counted as its own incident. Duplicate coverage inflates the numbers.
               </Notice>
             )}
             {report.coverageFrom && (
-              <Notice tone="warn">
-                <b className="font-medium text-foreground">Coverage is full from {formatDay(report.coverageFrom)}.</b> Deckwatch captured
+              <Notice>
+                <B>Coverage is full from {formatDay(report.coverageFrom)}.</B> Deckwatch captured
                 only a few reports before then, so the first {coverageDay - 1} days are under-counted. Every figure here counts incidents{" "}
-                <b className="font-medium text-foreground">captured by Deckwatch</b>. That is not the same as every incident that happened
+                <B>captured by Deckwatch</B>. That is not the same as every incident that happened
                 in Kenya.
               </Notice>
             )}
@@ -177,13 +183,13 @@ export default async function MonthlyReportPage({ params }: { params: Promise<{ 
             title={report.headlines?.what || `${cats[0] ? REPORT_CATEGORY_LABELS[cats[0].category] : "No category"} made up the most incidents`}
           >
             <div className="max-w-3xl space-y-1">
-              <div className="grid grid-cols-[minmax(110px,200px)_1fr_76px] gap-3 font-mono text-[11px] uppercase tracking-wider text-muted">
+              <div className={`${CATEGORY_GRID} font-mono text-[11px] uppercase tracking-wider text-muted`}>
                 <span>Category</span>
                 <span>Incidents</span>
                 <span className="text-right">Inc. · deaths</span>
               </div>
               {cats.map((c) => (
-                <div key={c.category} className="grid grid-cols-[minmax(110px,200px)_1fr_76px] items-center gap-3 py-1.5" title={`${REPORT_CATEGORY_LABELS[c.category]}: ${c.incidents} incidents, ${c.deaths} deaths`}>
+                <div key={c.category} className={`${CATEGORY_GRID} items-center py-1.5`} title={`${REPORT_CATEGORY_LABELS[c.category]}: ${c.incidents} incidents, ${c.deaths} deaths`}>
                   <span className="text-sm text-foreground">{REPORT_CATEGORY_LABELS[c.category]}</span>
                   <div className="h-3">
                     <div className="h-full min-w-[3px] rounded-r bg-brand" style={{ width: `${(c.incidents / cats[0].incidents) * 100}%` }} />
@@ -218,7 +224,7 @@ export default async function MonthlyReportPage({ params }: { params: Promise<{ 
               <CountyTable counties={counties} />
             </div>
             <Note>
-              Top {Math.min(12, counties.length)} of {counties.length} counties shown. Select a county on the map or in the table to open its
+              Top {Math.min(COUNTY_TABLE_LIMIT, counties.length)} of {counties.length} counties shown. Select a county on the map or in the table to open its
               brief.
               {quiet.length > 0 && (
                 <>
@@ -238,7 +244,7 @@ export default async function MonthlyReportPage({ params }: { params: Promise<{ 
               </p>
               <div className="grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
                 {report.hotspots.map((h) => {
-                  const evs = events.filter((e) => e.hotspot === h.key);
+                  const evs = hotspotEvents.get(h.key) ?? [];
                   const nCounties = new Set(evs.map((e) => e.county)).size;
                   return (
                     <div key={h.key} className="space-y-2.5 rounded-2xl border border-border bg-surface p-4">
@@ -350,20 +356,19 @@ export default async function MonthlyReportPage({ params }: { params: Promise<{ 
                       them; the live map does not yet.
                     </>
                   ) : null,
-                  events.some((e) => e.conflict) ? (
+                  conflicts.length > 0 ? (
                     <>
-                      <B>Reports conflicted</B> on key facts in {plural(events.filter((e) => e.conflict).length, "incident")}, including{" "}
-                      {events
-                        .filter((e) => e.conflict)
+                      <B>Reports conflicted</B> on key facts in {plural(conflicts.length, "incident")}, including{" "}
+                      {conflicts
                         .slice(0, 3)
                         .map((e) => e.title.split(/[;,]/)[0].toLowerCase())
                         .join("; ")}
                       .
                     </>
                   ) : null,
-                  events.some((e) => e.status === "Open") ? (
+                  openCases.length > 0 ? (
                     <>
-                      <B>{plural(events.filter((e) => e.status === "Open").length, "missing-person case")}</B> had no reported resolution by
+                      <B>{plural(openCases.length, "missing-person case")}</B> had no reported resolution by
                       the end of the month.
                     </>
                   ) : null,
@@ -484,10 +489,10 @@ function Note({ children }: { children: React.ReactNode }) {
   return <p className="max-w-3xl text-sm text-muted">{children}</p>;
 }
 
-function Notice({ tone, children }: { tone: "warn"; children: React.ReactNode }) {
+function Notice({ children }: { children: React.ReactNode }) {
   return (
     <p className="flex max-w-4xl gap-2.5 text-sm text-muted">
-      <i className="mt-1.5 h-2 w-2 flex-none rounded-sm" style={{ background: tone === "warn" ? "var(--medium)" : "var(--brand)" }} />
+      <i className="mt-1.5 h-2 w-2 flex-none rounded-sm" style={{ background: "var(--medium)" }} />
       <span>{children}</span>
     </p>
   );
@@ -559,7 +564,7 @@ function DefiningCard({ e }: { e: ReportEvent }) {
         </div>
         {e.why && (
           <p className="text-sm text-muted">
-            <b className="font-medium text-foreground">Why it matters.</b> {e.why}
+            <B>Why it matters.</B> {e.why}
             {e.conflict ? ` ${e.conflict}` : ""}
           </p>
         )}
@@ -600,20 +605,23 @@ function Help({ number, label }: { number: string; label: string }) {
 function MonthLink({ month, available, dir }: { month: string; available: Set<string>; dir: "prev" | "next" }) {
   const Icon = dir === "prev" ? ChevronLeft : ChevronRight;
   const label = formatMonth(month).replace(/ \d{4}$/, "");
+  const body = (
+    <>
+      {dir === "prev" && <Icon className="h-3.5 w-3.5" />}
+      {label}
+      {dir === "next" && <Icon className="h-3.5 w-3.5" />}
+    </>
+  );
   if (!available.has(month)) {
     return (
       <span className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-muted/40" aria-disabled>
-        {dir === "prev" && <Icon className="h-3.5 w-3.5" />}
-        {label}
-        {dir === "next" && <Icon className="h-3.5 w-3.5" />}
+        {body}
       </span>
     );
   }
   return (
     <Link href={`/dashboard/reports/${month}`} className="inline-flex items-center gap-1 rounded-md px-2 py-1 hover:bg-surface-raised hover:text-foreground">
-      {dir === "prev" && <Icon className="h-3.5 w-3.5" />}
-      {label}
-      {dir === "next" && <Icon className="h-3.5 w-3.5" />}
+      {body}
     </Link>
   );
 }

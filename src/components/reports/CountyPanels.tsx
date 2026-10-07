@@ -2,6 +2,7 @@
 
 import clsx from "clsx";
 import {
+  COUNTY_TABLE_LIMIT,
   REPORT_CATEGORY_LABELS,
   byCategory,
   formatDay,
@@ -9,7 +10,7 @@ import {
 } from "@/lib/monthly-reports";
 import { COUNTY_BRIEF_ID, useReportSelection } from "@/components/reports/ReportSelection";
 
-export function CountyTable({ counties, limit = 12 }: { counties: CountyRow[]; limit?: number }) {
+export function CountyTable({ counties }: { counties: CountyRow[] }) {
   const { county: selected, select } = useReportSelection();
   return (
     <div className="overflow-x-auto">
@@ -23,7 +24,7 @@ export function CountyTable({ counties, limit = 12 }: { counties: CountyRow[]; l
           </tr>
         </thead>
         <tbody>
-          {counties.slice(0, limit).map((c) => (
+          {counties.slice(0, COUNTY_TABLE_LIMIT).map((c) => (
             <tr
               key={c.county}
               onClick={() => select(c.county, { scroll: true })}

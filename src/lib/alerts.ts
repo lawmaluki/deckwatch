@@ -1,4 +1,5 @@
 import { haversineDistanceKm } from "@/lib/geo";
+import { MS_PER_HOUR } from "@/lib/constants";
 import type { Incident } from "@/lib/types";
 import type { NotificationSubscription } from "@/store/useAppStore";
 
@@ -55,7 +56,7 @@ export function hasActiveSubscription(sub: NotificationSubscription): boolean {
 export const ALERT_MAX_AGE_HOURS = 24;
 
 export function recentEnoughToAlert(incident: Incident, nowMs: number): boolean {
-  return nowMs - Date.parse(incident.reportedAt) <= ALERT_MAX_AGE_HOURS * 3_600_000;
+  return nowMs - Date.parse(incident.reportedAt) <= ALERT_MAX_AGE_HOURS * MS_PER_HOUR;
 }
 
 /** Whether a snapshot can define "what was already here" for alerts. In api

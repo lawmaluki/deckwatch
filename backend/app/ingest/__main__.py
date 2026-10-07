@@ -7,15 +7,17 @@ ANTHROPIC_API_KEY."""
 
 import sys
 
+from ..config import settings
 from ..db import SessionLocal
 from .classify import build_classifier
-from . import pipeline
+from . import dedup, pipeline
 
 
 def main() -> None:
     classify_fn = build_classifier()
+    similarity = dedup.build_similarity(settings.dedup_text, settings.rag_embed_model)
     with SessionLocal() as session:
-        stats = pipeline.run(session, classify_fn)
+        stats = pipeline.run(session, classify_fn, similarity=similarity)
     summary = ", ".join(f"{k}={v}" for k, v in stats.items())
     print(f"ingest complete: {summary}")
     if hasattr(classify_fn, "summary"):

@@ -9,7 +9,6 @@ from sqlalchemy.orm import Session
 
 from .. import repository
 from ..domain import now_ms, parse_iso_ms, to_iso_z
-from ..config import settings
 from . import dedup, prefilter, sources
 from .classifier import ClassifierError
 from .verification import score_verification
@@ -116,19 +115,16 @@ def merge_fields(existing: Mapping[str, Any], new_source: Mapping[str, Any]):
     return sources_list, report_count, score, status
 
 
-_FROM_SETTINGS = object()
-
-
 def run(
     session: Session,
     classify_fn: Classifier,
     items: Optional[List[Dict[str, str]]] = None,
     feeds: Optional[list] = None,
-    similarity: Any = _FROM_SETTINGS,
+    similarity: Any = None,
 ) -> Dict[str, int]:
+    """`similarity` enables story matching (dedup.build_similarity); None
+    leaves only the location rule."""
     at_ms = now_ms()
-    if similarity is _FROM_SETTINGS:
-        similarity = dedup.build_similarity(settings.dedup_text, settings.rag_embed_model)
     # Dedup only against other real ingested incidents ("ing-" ids), never
     # seed/demo data ("ow-" ids) — a fictional incident sharing a hotspot and
     # category with a real story is not the same real-world event, and merging
@@ -208,11 +204,9 @@ def run(
             stats["skipped"] += 1
             continue
 
-        duplicate = dedup.find_duplicate(incident, existing)
-        if duplicate is None and similarity is not None:
-            duplicate = dedup.find_same_story(incident, existing, similarity)
-            if duplicate is not None:
-                stats["merged_by_story"] += 1
+        duplicate, rule = dedup.find_match(incident, existing, similarity)
+        if rule == "story":
+            stats["merged_by_story"] += 1
         if duplicate is not None:
             merged_sources, report_count, score, status = merge_fields(
                 duplicate, incident["sources"][0]

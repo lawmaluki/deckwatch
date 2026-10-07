@@ -8,6 +8,7 @@ Two independent rules, tried in order:
   2. same story: the headlines say the same thing, within 72 hours
      (find_same_story), which also covers articles that only name a county."""
 
+import functools
 import math
 import re
 from datetime import datetime, timezone
@@ -160,16 +161,18 @@ class EmbeddingSimilarity:
         self._embed = None
         self._vectors: Dict[str, Any] = {}
 
-    def _vecs(self, texts: Sequence[str]):
-        import numpy as np
+    def prefetch(self, texts: Sequence[str]) -> None:
+        """Embed every not-yet-seen text in one model call."""
+        from .examples import unit_vectors
 
         missing = [t for t in dict.fromkeys(texts) if t not in self._vectors]
         if missing:
             if self._embed is None:
                 self._embed = self._make()
-            m = np.asarray(self._embed(missing), dtype="float32")
-            m /= np.maximum(np.linalg.norm(m, axis=1, keepdims=True), 1e-9)
-            self._vectors.update(zip(missing, m))
+            self._vectors.update(zip(missing, unit_vectors(self._embed(missing))))
+
+    def _vecs(self, texts: Sequence[str]):
+        self.prefetch(texts)
         return [self._vectors[t] for t in texts]
 
     def score(self, text: str, others: Sequence[str]) -> float:
@@ -207,9 +210,14 @@ def story_texts(incident: Incident) -> List[str]:
     return [incident["title"]] + [s["title"] for s in incident.get("sources", []) if s.get("title")]
 
 
+# Called for every stored incident on every new article; the same few thousand
+# timestamps recur, so parse each string once per process.
+_parse_ms = functools.lru_cache(maxsize=65536)(parse_iso_ms)
+
+
 def _story_times_ms(incident: Incident) -> List[int]:
-    times = [parse_iso_ms(incident["reportedAt"])]
-    times += [parse_iso_ms(s["publishedAt"]) for s in incident.get("sources", []) if s.get("publishedAt")]
+    times = [_parse_ms(incident["reportedAt"])]
+    times += [_parse_ms(s["publishedAt"]) for s in incident.get("sources", []) if s.get("publishedAt")]
     return times
 
 
@@ -219,15 +227,30 @@ def find_same_story(candidate: Incident, existing: Sequence[Incident], similarit
     Compared against every headline already merged into an incident, and timed
     against its latest article, so a story followed for days keeps absorbing
     its follow-ups ("death toll rises", "victims named")."""
-    t = parse_iso_ms(candidate["reportedAt"])
+    t = _parse_ms(candidate["reportedAt"])
     window_ms = STORY_WINDOW_HOURS * MS_PER_HOUR
+    recent = [e for e in existing if any(abs(t - u) <= window_ms for u in _story_times_ms(e))]
+    if hasattr(similarity, "prefetch"):  # one model call for the whole window
+        similarity.prefetch([candidate["title"], *(h for e in recent for h in story_texts(e))])
     best: Optional[Incident] = None
     best_score = 0.0
-    for e in existing:
-        if not any(abs(t - u) <= window_ms for u in _story_times_ms(e)):
-            continue
+    for e in recent:
         s = similarity.score(candidate["title"], story_texts(e))
         same_county = e["county"] == candidate["county"]
         if (s >= similarity.strong or (s >= similarity.moderate and same_county)) and s > best_score:
             best, best_score = e, s
     return best
+
+
+def find_match(candidate: Incident, existing: Sequence[Incident], similarity: Optional[Similarity]):
+    """The incident a new report belongs to and the rule that matched, or
+    (None, None): same place first, then same story. The one definition of
+    "same event" shared by ingestion and the duplicate cleanup."""
+    found = find_duplicate(candidate, list(existing))
+    if found is not None:
+        return found, "place"
+    if similarity is not None:
+        found = find_same_story(candidate, existing, similarity)
+        if found is not None:
+            return found, "story"
+    return None, None
