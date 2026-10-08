@@ -4,11 +4,15 @@
 // same-origin Next routes and never sees the backend URL.
 export const BACKEND_URL = process.env.API_BASE_URL;
 
-// Forwards a request to the backend and mirrors its status + body. The backend
-// re-anchors data per request, so responses are never cached.
+import { cacheControl } from "@/lib/api-response";
+
+// Forwards a request to the backend and mirrors its status + body. Next never
+// caches the fetch itself; `cacheSeconds` lets the edge keep a successful
+// response briefly for public callers (see api-response.ts).
 export async function proxyJson(
   path: string,
-  init?: RequestInit
+  init?: RequestInit,
+  { cacheSeconds }: { cacheSeconds?: number } = {}
 ): Promise<Response> {
   const res = await fetch(`${BACKEND_URL}${path}`, { ...init, cache: "no-store" });
   const body = await res.text();
@@ -16,6 +20,7 @@ export async function proxyJson(
     status: res.status,
     headers: {
       "content-type": res.headers.get("content-type") ?? "application/json",
+      "cache-control": cacheControl(cacheSeconds, res.ok),
     },
   });
 }

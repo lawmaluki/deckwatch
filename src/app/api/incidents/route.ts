@@ -3,6 +3,7 @@ import { getLiveIncidents } from "@/lib/incidents-source";
 import { filterIncidents } from "@/lib/incident-filter";
 import { parseIncidentQuery } from "@/lib/api-validation";
 import { BACKEND_URL, proxyJson } from "@/lib/backend";
+import { API_CACHE_SECONDS, apiJson } from "@/lib/api-response";
 
 // NOTE: results are summaries. aiSummary and recommendedActions were once
 // included so a client could render detail without a follow-up fetch, but
@@ -20,13 +21,13 @@ export async function GET(request: NextRequest) {
     // the only data there is.
     const params = new URLSearchParams(request.nextUrl.searchParams);
     params.set("live", "true");
-    return proxyJson(`/incidents?${params}`);
+    return proxyJson(`/incidents?${params}`, undefined, { cacheSeconds: API_CACHE_SECONDS.live });
   }
 
   const asOf = new Date();
   const parsed = parseIncidentQuery(request.nextUrl.searchParams, asOf.getTime());
   if (!parsed.ok) {
-    return Response.json({ error: parsed.error }, { status: 400 });
+    return apiJson({ error: parsed.error }, { status: 400 });
   }
 
   let results = filterIncidents(
@@ -38,9 +39,8 @@ export async function GET(request: NextRequest) {
     results = results.slice(0, parsed.value.limit);
   }
 
-  return Response.json({
-    count: results.length,
-    asOf: asOf.toISOString(),
-    results,
-  });
+  return apiJson(
+    { count: results.length, asOf: asOf.toISOString(), results },
+    { cacheSeconds: API_CACHE_SECONDS.live }
+  );
 }

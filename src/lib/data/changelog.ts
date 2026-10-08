@@ -26,6 +26,13 @@ export const CHANGE_KIND_COLOR: Record<ChangeKind, string> = {
  * build work stays in the commit history where it belongs. */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-08",
+    kind: "new",
+    area: "API",
+    title: "Use Deckwatch data in your own apps",
+    body: "The API is open to everyone: no key, no sign-up, and it works from any website, not just this one. It now serves the monthly safety reports too, and the API page has copy-and-paste examples in curl, JavaScript and Python and a Try it button on every endpoint that sends a real request. Developers can import the OpenAPI description into Postman or Swagger.",
+  },
+  {
     date: "2026-10-01",
     kind: "new",
     area: "Dashboard",
