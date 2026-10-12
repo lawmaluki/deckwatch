@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Map, LayoutDashboard, Building2, Bell } from "lucide-react";
+import { Map, LayoutDashboard, Building2, Bell, Route } from "lucide-react";
 import clsx from "clsx";
 import { useUiStore } from "@/store/useUiStore";
 import { useAppStore } from "@/store/useAppStore";
@@ -10,6 +10,7 @@ import { hasActiveSubscription } from "@/lib/alerts";
 
 const LINKS = [
   { href: "/", label: "Map", icon: Map },
+  { href: "/route-watch", label: "Routes", icon: Route },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/counties", label: "Counties", icon: Building2 },
 ];

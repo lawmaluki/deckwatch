@@ -11,11 +11,14 @@ export interface Alert {
    * shouldn't collide with, or dismiss, the one already on screen. */
   key: string;
   incident: Incident;
+  /** Why this reader is hearing about it, when it is more specific than the
+   * subscription: "On Nairobi CBD → Thika, 12 km in". */
+  context?: string;
 }
 
 interface AlertState {
   alerts: Alert[];
-  raise: (incidents: Incident[]) => void;
+  raise: (incidents: Incident[], context?: (incident: Incident) => string | undefined) => void;
   dismiss: (key: string) => void;
   clear: () => void;
 }
@@ -24,11 +27,15 @@ let counter = 0;
 
 export const useAlertStore = create<AlertState>((set) => ({
   alerts: [],
-  raise: (incidents) =>
+  raise: (incidents, context) =>
     set((s) => ({
       alerts: [
         ...s.alerts,
-        ...incidents.map((incident) => ({ key: `${incident.id}:${counter++}`, incident })),
+        ...incidents.map((incident) => ({
+          key: `${incident.id}:${counter++}`,
+          incident,
+          context: context?.(incident),
+        })),
       ].slice(-MAX_VISIBLE),
     })),
   dismiss: (key) => set((s) => ({ alerts: s.alerts.filter((a) => a.key !== key) })),

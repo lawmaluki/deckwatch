@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Category, Severity, VerificationStatus } from "@/lib/types";
+import type { SavedRoute } from "@/lib/route-watch";
 
 export type TimelineRange = 24 | 168 | 720;
 
@@ -65,6 +66,13 @@ interface AppState {
 
   userLocation: Coords | null;
   setUserLocation: (coords: Coords | null) => void;
+
+  /** Route Watch journeys the reader kept, newest first. Saved with alerts on:
+   * keeping a route is asking to hear about it. */
+  savedRoutes: SavedRoute[];
+  saveRoute: (route: SavedRoute) => void;
+  removeRoute: (id: string) => void;
+  setRouteAlerts: (id: string, on: boolean) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -130,10 +138,20 @@ export const useAppStore = create<AppState>()(
 
       userLocation: null,
       setUserLocation: (coords) => set({ userLocation: coords }),
+
+      savedRoutes: [],
+      // Same id replaces: re-saving a route with a new corridor updates it.
+      saveRoute: (route) =>
+        set((s) => ({ savedRoutes: [route, ...s.savedRoutes.filter((r) => r.id !== route.id)] })),
+      removeRoute: (id) => set((s) => ({ savedRoutes: s.savedRoutes.filter((r) => r.id !== id) })),
+      setRouteAlerts: (id, on) =>
+        set((s) => ({
+          savedRoutes: s.savedRoutes.map((r) => (r.id === id ? { ...r, alerts: on } : r)),
+        })),
     }),
     {
       name: "deckwatch-kenya-preferences",
-      partialize: (s) => ({ notifications: s.notifications }),
+      partialize: (s) => ({ notifications: s.notifications, savedRoutes: s.savedRoutes }),
       // Persisted subscriptions predate later fields, and zustand replaces the
       // whole object rather than filling the gaps — so merge over the defaults
       // or a returning reader gets `undefined` where a flag should be.
@@ -143,6 +161,7 @@ export const useAppStore = create<AppState>()(
           ...current,
           ...saved,
           notifications: { ...DEFAULT_NOTIFICATIONS, ...(saved.notifications ?? {}) },
+          savedRoutes: Array.isArray(saved.savedRoutes) ? saved.savedRoutes : [],
         };
       },
     }
