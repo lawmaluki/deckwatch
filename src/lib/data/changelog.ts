@@ -26,6 +26,26 @@ export const CHANGE_KIND_COLOR: Record<ChangeKind, string> = {
  * build work stays in the commit history where it belongs. */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-13",
+    kind: "new",
+    area: "Route Watch",
+    title: "Know what's happening along your route",
+    body: "Before you set off, pick where you're starting and where you're going, and Route Watch shows what has been reported along the road: crashes, protests, flooding, security incidents. They're listed in the order you'd reach them, each with how far it is from your route, when it was reported, who reported it and how well it's corroborated. Reports that only name a county are listed separately rather than pinned on your road. Save a route to get an alert when something new is reported along it. No reports doesn't mean a route is safe: Deckwatch only knows what the news has covered.",
+  },
+  {
+    date: "2026-10-13",
+    kind: "improved",
+    area: "Map",
+    title: "Incidents placed where they happened",
+    body: "Most incidents used to sit on the middle of their county, because Deckwatch only recognised about seventy places. It now knows over nine thousand towns, estates and villages, so a report from Juja, Kayole or Gilgil is placed there. Each incident also records how precisely it's placed, from a single estate to only the county, and the API shares that so nobody mistakes a county's centre for the scene. Reports filed under the wrong county, like a Gilgil crash once listed under Nairobi, are corrected when the headline names a town.",
+  },
+  {
+    date: "2026-10-13",
+    kind: "fixed",
+    title: "Murang'a incidents filed under Murang'a",
+    body: "Headlines that wrote Murang'a with a curly apostrophe weren't recognised as Murang'a County, so those incidents could land in another county. They now count where they belong.",
+  },
+  {
     date: "2026-10-08",
     kind: "new",
     area: "API",
