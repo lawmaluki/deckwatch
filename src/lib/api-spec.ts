@@ -43,7 +43,7 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
     path: "/api/incidents",
     title: "List incidents",
     summary:
-      "Real incidents ingested from Kenyan newsrooms, newest first. Filters combine. Results are summaries: aiSummary and recommendedActions come from the single-incident endpoint.",
+      "Real incidents ingested from Kenyan newsrooms, newest first. Filters combine. Results are summaries: aiSummary and recommendedActions come from the single-incident endpoint. locationPrecision says how much ground lat/lng stands for: local (a village or estate), town, road (somewhere along it), area, or county (only the county centre is known; don't read the point as a place).",
     params: [
       { name: "category", in: "query", type: "string", enum: categories, description: "Only this kind of incident.", example: "traffic_accident" },
       { name: "severity", in: "query", type: "string", enum: severities, description: "Only this severity.", example: "critical" },
@@ -65,6 +65,7 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
       "severity": "critical",
       "county": "Makueni",
       "locationName": "Salama",
+      "locationPrecision": "town",
       "lat": -1.7442,
       "lng": 37.6012,
       "reportedAt": "2026-10-03T06:12:00.000Z",

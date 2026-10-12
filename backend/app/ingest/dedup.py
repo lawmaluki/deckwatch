@@ -37,6 +37,27 @@ def haversine_km(a: tuple, b: tuple) -> float:
     return 2 * EARTH_RADIUS_KM * math.asin(math.sqrt(s))
 
 
+# Precisions whose point holds many unrelated incidents at once (see
+# geocode.locate): all of Eldoret, anywhere on Thika Road, the whole county.
+_TOO_WIDE_TO_MATCH = frozenset({"town", "road", "area", "county"})
+
+
+def _pinned(incident: Incident) -> bool:
+    """Whether the incident's point is one spot, close enough to another's to
+    say they are the same event.
+
+    A county centroid means the geocoder found no specific place. Every vague
+    report in the county sits on that identical point, so comparing distance
+    says "same place" for stories that merely happened in the same county. A
+    town or a road is the same problem at a smaller scale: two crashes in
+    Eldoret in three days are not one crash. Those are left to the story rule.
+    Incidents stored before precision was recorded fall back to the centroid
+    test alone."""
+    if incident.get("locationPrecision") in _TOO_WIDE_TO_MATCH:
+        return False
+    return not is_county_centroid(incident["county"], incident["lat"], incident["lng"])
+
+
 def is_same_event(
     candidate: Incident, existing: Incident
 ) -> bool:
@@ -49,13 +70,7 @@ def is_same_event(
     each merged outlet raises the verification score, stamps the result as
     corroborated.
     """
-    # A county centroid means the geocoder found no specific place. Every vague
-    # report in the county sits on that identical point, so comparing distance
-    # says "same place" for stories that merely happened in the same county.
-    # Without a real location there is no evidence these are one event.
-    if is_county_centroid(
-        candidate["county"], candidate["lat"], candidate["lng"]
-    ) or is_county_centroid(existing["county"], existing["lat"], existing["lng"]):
+    if not _pinned(candidate) or not _pinned(existing):
         return False
 
     distance = haversine_km(

@@ -58,12 +58,15 @@ def build_incident(
     time: this is a record built from verifiable reporting, so the stored date
     has to match what the source says. Only seed data lives in the REFERENCE
     frame and gets time-shifted on read (see domain.shift_incidents)."""
-    from .geocode import geocode
+    from .geocode import locate
 
-    coords = geocode(candidate["county"], candidate["location_name"])
-    if coords is None:
+    # The headline and feed summary are searched too: the keyword classifier
+    # reports only the county, and a place named in the article beats its centre.
+    loc = locate(
+        candidate["county"], candidate["location_name"], item.get("title", ""), item.get("summary", "")
+    )
+    if loc is None:
         return None
-    lat, lng = coords
 
     # Clamped to the run clock so a feed with a bad future date can't file an
     # incident dated ahead of the ingest that found it.
@@ -90,10 +93,11 @@ def build_incident(
         "title": item["title"],
         "category": candidate["category"],
         "severity": candidate["severity"],
-        "county": candidate["county"],
-        "locationName": candidate["location_name"],
-        "lat": lat,
-        "lng": lng,
+        "county": loc.county,
+        "locationName": loc.name,
+        "locationPrecision": loc.precision,
+        "lat": loc.lat,
+        "lng": loc.lng,
         "reportedAt": to_iso_z(reported_ms),
         "verificationScore": score,
         "verificationStatus": status,

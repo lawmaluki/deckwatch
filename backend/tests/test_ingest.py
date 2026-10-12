@@ -59,6 +59,98 @@ def test_geocode_unknown_county_is_none():
     assert geocode.geocode("Atlantis", "anywhere") is None
 
 
+def test_locate_finds_a_gazetteer_place_in_the_headline():
+    loc = geocode.locate("Kiambu", "Kiambu", "2 children are killed in house fire in Ndenderu, Kiambu County")
+    assert (loc.county, loc.name, loc.precision) == ("Kiambu", "Ndenderu", "local")
+    assert not geocode.is_county_centroid("Kiambu", loc.lat, loc.lng)
+
+
+def test_locate_keeps_the_classifier_location_text():
+    """The classifier's own words say more than the gazetteer name."""
+    loc = geocode.locate("Kiambu", "Juja, near the farm gate", "Caretaker found dead")
+    assert (loc.name, loc.precision) == ("Juja, near the farm gate", "town")
+
+
+def test_locate_falls_back_to_the_county_centre():
+    loc = geocode.locate("Mombasa", "Mombasa", "Fire guts popular club")
+    assert loc.precision == "county"
+    assert geocode.is_county_centroid("Mombasa", loc.lat, loc.lng)
+
+
+def test_locate_ignores_county_names_people_and_words():
+    """'Kajiado' is the county, not Kajiado town; 'Okoth' and 'Obado' are a
+    village and a politician; 'Salama' is a place and the word for safe."""
+    for county, headline in [
+        ("Kajiado", "Why Kajiado's satellite towns are at risk of flooding"),
+        ("Migori", "Okoth Obado: Court sets new date for sentencing"),
+        ("Tana River", "Salama Accident: Fresh details reveal pilgrim was planning wedding"),
+    ]:
+        assert geocode.locate(county, county, headline).precision == "county", headline
+
+
+def test_locate_skips_destinations_and_roads_named_after_towns():
+    # Where the pilgrims were going, not where they crashed.
+    trip = geocode.locate("Mombasa", "Mombasa", "17 pilgrims died on way to Subukia shrine")
+    assert (trip.county, trip.precision) == ("Mombasa", "county")
+    # Kangundo Road runs through Nairobi; Kangundo town is in Machakos.
+    road = geocode.locate("Nairobi", "Nairobi", "3 killed in head-on collision along Kangundo Road, Nairobi")
+    assert road.county == "Nairobi"
+
+
+def test_locate_moves_the_county_for_an_unambiguous_town_in_the_headline():
+    loc = geocode.locate("Nairobi", "Nairobi", "5 people killed after road accident in Gilgil")
+    assert (loc.county, loc.name, loc.precision) == ("Nakuru", "Gilgil", "town")
+
+
+def test_locate_does_not_move_the_county_from_the_summary():
+    """A summary mentions places in passing; only the location or the
+    headline is trusted to say the county is wrong."""
+    loc = geocode.locate("Nairobi", "Nairobi", "Man killed in road accident", "He was from Gilgil.")
+    assert (loc.county, loc.precision) == ("Nairobi", "county")
+
+
+def test_locate_reads_a_road_between_two_towns():
+    loc = geocode.locate("Uasin Gishu", "Uasin Gishu", "Tanker explosion on Eldoret–Webuye Road")
+    assert (loc.county, loc.name, loc.precision) == ("Uasin Gishu", "Eldoret-Webuye Road", "road")
+    # Neither end in the filed county: the road can't be placed in it.
+    away = geocode.locate("Nairobi", "Nairobi", "10 evacuated after tanker explosion on Eldoret-Webuye road")
+    assert away.precision == "county"
+
+
+def test_locate_skips_a_name_listed_far_apart_in_one_county():
+    """Two places sharing a name in one county: neither is used."""
+    twins = [
+        name for name, listings in geocode._INDEX.items()
+        if geocode._usable(name)
+        and any(geocode._one_place([l for l in listings if l.county == c]) is None for c in {l.county for l in listings})
+    ]
+    assert twins, "the gazetteer should hold at least one such name"
+    name = twins[0]
+    county = next(
+        c for c in {l.county for l in geocode._INDEX[name]}
+        if geocode._one_place([l for l in geocode._INDEX[name] if l.county == c]) is None
+    )
+    loc = geocode.locate(county, county, f"Incident reported in {name.title()}")
+    assert loc.precision == "county" or loc.name.lower() != name
+
+
+def test_build_incident_records_the_location_precision():
+    item = {
+        "title": "Armed gang shoots M-Pesa attendant in Ruiru",
+        "summary": "",
+        "link": "https://example.co.ke/a",
+        "source": "Sample",
+        "source_type": "news",
+        "published": "2026-07-02T08:00:00.000Z",
+    }
+    candidate = {
+        "category": "crime", "severity": "high", "county": "Kiambu",
+        "location_name": "Kiambu", "summary": "s", "recommended_actions": [],
+    }
+    inc = pipeline.build_incident(candidate, item, REFERENCE_MS, 0)
+    assert (inc["county"], inc["locationName"], inc["locationPrecision"]) == ("Kiambu", "Ruiru", "town")
+
+
 # --- dedup -------------------------------------------------------------------
 
 def _inc(lat, lng, category, reported, county="Nairobi"):
@@ -112,6 +204,20 @@ def test_not_same_event_when_only_the_county_is_known():
     precise = _inc(-1.2739, 36.8442, "crime", "2026-07-02T09:00:00.000Z")
     other = _inc(-1.2741, 36.8444, "crime", "2026-07-02T08:00:00.000Z")
     assert dedup.is_same_event(precise, other)
+
+
+def test_not_same_event_when_only_the_town_or_road_is_known():
+    """Two crashes on Thika Road, or two robberies in Eldoret, in three days
+    are not one event; a point that stands for a whole town or road can't say
+    they are. The story rule still can."""
+    for precision in ("town", "road", "area"):
+        a = {**_inc(-1.29, 36.82, "crime", "2026-07-02T09:00:00.000Z"), "locationPrecision": precision}
+        b = {**_inc(-1.29, 36.82, "crime", "2026-07-02T08:00:00.000Z"), "locationPrecision": "local"}
+        assert not dedup.is_same_event(a, b)
+        assert not dedup.is_same_event(b, a)
+    a = {**_inc(-1.29, 36.82, "crime", "2026-07-02T09:00:00.000Z"), "locationPrecision": "local"}
+    b = {**_inc(-1.291, 36.821, "crime", "2026-07-02T08:00:00.000Z"), "locationPrecision": "local"}
+    assert dedup.is_same_event(a, b)
 
 
 def test_find_duplicate_returns_nearest():
