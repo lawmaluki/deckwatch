@@ -3,6 +3,7 @@ dedup/merge -> persist. The building blocks (build_incident, merge_fields) are
 pure and unit-tested; run() wires them to the network, the LLM, and the DB."""
 
 import hashlib
+from datetime import datetime, timezone
 from typing import Any, Callable, Dict, List, Mapping, Optional
 
 from sqlalchemy.orm import Session
@@ -19,6 +20,20 @@ Classifier = Callable[[Mapping[str, str]], Optional[dict]]
 # blip; several in a row means the key, the credit or the service is gone, and
 # sending the rest of the feed at it only wastes time.
 MAX_CONSECUTIVE_ERRORS = 3
+
+# How far apart two articles can be and still merge: the wider of the place
+# rule's and the story rule's windows (both 72 hours today).
+DEDUP_WINDOW_HOURS = max(dedup.SIMILAR_MAX_HOURS_APART, dedup.STORY_WINDOW_HOURS)
+MS_PER_HOUR = 3_600_000
+
+
+def _published_ms(item: Mapping[str, str], at_ms: int) -> int:
+    """The article's publish time as build_incident will store it (clamped to
+    the run clock), or the run clock if the feed's date is unreadable."""
+    try:
+        return min(parse_iso_ms(item["published"]), at_ms)
+    except (KeyError, ValueError, TypeError):
+        return at_ms
 
 
 def article_id(link: str) -> str:
@@ -125,58 +140,65 @@ def run(
     """`similarity` enables story matching (dedup.build_similarity); None
     leaves only the location rule."""
     at_ms = now_ms()
-    # Dedup only against other real ingested incidents ("ing-" ids), never
-    # seed/demo data ("ow-" ids) — a fictional incident sharing a hotspot and
-    # category with a real story is not the same real-world event, and merging
-    # them would silently attach a real article as a "source" on a mock incident.
-    existing = [
-        inc for inc in repository.get_all_incidents(session)
-        if inc["id"].startswith("ing-")
-    ]
+    raw = items if items is not None else sources.fetch_items(feeds)
+    relevant = [item for item in raw if prefilter.is_relevant(item)]
+
     # Article ids are sha1(link), so an article already ingested rebuilds to the
-    # same id on every run. Without this set the cron re-processed the whole feed
-    # window hourly: each article matched its own stored copy at distance zero
-    # and merged into itself, inflating reportCount without bound (one incident
-    # reached 88 "reports" from 5 sources) and dragging the verification score up
-    # with it.
-    seen_ids = {inc["id"] for inc in existing}
-    # An article that merged into another incident is not stored under its own
-    # id — it lives on as a source URL. Both routes have to be checked, or the
-    # merged ones keep re-merging on every run.
-    seen_links = {
-        s["url"]
-        for inc in existing
-        for s in inc["sources"]
-        if s.get("url")
-    }
-    ordinal = repository.next_ordinal(session)
+    # same id on every run. Without this check the cron re-processed the whole
+    # feed window hourly: each article matched its own stored copy at distance
+    # zero and merged into itself, inflating reportCount without bound (one
+    # incident reached 88 "reports" from 5 sources). An article that merged into
+    # another incident is not stored under its own id — it lives on as a source
+    # URL — so both routes are checked.
+    #
+    # Both are asked of the database for just this feed's articles. Loading the
+    # whole table to answer them, 96 times a day, was a large share of the
+    # project's Supabase egress (every returned byte is billed).
+    seen_ids, seen_links = repository.find_ingested(
+        session,
+        [article_id(item["link"]) for item in relevant],
+        [item["link"] for item in relevant],
+    )
+    fresh = [
+        item for item in relevant
+        if article_id(item["link"]) not in seen_ids and item["link"] not in seen_links
+    ]
+
+    # Dedup only compares articles within DEDUP_WINDOW_HOURS of each other, so
+    # only incidents with activity that recent relative to the oldest new
+    # article can be a match. Seed/demo data ("ow-" ids) is excluded in the
+    # query: a fictional incident sharing a hotspot with a real story is not
+    # the same real-world event.
+    existing: List[Dict[str, Any]] = []
+    if fresh:
+        oldest_ms = min(_published_ms(item, at_ms) for item in fresh)
+        since_ms = oldest_ms - DEDUP_WINDOW_HOURS * MS_PER_HOUR
+        existing = repository.get_dedup_candidates(
+            session, datetime.fromtimestamp(since_ms / 1000, tz=timezone.utc)
+        )
+
+    ordinal = repository.next_ordinal(session) if fresh else 0
     stats = {
-        "fetched": 0,
-        "relevant": 0,
+        "fetched": len(raw),
+        "relevant": len(relevant),
         "classified": 0,
         "inserted": 0,
         "merged": 0,
         "merged_by_story": 0,
         "skipped": 0,
-        "already_ingested": 0,
+        "already_ingested": len(relevant) - len(fresh),
         "errors": 0,
         "aborted": 0,
     }
     consecutive_errors = 0
     last_error = ""
 
-    raw = items if items is not None else sources.fetch_items(feeds)
-    stats["fetched"] = len(raw)
-
-    for item in raw:
-        if not prefilter.is_relevant(item):
-            continue
-        stats["relevant"] += 1
-
-        # Identity check first: this article may already be on record, either as
-        # its own incident or as a source merged onto one. Doing it before
-        # classification keeps the classifier off work whose answer we already
-        # have — free with the rule classifier, billed with the LLM one.
+    for item in fresh:
+        # Re-checked here as well as above: two articles in one feed window can
+        # share a link, and the first may have just been inserted or merged.
+        # Doing it before classification keeps the classifier off work whose
+        # answer we already have — free with the rule classifier, billed with
+        # the LLM one.
         if article_id(item["link"]) in seen_ids or item["link"] in seen_links:
             stats["already_ingested"] += 1
             continue

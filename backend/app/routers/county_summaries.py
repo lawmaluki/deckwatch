@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
-from .. import domain, repository
+from .. import cache, domain, repository
 from ..deps import get_session
 
 router = APIRouter()
@@ -24,7 +24,7 @@ def get_county_summary(
         return JSONResponse({"error": "County not found"}, status_code=404)
 
     as_of = domain.now_ms()
-    incidents = repository.get_live_incidents_by_county(session, county.name)
+    incidents = cache.incidents_in_county(session, county.name, live_only=True)
     return {
         "county": county.name,
         "slug": county.slug,

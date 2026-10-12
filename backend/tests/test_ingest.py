@@ -8,6 +8,8 @@ from pathlib import Path
 
 import pytest
 
+from _fakes import fake_store
+
 from app.domain import REFERENCE_MS
 from app.ingest import classifier, dedup, geocode, pipeline, prefilter, rules, sources
 from app.ingest.verification import score_verification
@@ -408,7 +410,7 @@ def test_run_does_not_dedup_real_incident_against_seed(monkeypatch):
         "reportCount": 1,
         "severity": "high",
     }
-    monkeypatch.setattr(pipeline.repository, "get_all_incidents", lambda session: [seed])
+    fake_store(monkeypatch, pipeline.repository, [seed])
     monkeypatch.setattr(pipeline.repository, "next_ordinal", lambda session: 1)
     inserted = []
     merged = []
@@ -439,7 +441,7 @@ def test_run_is_idempotent_across_repeated_runs(monkeypatch):
     one incident in a day, off only 5 sources, dragging its score to 99%.
     """
     stored = []
-    monkeypatch.setattr(pipeline.repository, "get_all_incidents", lambda s: list(stored))
+    fake_store(monkeypatch, pipeline.repository, stored)
     monkeypatch.setattr(pipeline.repository, "next_ordinal", lambda s: len(stored) + 1)
     monkeypatch.setattr(
         pipeline.repository, "insert_incident", lambda s, inc: stored.append(inc)
@@ -475,7 +477,7 @@ def test_run_skips_an_article_already_merged_as_a_source(monkeypatch):
         "reportCount": 2,
         "severity": "high",
     }
-    monkeypatch.setattr(pipeline.repository, "get_all_incidents", lambda s: [already])
+    fake_store(monkeypatch, pipeline.repository, [already])
     monkeypatch.setattr(pipeline.repository, "next_ordinal", lambda s: 5)
     merged = []
     monkeypatch.setattr(
@@ -598,7 +600,7 @@ def _items(n):
 
 
 def test_run_aborts_after_repeated_classifier_errors(monkeypatch):
-    monkeypatch.setattr(pipeline.repository, "get_all_incidents", lambda s: [])
+    fake_store(monkeypatch, pipeline.repository, [])
     monkeypatch.setattr(pipeline.repository, "next_ordinal", lambda s: 1)
     calls = []
 
@@ -614,7 +616,7 @@ def test_run_aborts_after_repeated_classifier_errors(monkeypatch):
 
 def test_run_survives_a_single_classifier_blip(monkeypatch):
     inserted = []
-    monkeypatch.setattr(pipeline.repository, "get_all_incidents", lambda s: [])
+    fake_store(monkeypatch, pipeline.repository, [])
     monkeypatch.setattr(pipeline.repository, "next_ordinal", lambda s: 1)
     monkeypatch.setattr(pipeline.repository, "insert_incident", lambda s, inc: inserted.append(inc))
 
@@ -668,3 +670,55 @@ def test_death_count_ignores_numbers_that_are_not_tolls():
 def test_claude_is_given_the_same_scale():
     assert "three or more people killed" in classifier.SYSTEM_PROMPT
     assert "court cases" in classifier.SYSTEM_PROMPT
+
+
+@pytest.mark.skipif(not TEST_DB, reason="TEST_DATABASE_URL not set")
+def test_ingestion_reads_only_what_dedup_needs():
+    """find_ingested answers from the feed's own links; get_dedup_candidates
+    returns only incidents with activity inside the window — including an old
+    incident kept alive by a recent follow-up source — and never seed rows."""
+    os.environ["DATABASE_URL"] = TEST_DB
+    from datetime import datetime, timezone
+
+    from app.db import Base, SessionLocal, engine
+    from app.init_db import main as init_db
+    from app import repository
+
+    Base.metadata.drop_all(engine)
+    init_db()
+
+    def row(iid, reported, sources):
+        return {
+            "id": iid, "ordinal": int(iid[-1]), "title": iid, "category": "crime",
+            "severity": "high", "county": "Nairobi", "locationName": "Nairobi",
+            "lat": -1.28, "lng": 36.82, "reportedAt": reported,
+            "verificationScore": 30, "verificationStatus": "unconfirmed",
+            "sources": sources, "reportCount": len(sources), "aiSummary": "s",
+            "recommendedActions": [], "hasImage": False, "isCitizenReport": False,
+        }
+
+    def src(url, published):
+        return {"name": "X", "type": "news", "url": url, "publishedAt": published}
+
+    with SessionLocal() as session:
+        for r in [
+            row("ing-1", "2026-09-01T00:00:00.000Z", [src("https://a/1", "2026-09-01T00:00:00.000Z")]),
+            row("ing-2", "2026-09-01T00:00:00.000Z", [src("https://a/2", "2026-09-01T00:00:00.000Z"),
+                                                       src("https://a/2b", "2026-09-20T00:00:00.000Z")]),
+            row("ing-3", "2026-09-21T00:00:00.000Z", [src("https://a/3", "2026-09-21T00:00:00.000Z")]),
+            row("ow-0004", "2026-09-21T00:00:00.000Z", [src("https://a/4", "2026-09-21T00:00:00.000Z")]),
+        ]:
+            repository.insert_incident(session, r)
+        session.commit()
+
+        ids, links = repository.find_ingested(
+            session, ["ing-1", "ing-9"], ["https://a/2b", "https://new"]
+        )
+        assert ids == {"ing-1"}
+        assert links == {"https://a/2b"}
+
+        since = datetime(2026, 9, 19, tzinfo=timezone.utc)
+        got = {i["id"] for i in repository.get_dedup_candidates(session, since)}
+        assert got == {"ing-2", "ing-3"}
+        # summaries: the detail text never leaves the database on these reads
+        assert all("aiSummary" not in i for i in repository.get_all_incidents(session))

@@ -16,7 +16,7 @@ function req(path: string) {
 describe("public API caching", () => {
   it("lets the edge cache successful reads briefly", async () => {
     const res = await listIncidents(req("/api/incidents?limit=1"));
-    expect(res.headers.get("cache-control")).toBe("public, s-maxage=60, stale-while-revalidate=300");
+    expect(res.headers.get("cache-control")).toBe("public, s-maxage=300, stale-while-revalidate=1500");
   });
 
   it("never caches an error", async () => {

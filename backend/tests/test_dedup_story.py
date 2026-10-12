@@ -3,6 +3,8 @@ no database and no model: word overlap is real, embeddings are stubbed."""
 
 import pytest
 
+from _fakes import fake_store
+
 from app.ingest import dedup, pipeline
 
 KAJ_LAT, KAJ_LNG = -1.9927, 36.936  # Kajiado county centre: geocoder found no specific place
@@ -133,7 +135,7 @@ CANDIDATE = {"category": "traffic_accident", "severity": "high", "county": "Kaji
 
 def test_pipeline_merges_county_level_duplicates_by_story(monkeypatch):
     stored, merged = [], []
-    monkeypatch.setattr(pipeline.repository, "get_all_incidents", lambda s: list(stored))
+    fake_store(monkeypatch, pipeline.repository, stored)
     monkeypatch.setattr(pipeline.repository, "next_ordinal", lambda s: 1)
     monkeypatch.setattr(pipeline.repository, "insert_incident", lambda s, i: stored.append(i))
     monkeypatch.setattr(pipeline.repository, "merge_incident", lambda s, *a: merged.append(a))
@@ -151,7 +153,7 @@ def test_pipeline_merges_county_level_duplicates_by_story(monkeypatch):
 
 def test_pipeline_with_story_matching_off_keeps_them_apart(monkeypatch):
     stored = []
-    monkeypatch.setattr(pipeline.repository, "get_all_incidents", lambda s: list(stored))
+    fake_store(monkeypatch, pipeline.repository, stored)
     monkeypatch.setattr(pipeline.repository, "next_ordinal", lambda s: 1)
     monkeypatch.setattr(pipeline.repository, "insert_incident", lambda s, i: stored.append(i))
     monkeypatch.setattr(pipeline.repository, "merge_incident", lambda s, *a: None)

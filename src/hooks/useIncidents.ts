@@ -37,17 +37,45 @@ async function refresh(): Promise<void> {
   }
 }
 
+// Polling stops while the tab is hidden: a map left open in a background tab
+// all day used to re-download every incident on every tick, for no reader.
+// Coming back to the tab refreshes at once if the data is due, then resumes.
+let lastRefreshAt = 0;
+
+function startTimer(): void {
+  if (timer !== null) return;
+  if (Date.now() - lastRefreshAt >= POLL_INTERVAL_MS) {
+    lastRefreshAt = Date.now();
+    void refresh();
+  }
+  timer = setInterval(() => {
+    lastRefreshAt = Date.now();
+    void refresh();
+  }, POLL_INTERVAL_MS);
+}
+
+function stopTimer(): void {
+  if (timer === null) return;
+  clearInterval(timer);
+  timer = null;
+}
+
+function onVisibilityChange(): void {
+  if (document.hidden) stopTimer();
+  else if (listeners.size > 0) startTimer();
+}
+
 function subscribe(listener: () => void): () => void {
   listeners.add(listener);
-  if (USE_API && timer === null) {
-    void refresh();
-    timer = setInterval(refresh, POLL_INTERVAL_MS);
+  if (USE_API && listeners.size === 1) {
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    if (!document.hidden) startTimer();
   }
   return () => {
     listeners.delete(listener);
-    if (listeners.size === 0 && timer !== null) {
-      clearInterval(timer);
-      timer = null;
+    if (listeners.size === 0) {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      stopTimer();
     }
   };
 }

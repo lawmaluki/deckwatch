@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
-from .. import domain, repository
+from .. import cache, domain, repository
 from ..deps import get_session
 
 router = APIRouter()
@@ -14,14 +14,14 @@ router = APIRouter()
 @router.get("/incidents")
 def list_incidents(request: Request, session: Session = Depends(get_session)):
     as_of = domain.now_ms()
-    county_names = repository.get_county_names(session)
+    county_names = cache.county_names(session)
     parsed = domain.parse_incident_query(
         dict(request.query_params), county_names, as_of
     )
     if not parsed["ok"]:
         return JSONResponse({"error": parsed["error"]}, status_code=400)
 
-    incidents = domain.shift_incidents(repository.get_all_incidents(session), as_of)
+    incidents = domain.shift_incidents(cache.incidents(session), as_of)
     results = domain.filter_incidents(incidents, parsed["value"]["filter"], as_of)
     county = parsed["value"]["filter"].get("county")
     if county:

@@ -2,9 +2,9 @@
 src/lib/types.ts) so the pure domain layer can operate on them uniformly."""
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
-from sqlalchemy import func, select
+from sqlalchemy import ARRAY, Text, bindparam, func, or_, select, text
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
@@ -52,10 +52,64 @@ def _select_with_coords():
     ).order_by(Incident.ordinal)
 
 
+# --- summary reads --------------------------------------------------------------
+#
+# Every byte a query returns leaves Supabase as billed egress, and the free plan
+# allows 5 GB a month. Selecting the whole Incident entity pulled ai_summary and
+# recommended_actions for every row only for _to_dict(detail=False) to drop them
+# in Python, so list reads name their columns instead. Detail reads (one
+# incident, the monthly report) still load the full row.
+
+_SUMMARY_COLUMNS = (
+    Incident.id,
+    Incident.title,
+    Incident.category,
+    Incident.severity,
+    Incident.county_name,
+    Incident.location_name,
+    func.ST_Y(Incident.geom).label("lat"),
+    func.ST_X(Incident.geom).label("lng"),
+    Incident.reported_at,
+    Incident.verification_score,
+    Incident.verification_status,
+    Incident.sources,
+    Incident.report_count,
+    Incident.has_image,
+    Incident.is_citizen_report,
+)
+
+
+def _select_summaries():
+    return select(*_SUMMARY_COLUMNS).order_by(Incident.ordinal)
+
+
+def _summary_to_dict(row: Any) -> domain.Incident:
+    return {
+        "id": row.id,
+        "title": row.title,
+        "category": row.category,
+        "severity": row.severity,
+        "county": row.county_name,
+        "locationName": row.location_name,
+        "lat": row.lat,
+        "lng": row.lng,
+        "reportedAt": domain.to_iso_z(round(row.reported_at.timestamp() * 1000)),
+        "verificationScore": row.verification_score,
+        "verificationStatus": row.verification_status,
+        "sources": row.sources,
+        "reportCount": row.report_count,
+        "hasImage": row.has_image,
+        "isCitizenReport": row.is_citizen_report,
+        "isLive": row.id.startswith("ing-"),
+    }
+
+
 def get_all_incidents(session: Session, detail: bool = False) -> List[domain.Incident]:
     """Summaries by default: every caller is a list or an aggregate."""
-    rows = session.execute(_select_with_coords()).all()
-    return [_to_dict(inc, lat, lng, detail) for inc, lat, lng in rows]
+    if detail:
+        rows = session.execute(_select_with_coords()).all()
+        return [_to_dict(inc, lat, lng) for inc, lat, lng in rows]
+    return [_summary_to_dict(r) for r in session.execute(_select_summaries())]
 
 
 def get_incident(session: Session, incident_id: str) -> Optional[domain.Incident]:
@@ -72,9 +126,9 @@ def get_incidents_by_county(
     session: Session, county_name: str
 ) -> List[domain.Incident]:
     rows = session.execute(
-        _select_with_coords().where(Incident.county_name == county_name)
-    ).all()
-    return [_to_dict(inc, lat, lng, detail=False) for inc, lat, lng in rows]
+        _select_summaries().where(Incident.county_name == county_name)
+    )
+    return [_summary_to_dict(r) for r in rows]
 
 
 def get_live_incidents_by_county(
@@ -82,12 +136,61 @@ def get_live_incidents_by_county(
 ) -> List[domain.Incident]:
     """Return only news-ingested incidents, excluding synthetic seed records."""
     rows = session.execute(
-        _select_with_coords().where(
+        _select_summaries().where(
             Incident.county_name == county_name,
             Incident.id.startswith("ing-"),
         )
-    ).all()
-    return [_to_dict(inc, lat, lng, detail=False) for inc, lat, lng in rows]
+    )
+    return [_summary_to_dict(r) for r in rows]
+
+
+# --- ingestion reads -------------------------------------------------------------
+#
+# Ingestion runs every 15 minutes. It used to download the whole table each run
+# to answer two questions that need a sliver of it; these answer them directly.
+
+def find_ingested(
+    session: Session, ids: Sequence[str], links: Sequence[str]
+) -> Tuple[Set[str], Set[str]]:
+    """Which of these article ids are stored as incidents, and which of these
+    links are already listed as a source on one. Only matches come back, so the
+    cost is the size of the feed, not of the table."""
+    if not ids and not links:
+        return set(), set()
+    found_ids = set(
+        session.execute(
+            select(Incident.id).where(Incident.id.in_(list(ids)))
+        ).scalars()
+    ) if ids else set()
+    found_links: Set[str] = set()
+    if links:
+        stmt = text(
+            "SELECT DISTINCT s->>'url' FROM incidents, "
+            "jsonb_array_elements(incidents.sources) AS s "
+            "WHERE s->>'url' = ANY(:links)"
+        ).bindparams(bindparam("links", type_=ARRAY(Text)))
+        found_links = set(session.execute(stmt, {"links": list(links)}).scalars())
+    return found_ids, found_links
+
+
+def get_dedup_candidates(session: Session, since: datetime) -> List[domain.Incident]:
+    """Ingested incidents a new article published at or after `since` + the
+    dedup window could still merge into: reported since then, or carrying a
+    source article published since then (a story followed for days keeps
+    absorbing follow-ups; see dedup.find_same_story). Seed rows are excluded —
+    real articles must never merge onto fictional incidents."""
+    since_iso = domain.to_iso_z(round(since.timestamp() * 1000))
+    has_recent_source = text(
+        "EXISTS (SELECT 1 FROM jsonb_array_elements(incidents.sources) AS s "
+        "WHERE s->>'publishedAt' >= :since_iso)"
+    ).bindparams(since_iso=since_iso)
+    rows = session.execute(
+        _select_summaries().where(
+            Incident.id.startswith("ing-"),
+            or_(Incident.reported_at >= since, has_recent_source),
+        )
+    )
+    return [_summary_to_dict(r) for r in rows]
 
 
 def get_county_by_slug(session: Session, slug: str) -> Optional[County]:
