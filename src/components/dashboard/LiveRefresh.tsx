@@ -19,8 +19,31 @@ export function LiveRefresh() {
   useEffect(() => {
     // Mock mode is anchored to a fixed clock, so there is nothing to refresh to.
     if (!USE_API) return;
-    const timer = setInterval(() => router.refresh(), POLL_INTERVAL_MS);
-    return () => clearInterval(timer);
+    // Paused while the tab is hidden: each refresh is a server render that
+    // reads the incident list, and nobody is looking at a background tab.
+    // On return, refresh at once if a poll was missed, then resume.
+    let timer: ReturnType<typeof setInterval> | null = null;
+    let lastRefreshAt = Date.now(); // the page itself was just rendered
+    const tick = () => {
+      lastRefreshAt = Date.now();
+      router.refresh();
+    };
+    const start = () => {
+      if (timer !== null) return;
+      if (Date.now() - lastRefreshAt >= POLL_INTERVAL_MS) tick();
+      timer = setInterval(tick, POLL_INTERVAL_MS);
+    };
+    const stop = () => {
+      if (timer !== null) clearInterval(timer);
+      timer = null;
+    };
+    const onVisibility = () => (document.hidden ? stop() : start());
+    document.addEventListener("visibilitychange", onVisibility);
+    if (!document.hidden) start();
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      stop();
+    };
   }, [router]);
 
   return null;
