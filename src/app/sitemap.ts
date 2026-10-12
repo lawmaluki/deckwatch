@@ -12,6 +12,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const pages: MetadataRoute.Sitemap = [
     { url: SITE_URL, changeFrequency: "hourly", priority: 1 },
     { url: `${SITE_URL}/dashboard`, changeFrequency: "hourly", priority: 0.9 },
+    { url: `${SITE_URL}/route-watch`, changeFrequency: "hourly", priority: 0.8 },
     { url: `${SITE_URL}/counties`, changeFrequency: "hourly", priority: 0.8 },
     { url: `${SITE_URL}/why`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${SITE_URL}/whats-new`, changeFrequency: "weekly", priority: 0.4 },

@@ -77,6 +77,9 @@ function AlertToast({ alert }: { alert: Alert }) {
         }}
         className="block w-full text-left"
       >
+        {alert.context && (
+          <p className="mb-0.5 text-[11px] font-semibold text-brand">{alert.context}</p>
+        )}
         <p className="line-clamp-2 text-xs text-foreground/90">{incident.title}</p>
         <p suppressHydrationWarning className="mt-1 text-[10px] text-muted">
           {incident.county} County · {relativeTime(incident.reportedAt)} · View on map

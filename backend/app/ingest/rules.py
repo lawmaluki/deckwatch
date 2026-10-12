@@ -191,12 +191,18 @@ def classify(item: Mapping[str, str], *args: Any, **kwargs: Any) -> Optional[Dic
     return _classify(item, text, matched_categories(text))
 
 
+def _straight_quotes(text: str) -> str:
+    """Feeds write "Murang’a" with a curly apostrophe; county names use a
+    straight one, so without this the county was never found in the text."""
+    return text.replace("\u2019", "'").replace("\u2018", "'")
+
+
 def _text(item: Mapping[str, str]) -> str:
-    return f"{item.get('title', '')} {item.get('summary', '')}".lower()
+    return _straight_quotes(f"{item.get('title', '')} {item.get('summary', '')}").lower()
 
 
 def _classify(item: Mapping[str, str], text: str, categories: List[str]) -> Optional[Dict[str, Any]]:
-    title = item.get("title", "")
+    title = _straight_quotes(item.get("title", ""))
     if not categories:
         return None
     category = categories[0]

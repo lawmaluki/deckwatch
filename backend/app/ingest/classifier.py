@@ -35,7 +35,11 @@ SYSTEM_PROMPT = (
     "violence). Opinion pieces, politics, sports, business, and general news "
     "are NOT incidents. If it is an incident, extract structured details, "
     "choosing the single Kenyan county it occurred in. If the county is "
-    "unclear, use \"Unknown\". Write a concise factual summary and 2-4 short "
+    "unclear, use \"Unknown\". For location_name give the most specific place "
+    "the article says it happened: an estate, village, town or road, with the "
+    "nearest landmark if given (e.g. \"Githurai 45, Thika Road\"). Use the "
+    "county name only if nothing more specific is given, and never a place "
+    "people were travelling to or from. Write a concise factual summary and 2-4 short "
     "recommended safety actions for people nearby."
 )
 

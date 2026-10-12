@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Bell, Map, LayoutDashboard, Building2, ShieldAlert, Radio } from "lucide-react";
+import { Bell, Map, LayoutDashboard, Building2, ShieldAlert, Radio, Route } from "lucide-react";
 import clsx from "clsx";
 import { useUiStore } from "@/store/useUiStore";
 import { useAppStore } from "@/store/useAppStore";
@@ -15,6 +15,7 @@ import { Fragment } from "react";
 
 const NAV_LINKS = [
   { href: "/", label: "Live Map", icon: Map },
+  { href: "/route-watch", label: "Route Watch", icon: Route },
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/counties", label: "Counties", icon: Building2 },
 ];

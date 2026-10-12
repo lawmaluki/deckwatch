@@ -46,6 +46,9 @@ VERIFICATION_STATUSES: Tuple[str, ...] = (
     "unconfirmed",
     "false_report",
 )
+# How much ground an incident's point stands for, most precise first (see
+# ingest.geocode.locate). "county" is the county centre: no place was found.
+LOCATION_PRECISIONS: Tuple[str, ...] = ("local", "town", "road", "area", "county")
 
 SEVERITY_WEIGHT = {"low": 1.0, "medium": 2.5, "high": 5.0, "critical": 9.0}
 

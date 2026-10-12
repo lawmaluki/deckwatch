@@ -27,6 +27,7 @@ def _to_dict(inc: Incident, lat: float, lng: float, detail: bool = True) -> doma
         "severity": inc.severity,
         "county": inc.county_name,
         "locationName": inc.location_name,
+        "locationPrecision": inc.location_precision,
         "lat": lat,
         "lng": lng,
         "reportedAt": domain.to_iso_z(round(inc.reported_at.timestamp() * 1000)),
@@ -67,6 +68,7 @@ _SUMMARY_COLUMNS = (
     Incident.severity,
     Incident.county_name,
     Incident.location_name,
+    Incident.location_precision,
     func.ST_Y(Incident.geom).label("lat"),
     func.ST_X(Incident.geom).label("lng"),
     Incident.reported_at,
@@ -91,6 +93,7 @@ def _summary_to_dict(row: Any) -> domain.Incident:
         "severity": row.severity,
         "county": row.county_name,
         "locationName": row.location_name,
+        "locationPrecision": row.location_precision,
         "lat": row.lat,
         "lng": row.lng,
         "reportedAt": domain.to_iso_z(round(row.reported_at.timestamp() * 1000)),
@@ -227,6 +230,7 @@ def insert_incident(session: Session, inc: Dict[str, Any]) -> None:
             severity=inc["severity"],
             county_name=inc["county"],
             location_name=inc["locationName"],
+            location_precision=inc.get("locationPrecision"),
             geom=func.ST_SetSRID(func.ST_MakePoint(inc["lng"], inc["lat"]), 4326),
             reported_at=_parse_dt(inc["reportedAt"]),
             verification_score=inc["verificationScore"],
@@ -259,6 +263,26 @@ def merge_incident(
     obj.report_count = report_count
     obj.verification_score = verification_score
     obj.verification_status = verification_status
+
+
+def relocate_incident(
+    session: Session,
+    incident_id: str,
+    county: str,
+    location_name: str,
+    lat: float,
+    lng: float,
+    precision: str,
+) -> None:
+    """Move an incident to a better-resolved place (ingest/relocate.py).
+    Never called by live ingestion."""
+    obj = session.get(Incident, incident_id)
+    if obj is None:
+        return
+    obj.county_name = county
+    obj.location_name = location_name
+    obj.geom = func.ST_SetSRID(func.ST_MakePoint(lng, lat), 4326)
+    obj.location_precision = precision
 
 
 def delete_incident(session: Session, incident_id: str) -> None:

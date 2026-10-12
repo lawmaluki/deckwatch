@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from geoalchemy2 import Geometry
 from sqlalchemy import ARRAY, Boolean, DateTime, Integer, Text
@@ -30,6 +31,9 @@ class Incident(Base):
     county_name: Mapped[str] = mapped_column(Text, nullable=False, index=True)
     location_name: Mapped[str] = mapped_column(Text, nullable=False)
     geom = mapped_column(Geometry("POINT", srid=4326), nullable=False)
+    # domain.LOCATION_PRECISIONS: how much ground geom stands for. Null for
+    # seed rows and for ingested rows not yet re-located (ingest/relocate.py).
+    location_precision: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     reported_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, index=True
     )

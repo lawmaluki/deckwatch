@@ -19,7 +19,10 @@ export type VerificationStatus =
   | "unconfirmed"
   | "false_report";
 
-export type SourceType = "news" | "police" | "citizen" | "government" | "social";
+/** Mirrors backend domain.LOCATION_PRECISIONS, most precise first. */
+export type LocationPrecision = "local" | "town" | "road" | "area" | "county";
+
+export type SourceType ="news" | "police" | "citizen" | "government" | "social";
 
 export interface Source {
   name: string;
@@ -35,6 +38,11 @@ export interface Incident {
   severity: Severity;
   county: string;
   locationName: string;
+  /** How much ground lat/lng stands for: a village or estate ("local"), a
+   * town, somewhere along a named road, a wider area, or only the county
+   * centre. Null for seed data and incidents not yet re-located; absent from
+   * the seed-only API. See backend/app/ingest/geocode.py. */
+  locationPrecision?: LocationPrecision | null;
   lat: number;
   lng: number;
   reportedAt: string;

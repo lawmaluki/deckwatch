@@ -44,6 +44,14 @@ jobs:
           path: .fastembed-cache
           key: fastembed-${{ vars.RAG_EMBED_MODEL || 'BAAI/bge-small-en-v1.5' }}
 
+      # Adds any column a newer schema needs (init_db.ADDED_COLUMNS) before
+      # ingest writes it, so a merge to main can't break a run that starts
+      # before the API's redeploy has done the same. Idempotent.
+      - name: Bring the schema up to date
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python -m app.init_db
+
       - name: Run ingest
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}

@@ -8,9 +8,13 @@ import { useAppStore } from "@/store/useAppStore";
 import { useRouter } from "next/navigation";
 import { COUNTY_BY_NAME } from "@/lib/data/counties";
 
-export function CountyBoundaries() {
+/** `interactive={false}` draws the outlines only: no tooltips, no clicks, no
+ * highlighted county. For maps (Route Watch) where a county click would set
+ * the live map's county filter behind the reader's back. */
+export function CountyBoundaries({ interactive = true }: { interactive?: boolean } = {}) {
   const [data, setData] = useState<FeatureCollection | null>(null);
-  const countyFilter = useAppStore((s) => s.countyFilter);
+  const storeCountyFilter = useAppStore((s) => s.countyFilter);
+  const countyFilter = interactive ? storeCountyFilter : null;
   const setCountyFilter = useAppStore((s) => s.setCountyFilter);
   const router = useRouter();
 
@@ -76,7 +80,12 @@ export function CountyBoundaries() {
         <GeoJSON data={data} style={outlineStyle} interactive={false} />
       </Pane>
       <Pane name="county-boundaries" style={{ zIndex: 350 }}>
-        <GeoJSON data={data} style={style} onEachFeature={onEachFeature} />
+        <GeoJSON
+          data={data}
+          style={style}
+          interactive={interactive}
+          onEachFeature={interactive ? onEachFeature : undefined}
+        />
       </Pane>
     </>
   );
