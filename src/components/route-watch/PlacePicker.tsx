@@ -117,7 +117,7 @@ export function PlacePicker({
     return (
       <div>
         <span className="mb-1 block text-[11px] font-medium uppercase tracking-wide text-muted">{label}</span>
-        <div className="flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2">
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-surface py-1 pl-3 pr-1 md:py-2 md:pr-3">
           <MapPin className="h-4 w-4 shrink-0 text-brand" />
           <span className="min-w-0 flex-1 truncate text-sm text-foreground">
             {value.name}
@@ -129,7 +129,7 @@ export function PlacePicker({
               requestAnimationFrame(() => inputRef.current?.focus());
             }}
             aria-label={`Change ${label.toLowerCase()}`}
-            className="shrink-0 text-muted hover:text-foreground"
+            className="flex h-10 w-10 shrink-0 items-center justify-center text-muted hover:text-foreground md:h-auto md:w-auto"
           >
             <X className="h-4 w-4" />
           </button>
@@ -178,7 +178,8 @@ export function PlacePicker({
               setOpen(false);
             }
           }}
-          className="min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-sm text-foreground placeholder:text-muted/70 focus:border-brand/60 focus:outline-none"
+          // 16px on phones: iOS zooms the page into any smaller input.
+          className="h-11 min-w-0 flex-1 rounded-lg border border-border bg-surface px-3 text-base text-foreground placeholder:text-muted/70 focus:border-brand/60 focus:outline-none md:h-auto md:py-2 md:text-sm"
         />
         {allowMyLocation && (
           <button
@@ -186,7 +187,7 @@ export function PlacePicker({
             disabled={locating}
             aria-label="Use my location"
             title="Use my location"
-            className="flex shrink-0 items-center justify-center rounded-lg border border-border bg-surface px-2.5 text-muted transition-colors hover:text-foreground disabled:opacity-50"
+            className="flex w-11 shrink-0 items-center justify-center rounded-lg border border-border bg-surface text-muted transition-colors hover:text-foreground disabled:opacity-50 md:w-auto md:px-2.5"
           >
             <LocateFixed className={clsx("h-4 w-4", locating && "animate-pulse text-brand")} />
           </button>
@@ -211,7 +212,7 @@ export function PlacePicker({
               }}
               onMouseEnter={() => setActive(i)}
               className={clsx(
-                "flex cursor-pointer items-baseline justify-between gap-3 px-3 py-1.5 text-sm",
+                "flex cursor-pointer items-baseline justify-between gap-3 px-3 py-2.5 text-sm md:py-1.5",
                 i === active ? "bg-brand/10 text-foreground" : "text-foreground/90"
               )}
             >

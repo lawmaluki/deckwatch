@@ -69,7 +69,7 @@ export function RouteIncidentCard({
       </p>
       <button
         onClick={() => focus({ kind: "incident", value: incident.id })}
-        className="mt-2 text-[11px] font-medium text-brand hover:underline"
+        className="mt-1 min-h-10 text-xs font-medium text-brand hover:underline md:mt-2 md:min-h-0 md:text-[11px]"
       >
         View incident details
       </button>

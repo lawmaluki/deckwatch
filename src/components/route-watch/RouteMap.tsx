@@ -37,6 +37,34 @@ function FitRoute({ coords }: { coords: LatLng[] | null }) {
   return null;
 }
 
+/** Keeps Leaflet's idea of its size in step with the container's. On a
+ * phone the map is hidden until there is a route and can be enlarged, and
+ * Leaflet only measures itself on window resize: without this it draws into
+ * the size it had when it was hidden (zero) or before it grew. Coming out of
+ * zero it also refits, since the fit made while hidden fitted nothing. */
+function TrackSize({ coords }: { coords: LatLng[] | null }) {
+  const map = useMap();
+  useEffect(() => {
+    const el = map.getContainer();
+    let wasEmpty = el.clientWidth === 0 || el.clientHeight === 0;
+    const observer = new ResizeObserver(() => {
+      const empty = el.clientWidth === 0 || el.clientHeight === 0;
+      if (empty) {
+        wasEmpty = true;
+        return;
+      }
+      map.invalidateSize();
+      if (wasEmpty && coords && coords.length > 1) {
+        map.fitBounds(L.latLngBounds(coords), { padding: [32, 32], animate: false });
+      }
+      wasEmpty = false;
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [map, coords]);
+  return null;
+}
+
 /** Pans to the incident picked in the list, without changing the zoom the
  * reader chose. */
 function PanToSelected({ match }: { match: RouteMatch | null }) {
@@ -100,6 +128,7 @@ export default function RouteMap({
         />
       ))}
       <FitRoute coords={coords} />
+      <TrackSize coords={coords} />
       <PanToSelected match={selected} />
     </MapContainer>
   );

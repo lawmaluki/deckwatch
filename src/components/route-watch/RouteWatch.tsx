@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import type { FeatureCollection } from "geojson";
-import { ArrowUpDown, Bell, BellOff, Bookmark, Info, Trash2 } from "lucide-react";
+import { ArrowUpDown, Bell, BellOff, Bookmark, Info, Maximize2, Minimize2, Pencil, Trash2 } from "lucide-react";
 import clsx from "clsx";
 import { PlacePicker } from "@/components/route-watch/PlacePicker";
 import { RouteIncidentCard } from "@/components/route-watch/RouteIncidentCard";
@@ -105,6 +105,11 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
   const [counties, setCounties] = useState<FeatureCollection | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showAllCounty, setShowAllCounty] = useState(false);
+  // Phones only (md: always shows the full form and a full-height map): the
+  // route being edited, so the form folds back to one line as soon as a new
+  // route is chosen, and whether the map has been enlarged.
+  const [editingQuery, setEditingQuery] = useState<string | null>(null);
+  const [mapExpanded, setMapExpanded] = useState(false);
 
   const snapshot = useIncidents();
   // In api mode the first snapshot is sample data kept for hydration (see
@@ -138,6 +143,8 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
       });
     return () => controller.abort();
   }, [query]);
+
+  const compact = query !== null && editingQuery !== query;
 
   const route: RouteState =
     query === null
@@ -202,7 +209,16 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
 
   return (
     <div className="flex h-full flex-col md:flex-row">
-      <div className="relative h-[38vh] shrink-0 md:order-last md:h-full md:flex-1">
+      {/* On a phone the map waits for a route (before one there is nothing on
+          it worth a third of the screen) and starts compact so the list stays
+          in view; it can be enlarged. dvh, not vh: mobile browsers' collapsing
+          toolbars make 100vh taller than the visible page. */}
+      <div
+        className={clsx(
+          "relative shrink-0 md:order-last md:block md:h-full md:flex-1",
+          query === null ? "hidden" : mapExpanded ? "h-[62dvh]" : "h-[30dvh]"
+        )}
+      >
         <RouteMap
           coords={geometry?.coords ?? null}
           from={from}
@@ -214,18 +230,41 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
             document.getElementById(`route-incident-${id}`)?.scrollIntoView({ block: "nearest", behavior: "smooth" });
           }}
         />
+        <button
+          onClick={() => setMapExpanded((v) => !v)}
+          aria-label={mapExpanded ? "Make the map smaller" : "Make the map bigger"}
+          className="glass-panel absolute bottom-7 right-2 z-[500] flex h-10 w-10 items-center justify-center rounded-lg text-foreground md:hidden"
+        >
+          {mapExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+        </button>
       </div>
 
       <section
         aria-label="Route Watch"
         className="min-h-0 flex-1 overflow-y-auto border-border px-4 py-4 md:w-[420px] md:flex-none md:border-r"
       >
-        <h1 className="text-lg font-semibold text-foreground">Route Watch</h1>
-        <p className="mt-0.5 text-xs text-muted">
+        <h1 className={clsx("text-lg font-semibold text-foreground", compact && "sr-only md:not-sr-only")}>
+          Route Watch
+        </h1>
+        <p className={clsx("mt-0.5 text-xs text-muted", compact && "hidden md:block")}>
           Before you leave, see what has been reported along your route.
         </p>
 
-        <div className="mt-4 space-y-2">
+        {compact && from && to && (
+          <div className="flex items-center gap-2 rounded-lg border border-border bg-surface py-1 pl-3 pr-1 md:hidden">
+            <p className="min-w-0 flex-1 truncate text-sm text-foreground">
+              {from.name} <span className="text-muted">&rarr;</span> {to.name}
+            </p>
+            <button
+              onClick={() => setEditingQuery(query)}
+              className="flex h-10 shrink-0 items-center gap-1.5 rounded-md px-3 text-xs font-medium text-brand"
+            >
+              <Pencil className="h-3.5 w-3.5" /> Change
+            </button>
+          </div>
+        )}
+
+        <div className={clsx("mt-4 space-y-2", compact && "hidden md:block")}>
           <PlacePicker label="Starting point" value={from} onChange={setFrom} allowMyLocation />
           <div className="flex justify-end">
             <button
@@ -234,7 +273,7 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
                 setTo(from);
               }}
               disabled={!from && !to}
-              className="flex items-center gap-1 text-[11px] text-muted hover:text-foreground disabled:opacity-40"
+              className="-my-1 flex h-9 items-center gap-1 px-1 text-xs text-muted hover:text-foreground disabled:opacity-40 md:h-auto md:text-[11px]"
             >
               <ArrowUpDown className="h-3.5 w-3.5" /> Swap
             </button>
@@ -253,7 +292,7 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
                     setFrom(r.from);
                     setTo(r.to);
                   }}
-                  className="rounded-full border border-border bg-surface px-2.5 py-1 text-xs text-foreground/90 hover:border-brand/50"
+                  className="rounded-full border border-border bg-surface px-3 py-2 text-xs text-foreground/90 hover:border-brand/50 md:px-2.5 md:py-1"
                 >
                   {routeName(r)}
                 </button>
@@ -263,11 +302,11 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
         )}
 
         {mounted && savedRoutes.length > 0 && (
-          <div className="mt-4">
+          <div className={clsx("mt-4", compact && "hidden md:block")}>
             <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-muted">Your routes</p>
             <ul className="space-y-1">
               {savedRoutes.map((r) => (
-                <li key={r.id} className="flex items-center gap-2 rounded-lg bg-surface px-2.5 py-1.5">
+                <li key={r.id} className="flex items-center gap-1 rounded-lg bg-surface pl-2.5 md:gap-2 md:py-1.5 md:pr-2.5">
                   <button
                     onClick={() => {
                       setFrom(r.from);
@@ -275,7 +314,7 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
                       setBufferKm(r.bufferKm);
                       setGroup(r.group);
                     }}
-                    className="min-w-0 flex-1 truncate text-left text-xs text-foreground hover:text-brand"
+                    className="min-h-10 min-w-0 flex-1 truncate text-left text-sm text-foreground hover:text-brand md:min-h-0 md:text-xs"
                   >
                     {routeName(r)}
                   </button>
@@ -283,14 +322,17 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
                     onClick={() => setRouteAlerts(r.id, !r.alerts)}
                     aria-label={r.alerts ? `Turn off alerts for ${routeName(r)}` : `Turn on alerts for ${routeName(r)}`}
                     title={r.alerts ? "Alerts on" : "Alerts off"}
-                    className={clsx("shrink-0", r.alerts ? "text-brand" : "text-muted hover:text-foreground")}
+                    className={clsx(
+                      "flex h-10 w-10 shrink-0 items-center justify-center md:h-auto md:w-auto",
+                      r.alerts ? "text-brand" : "text-muted hover:text-foreground"
+                    )}
                   >
                     {r.alerts ? <Bell className="h-3.5 w-3.5" /> : <BellOff className="h-3.5 w-3.5" />}
                   </button>
                   <button
                     onClick={() => removeRoute(r.id)}
                     aria-label={`Remove ${routeName(r)}`}
-                    className="shrink-0 text-muted hover:text-critical"
+                    className="flex h-10 w-10 shrink-0 items-center justify-center text-muted hover:text-critical md:h-auto md:w-auto"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
@@ -301,15 +343,15 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
         )}
 
         {(from || to) && (
-          <div className="mt-4 grid grid-cols-3 gap-2">
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 md:mt-4">
             <Select
-              label="Distance from road"
+              label="Within"
               value={String(bufferKm)}
               onChange={(v) => setBufferKm(Number(v))}
               options={BUFFER_OPTIONS_KM.map((km) => ({ value: String(km), label: `${km} km` }))}
             />
             <Select
-              label="Reported in"
+              label="Reported"
               value={String(windowHours)}
               onChange={(v) => setWindowHours(Number(v))}
               options={WINDOW_OPTIONS_HOURS.map((h) => ({
@@ -318,6 +360,7 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
               }))}
             />
             <Select
+              className="col-span-2 sm:col-span-1"
               label="Show"
               value={group}
               onChange={(v) => setGroup(v as RouteIncidentGroup)}
@@ -349,7 +392,7 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
                 <button
                   onClick={saved ? () => removeRoute(saved.id) : onSave}
                   className={clsx(
-                    "flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium",
+                    "flex h-10 shrink-0 items-center gap-1.5 rounded-md border px-3 text-xs font-medium md:h-auto md:px-2.5 md:py-1.5",
                     saved ? "border-brand/50 text-brand" : "border-border text-foreground hover:border-brand/50"
                   )}
                 >
@@ -416,7 +459,7 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
                     {matches.inCounties.length > COUNTY_LEVEL_PREVIEW && (
                       <button
                         onClick={() => setShowAllCounty((v) => !v)}
-                        className="mt-1.5 text-[11px] font-medium text-brand hover:underline"
+                        className="mt-1 min-h-10 text-xs font-medium text-brand hover:underline md:min-h-0 md:text-[11px]"
                       >
                         {showAllCounty ? "Show fewer" : `Show all ${matches.inCounties.length}`}
                       </button>
@@ -456,19 +499,22 @@ function Select({
   value,
   onChange,
   options,
+  className,
 }: {
+  className?: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
   options: { value: string; label: string }[];
 }) {
   return (
-    <label className="block min-w-0">
+    <label className={clsx("block min-w-0", className)}>
       <span className="mb-1 block truncate text-[11px] font-medium uppercase tracking-wide text-muted">{label}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-border bg-surface px-2 py-1.5 text-xs text-foreground focus:border-brand/60 focus:outline-none"
+        // 16px on phones: iOS zooms the page into any smaller form control.
+        className="h-10 w-full rounded-lg border border-border bg-surface px-2 text-base text-foreground focus:border-brand/60 focus:outline-none md:h-auto md:py-1.5 md:text-xs"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
