@@ -41,6 +41,41 @@ def test_headline_county_beats_outlet_name_in_summary():
     assert incident["county"] == "West Pokot"
 
 
+class _FeedResponse:
+    def __init__(self, body, encoding=""):
+        self._body = body
+        self.headers = {"Content-Encoding": encoding}
+
+    def read(self):
+        return self._body
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
+def test_fetch_items_reads_gzip_and_names_a_failing_feed(monkeypatch, capsys):
+    import gzip
+    import urllib.error
+
+    good = sources.Feed("Good", "http://good", "news", "https://good")
+    dead = sources.Feed("Dead", "http://dead", "news", "https://dead")
+
+    def fake_urlopen(req, timeout):
+        assert timeout == sources.FETCH_TIMEOUT_S
+        if req.full_url == "http://dead":
+            raise urllib.error.URLError("timed out")
+        return _FeedResponse(gzip.compress(SAMPLE_FEED.encode()), "gzip")
+
+    monkeypatch.setattr(sources.urllib.request, "urlopen", fake_urlopen)
+    items = sources.fetch_items([good, dead])
+
+    assert items and all(i["source"] == "Good" for i in items)
+    assert "feed skipped: Dead (URLError" in capsys.readouterr().out
+
+
 # --- geocode -----------------------------------------------------------------
 
 def test_geocode_resolves_hotspot():

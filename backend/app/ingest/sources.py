@@ -4,13 +4,30 @@ Feed URLs are best-effort and easy to edit — outlets change RSS paths over tim
 The pipeline tolerates a dead feed (logs and skips). Tests run against a
 committed fixture, not the live network."""
 
+import gzip
 import html
 import re
+import urllib.request
+import zlib
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from html.parser import HTMLParser
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple, Union
 
 import feedparser
+
+# Fetched by us, not by feedparser: feedparser has no timeout, and one outlet
+# that stops answering (Kenya News Agency did, Oct 2026) held a run until
+# GitHub killed it. The headers are the ones feedparser sends, which outlets
+# answer: K24 and People Daily refuse an agent containing "Bot", and Business
+# Daily returns 404 without A-IM and Accept-Encoding.
+FETCH_TIMEOUT_S = 15
+REQUEST_HEADERS = {
+    "User-Agent": "Deckwatch/1.0 (+https://deckwatch.vercel.app)",
+    "Accept": "application/atom+xml,application/rdf+xml,application/rss+xml,application/xml;q=0.9,text/xml;q=0.2,*/*;q=0.1",
+    "Accept-Encoding": "gzip, deflate",
+    "A-IM": "feed",
+}
 
 
 class _TextExtractor(HTMLParser):
@@ -46,7 +63,9 @@ class Feed:
 # Curated Kenyan outlet feeds. `source_type` feeds verification scoring; the
 # homepage populates Source.url on ingested incidents.
 FEEDS: List[Feed] = [
-    Feed("The Standard", "https://www.standardmedia.co.ke/rss/kenya.php", "news",
+    # headlines.php, not kenya.php: by Oct 2026 the Kenya feed's newest item
+    # was four days old while headlines still moved daily.
+    Feed("The Standard", "https://www.standardmedia.co.ke/rss/headlines.php", "news",
          "https://www.standardmedia.co.ke"),
     Feed("Capital FM News", "https://www.capitalfm.co.ke/news/feed/", "news",
          "https://www.capitalfm.co.ke/news"),
@@ -66,13 +85,20 @@ FEEDS: List[Feed] = [
          "https://www.kbc.co.ke"),
     Feed("Nairobi News", "https://nairobinews.co.ke/feed/", "news",
          "https://nairobinews.co.ke"),
-    Feed("TV47", "https://tv47.co.ke/feed/", "news",
-         "https://tv47.co.ke"),
     Feed("Business Daily", "https://www.businessdailyafrica.com/bd/rss.xml", "news",
          "https://www.businessdailyafrica.com/bd"),
     Feed("People Daily", "https://peopledaily.digital/feed", "news",
          "https://peopledaily.digital"),
+    Feed("The Kenya Times", "https://thekenyatimes.com/feed/", "news",
+         "https://thekenyatimes.com"),
+    Feed("Kahawa Tungu", "https://www.kahawatungu.com/feed/", "news",
+         "https://www.kahawatungu.com"),
     # The Star: no working RSS feed as of 2026-08 (Next.js SPA, no discoverable feed URL).
+    # TV47: dropped Oct 2026, its feed errors or serves items weeks old.
+    # Kenya News Agency (kenyanews.go.ke/feed): times out; worth retrying, as
+    # a government source it would weigh more in verification.
+    # Mwakilishi: its feed carries no publish dates, so every item would read
+    # as happening at ingest time.
 ]
 
 
@@ -88,7 +114,7 @@ def _published_iso(entry) -> str:
     return dt.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
 
-def parse_feed(content: str, feed: Feed) -> List[Dict[str, str]]:
+def parse_feed(content: Union[str, bytes], feed: Feed) -> List[Dict[str, str]]:
     """Parse raw RSS/Atom text into normalized items (used directly in tests)."""
     parsed = feedparser.parse(content)
     items = []
@@ -112,36 +138,45 @@ def parse_feed(content: str, feed: Feed) -> List[Dict[str, str]]:
     return items
 
 
+def _fetch_one(feed: Feed) -> Tuple[List[Dict[str, str]], Optional[str]]:
+    """One feed's items, and why it gave none if it failed."""
+    try:
+        req = urllib.request.Request(feed.url, headers=REQUEST_HEADERS)
+        with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT_S) as res:
+            body = res.read()
+            encoding = (res.headers.get("Content-Encoding") or "").lower()
+        if encoding == "gzip":
+            body = gzip.decompress(body)
+        elif encoding == "deflate":
+            # Servers send either zlib-wrapped or raw deflate under this name.
+            try:
+                body = zlib.decompress(body)
+            except zlib.error:
+                body = zlib.decompress(body, -zlib.MAX_WBITS)
+    except Exception as e:  # network, HTTP status, timeout: skip this outlet
+        return [], f"{type(e).__name__}: {e}"
+    items = parse_feed(body, feed)
+    return items, None if items else "no items"
+
+
 def fetch_items(feeds: Optional[List[Feed]] = None) -> List[Dict[str, str]]:
-    """Fetch and normalize items across all feeds. Network failures per feed are
-    swallowed so one dead outlet doesn't sink the run."""
+    """Fetch and normalize items across all feeds, in parallel. A feed that
+    fails is skipped so one dead outlet doesn't sink the run, but is named in
+    the run log: until Oct 2026 failures were silent, and a feed could be dead
+    for weeks unnoticed."""
+    chosen = feeds if feeds is not None else FEEDS
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        results = list(pool.map(_fetch_one, chosen))
     items: List[Dict[str, str]] = []
-    for feed in feeds if feeds is not None else FEEDS:
-        try:
-            parsed = feedparser.parse(feed.url)
-        except Exception:
-            continue
-        for entry in parsed.entries:
-            title = getattr(entry, "title", "").strip()
-            link = getattr(entry, "link", "").strip()
-            if not title or not link:
-                continue
-            items.append(
-                {
-                    "title": title,
-                    "summary": _strip_html(getattr(entry, "summary", "")),
-                    "link": link,
-                    "published": _published_iso(entry),
-                    "source": feed.name,
-                    "source_type": feed.source_type,
-                    "homepage": feed.homepage,
-                }
-            )
+    for feed, (feed_items, problem) in zip(chosen, results):
+        if problem:
+            print(f"feed skipped: {feed.name} ({problem})")
+        items.extend(feed_items)
     return items
 
 
 if __name__ == "__main__":
     # Feed health check: python -m app.ingest.sources
     for feed in FEEDS:
-        count = len(fetch_items([feed]))
-        print(feed.name, count)
+        items, problem = _fetch_one(feed)
+        print(f"{feed.name:<18} {len(items):>4}  {problem or ''}")
