@@ -64,7 +64,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     kind: "new",
     area: "Alerts",
     title: "Alerts that actually reach you",
-    body: "Subscribing to counties and categories now does something. When a matching incident arrives you get an alert in the app, and on your desktop too if you allow it — so it reaches you even when Deckwatch isn't the tab you're looking at. Alerts land within a minute of an incident being ingested, and only for incidents that arrive while you're here: opening the site won't replay everything already on the map. You can also ask to hear about anything within a set distance of where you are, whichever county it falls in.",
+    body: "Subscribing to counties and categories now does something. When a matching incident arrives you get an alert in the app, and on your desktop too if you allow it — so it reaches you even when Deckwatch isn't the tab you're looking at. Alerts land within about five minutes of an incident being ingested, and only for incidents that arrive while you're here: opening the site won't replay everything already on the map. You can also ask to hear about anything within a set distance of where you are, whichever county it falls in.",
   },
   {
     date: "2026-09-17",

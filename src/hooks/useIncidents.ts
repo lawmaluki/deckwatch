@@ -8,6 +8,8 @@ import {
 } from "@/lib/incidents-source";
 import type { Incident } from "@/lib/types";
 import { POLL_INTERVAL_MS } from "@/lib/constants";
+import { wantsBackgroundAlerts } from "@/lib/alerts";
+import { useAppStore } from "@/store/useAppStore";
 
 // Module-scoped poller shared by every component using this hook: one
 // interval and one in-flight request total, not one per consumer.
@@ -40,7 +42,15 @@ async function refresh(): Promise<void> {
 // Polling stops while the tab is hidden: a map left open in a background tab
 // all day used to re-download every incident on every tick, for no reader.
 // Coming back to the tab refreshes at once if the data is due, then resumes.
+// The exception is a reader waiting on desktop notifications, who is only
+// reached while the tab is hidden (see wantsBackgroundAlerts).
 let lastRefreshAt = 0;
+
+function keepPollingWhileHidden(): boolean {
+  const { notifications, savedRoutes } = useAppStore.getState();
+  const permission = typeof Notification === "undefined" ? null : Notification.permission;
+  return wantsBackgroundAlerts(notifications, savedRoutes.some((r) => r.alerts), permission);
+}
 
 function startTimer(): void {
   if (timer !== null) return;
@@ -61,15 +71,16 @@ function stopTimer(): void {
 }
 
 function onVisibilityChange(): void {
-  if (document.hidden) stopTimer();
-  else if (listeners.size > 0) startTimer();
+  if (document.hidden) {
+    if (!keepPollingWhileHidden()) stopTimer();
+  } else if (listeners.size > 0) startTimer();
 }
 
 function subscribe(listener: () => void): () => void {
   listeners.add(listener);
   if (USE_API && listeners.size === 1) {
     document.addEventListener("visibilitychange", onVisibilityChange);
-    if (!document.hidden) startTimer();
+    if (!document.hidden || keepPollingWhileHidden()) startTimer();
   }
   return () => {
     listeners.delete(listener);

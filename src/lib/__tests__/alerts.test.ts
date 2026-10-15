@@ -5,6 +5,7 @@ import {
   matchesSubscription,
   newIncidents,
   recentEnoughToAlert,
+  wantsBackgroundAlerts,
 } from "@/lib/alerts";
 import type { NotificationSubscription } from "@/store/useAppStore";
 import type { Incident } from "@/lib/types";
@@ -146,5 +147,23 @@ describe("which incidents may alert", () => {
     }
     expect(alerts).toEqual([]);
     expect(seen).toEqual(new Set(["ing-old", "ing-new"]));
+  });
+});
+
+describe("wantsBackgroundAlerts", () => {
+  const counties = subscription({ counties: ["Nairobi"] });
+
+  it("keeps a hidden tab polling only for a reader a desktop notification can reach", () => {
+    expect(wantsBackgroundAlerts(counties, false, "granted")).toBe(true);
+    // Saved route alerts count as asking, even with no subscription set up.
+    expect(wantsBackgroundAlerts(subscription(), true, "granted")).toBe(true);
+  });
+
+  it("stops for everyone else", () => {
+    expect(wantsBackgroundAlerts(counties, false, "default")).toBe(false);
+    expect(wantsBackgroundAlerts(counties, false, null)).toBe(false);
+    expect(wantsBackgroundAlerts(subscription(), false, "granted")).toBe(false);
+    const pushOff = subscription({ counties: ["Nairobi"], channels: { push: false, sms: false, email: false } });
+    expect(wantsBackgroundAlerts(pushOff, true, "granted")).toBe(false);
   });
 });

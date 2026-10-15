@@ -49,6 +49,27 @@ export function hasActiveSubscription(sub: NotificationSubscription): boolean {
   return sub.counties.length > 0 || sub.categories.length > 0 || sub.useLocation;
 }
 
+/** Whether a hidden tab should keep polling so a desktop notification can
+ * still reach this reader.
+ *
+ * Polling stops in hidden tabs to save database egress (useIncidents), but a
+ * desktop notification exists for exactly the moment the tab is hidden. So it
+ * carries on only for a reader who would actually get one: notifications
+ * allowed by the browser, the push channel on, and something they asked to
+ * hear about — a subscription they set up or a saved route with alerts on.
+ * Those polls are served from the edge cache, not the database. */
+export function wantsBackgroundAlerts(
+  sub: NotificationSubscription,
+  routeAlertsOn: boolean,
+  notificationPermission: string | null
+): boolean {
+  return (
+    notificationPermission === "granted" &&
+    sub.channels.push &&
+    (hasActiveSubscription(sub) || routeAlertsOn)
+  );
+}
+
 /** An incident older than this never raises an alert, however it reaches the
  * browser. "New to this session" should already rule old ones out; this is
  * the backstop for when the session's idea of "already seen" is incomplete,
