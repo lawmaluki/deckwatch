@@ -26,6 +26,26 @@ export const CHANGE_KIND_COLOR: Record<ChangeKind, string> = {
  * build work stays in the commit history where it belongs. */
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    date: "2026-10-16",
+    kind: "new",
+    area: "Route Watch",
+    title: "Follow your trip, and get warned before you reach an incident",
+    body: "Press Start trip when you set off and Route Watch follows you along the route while the page is open. The list shows only what's still ahead and how far away it is, and you're warned about 5 km before each incident (half a kilometre on foot), or straight away if something new is reported further on. Your location stays on your phone. Route Watch also now offers up to three ways to go, each with how many incidents are reported along it, and works for walking as well as driving.",
+  },
+  {
+    date: "2026-10-16",
+    kind: "fixed",
+    area: "Alerts",
+    title: "Desktop alerts reach you on another tab again",
+    body: "If you've turned on alerts and allowed notifications, Deckwatch once again tells you about new incidents while you're working in another tab. A change to how often the site checks for news had stopped hidden tabs from hearing about them.",
+  },
+  {
+    date: "2026-10-16",
+    kind: "improved",
+    title: "More news sources, checked more reliably",
+    body: "Deckwatch now also reads The Kenya Times and Kahawa Tungu, and The Standard's coverage is fresh again after its old feed stopped updating. A news site that stops responding no longer holds up the others.",
+  },
+  {
     date: "2026-10-13",
     kind: "new",
     area: "Route Watch",
