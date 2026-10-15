@@ -93,12 +93,29 @@ FEEDS: List[Feed] = [
          "https://thekenyatimes.com"),
     Feed("Kahawa Tungu", "https://www.kahawatungu.com/feed/", "news",
          "https://www.kahawatungu.com"),
+    # Added Oct 2026 after checking ~120 Kenyan sites: Nairobi and North
+    # Eastern local news, the busiest safety feed found (~65 of 150 items).
+    Feed("The Eastleigh Voice", "https://eastleighvoice.co.ke/rss", "news",
+         "https://eastleighvoice.co.ke"),
+    Feed("Business Today", "https://businesstoday.co.ke/feed/", "news",
+         "https://businesstoday.co.ke"),
+    # Official sources: rarely updated, but they weigh more in verification
+    # (verification.SOURCE_WEIGHT) than any single newsroom.
+    Feed("Ministry of Health", "https://www.health.go.ke/rss.xml", "government",
+         "https://www.health.go.ke"),
+    Feed("National Police Service", "https://www.kenyapolice.go.ke/rss.xml", "police",
+         "https://www.kenyapolice.go.ke"),
     # The Star: no working RSS feed as of 2026-08 (Next.js SPA, no discoverable feed URL).
     # TV47: dropped Oct 2026, its feed errors or serves items weeks old.
     # Kenya News Agency (kenyanews.go.ke/feed): times out; worth retrying, as
     # a government source it would weigh more in verification.
     # Mwakilishi: its feed carries no publish dates, so every item would read
     # as happening at ingest time.
+    # Left out on purpose (Oct 2026): gossip, tabloid and partisan blogs with
+    # working feeds (Kenya Today, KDRTV, Nairobi Wire, Kenyan-Post, Ghafla).
+    # Verification counts every outlet as independent corroboration, so they
+    # would make rumours look confirmed. Also Google News search feeds: mostly
+    # foreign outlets, and links point at Google, not the article.
 ]
 
 
