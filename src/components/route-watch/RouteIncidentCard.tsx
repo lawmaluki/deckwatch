@@ -14,11 +14,14 @@ import { formatKm, placementLabel, type RouteMatch } from "@/lib/route-watch";
 export function RouteIncidentCard({
   match,
   routeKm,
+  aheadKm = null,
   active,
   onSelect,
 }: {
   match: RouteMatch;
   routeKm: number;
+  /** Distance ahead of the traveller, during a trip. */
+  aheadKm?: number | null;
   active: boolean;
   onSelect: () => void;
 }) {
@@ -44,8 +47,17 @@ export function RouteIncidentCard({
             <Icon className="h-3.5 w-3.5 shrink-0" />
             <span className="truncate">{category.label}</span>
           </span>
-          <span className="shrink-0 rounded-full bg-surface-raised px-2 py-0.5 text-[10px] font-medium tabular-nums text-muted">
-            km {Math.round(match.alongKm)} of {Math.round(routeKm)}
+          <span
+            className={clsx(
+              "shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium tabular-nums",
+              aheadKm === null ? "bg-surface-raised text-muted" : "bg-high/15 text-high"
+            )}
+          >
+            {aheadKm === null
+              ? `km ${Math.round(match.alongKm)} of ${Math.round(routeKm)}`
+              : aheadKm <= 0.3
+                ? "here"
+                : `${formatKm(aheadKm)} ahead`}
           </span>
         </div>
         <p className="mt-1.5 flex items-start gap-1.5 text-sm font-medium text-foreground">

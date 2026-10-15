@@ -16,6 +16,17 @@ import type { Category, Incident, LocationPrecision } from "@/lib/types";
 
 export type LatLng = [number, number];
 
+/** How the route is travelled. Public transport isn't offered: matatu routes
+ * aren't in OSRM (see app/api/route/route.ts). */
+export type TravelMode = "driving" | "walking";
+
+export const TRAVEL_MODES: Record<TravelMode, { label: string; defaultBufferKm: number; approachKm: number }> = {
+  // approachKm: how far ahead an incident is when a trip warns about it —
+  // a few minutes' notice at the pace of each mode.
+  driving: { label: "Driving", defaultBufferKm: 2, approachKm: 5 },
+  walking: { label: "Walking", defaultBufferKm: 1, approachKm: 0.5 },
+};
+
 export interface RoutePlace {
   name: string;
   county: string | null;
@@ -329,6 +340,8 @@ export interface SavedRoute {
   bufferKm: number;
   group: RouteIncidentGroup;
   alerts: boolean;
+  /** Absent on routes saved before walking was offered: those are driving. */
+  mode?: TravelMode;
 }
 
 /** Tolerance for a saved route's stored line: 100 m off the real road is well
@@ -363,4 +376,57 @@ export function savedRouteHit(
     if (match) return { route, match };
   }
   return null;
+}
+
+// --- trips --------------------------------------------------------------------
+//
+// While someone is travelling the route with the page open, their position
+// says which incidents are still ahead. Foreground only: the browser stops
+// reporting position when the page is closed.
+
+/** Off the route by more than this and the position no longer says where on
+ * it someone is (a different road, or a very poor fix). */
+export const OFF_ROUTE_KM = 1.5;
+/** An incident this far behind still counts as ahead: a fix can lag, and a
+ * report's point is only so precise. */
+const PASSED_SLACK_KM = 0.3;
+
+export interface TripProgress {
+  alongKm: number;
+  offRouteKm: number;
+  onRoute: boolean;
+  ahead: RouteMatch[];
+  passed: RouteMatch[];
+}
+
+export function tripProgress(route: PreparedRoute, matches: RouteMatch[], lat: number, lng: number): TripProgress {
+  const { alongKm, offRouteKm } = locateOnRoute(route, lat, lng);
+  const onRoute = offRouteKm <= OFF_ROUTE_KM;
+  // Off the route, nothing can honestly be called passed.
+  const isPassed = (m: RouteMatch) => onRoute && m.alongKm < alongKm - PASSED_SLACK_KM;
+  return {
+    alongKm,
+    offRouteKm,
+    onRoute,
+    ahead: matches.filter((m) => !isPassed(m)),
+    passed: matches.filter(isPassed),
+  };
+}
+
+/** Incidents ahead to warn about now: ones within `approachKm` not yet warned
+ * about, and ones reported since the trip started, wherever ahead they are. */
+export function tripAlerts(
+  progress: TripProgress,
+  approachKm: number,
+  warned: ReadonlySet<string>,
+  knownAtStart: ReadonlySet<string>
+): { match: RouteMatch; reason: "approaching" | "new" }[] {
+  if (!progress.onRoute) return [];
+  const out: { match: RouteMatch; reason: "approaching" | "new" }[] = [];
+  for (const m of progress.ahead) {
+    if (warned.has(m.incident.id)) continue;
+    if (!knownAtStart.has(m.incident.id)) out.push({ match: m, reason: "new" });
+    else if (m.alongKm - progress.alongKm <= approachKm) out.push({ match: m, reason: "approaching" });
+  }
+  return out;
 }

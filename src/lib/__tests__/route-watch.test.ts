@@ -9,6 +9,8 @@ import {
   prepareRoute,
   savedRouteHit,
   simplifyRoute,
+  tripAlerts,
+  tripProgress,
   type LatLng,
   type SavedRoute,
 } from "@/lib/route-watch";
@@ -140,5 +142,48 @@ describe("savedRouteHit", () => {
     expect(savedRouteHit(near, [{ ...saved, alerts: false }])).toBeNull();
     const vague = makeIncident({ ...beside(0.5, 0.5), locationPrecision: "county" });
     expect(savedRouteHit(vague, [saved])).toBeNull();
+  });
+});
+
+describe("trips", () => {
+  const along = (t: number) => {
+    const inc = makeIncident({ ...beside(t, 0.3), locationPrecision: "local" });
+    return matchRoute(ROUTE, [inc], OPTS).along[0];
+  };
+
+  it("splits incidents into ahead and passed by where the traveller is", () => {
+    const early = along(0.2);
+    const late = along(0.8);
+    const here = beside(0.5, 0.1);
+    const p = tripProgress(ROUTE, [early, late], here.lat, here.lng);
+    expect(p.onRoute).toBe(true);
+    expect(p.passed.map((m) => m.incident.id)).toEqual([early.incident.id]);
+    expect(p.ahead.map((m) => m.incident.id)).toEqual([late.incident.id]);
+  });
+
+  it("calls nothing passed when the traveller is off the route", () => {
+    const early = along(0.2);
+    const away = beside(0.5, 5);
+    const p = tripProgress(ROUTE, [early], away.lat, away.lng);
+    expect(p.onRoute).toBe(false);
+    expect(p.passed).toEqual([]);
+    expect(tripAlerts(p, 5, new Set(), new Set())).toEqual([]);
+  });
+
+  it("warns once when approaching, and at once for incidents reported mid-trip", () => {
+    const near = along(0.55); // ~2 km ahead of the halfway point
+    const far = along(0.95); // ~18 km ahead
+    const fresh = along(0.9);
+    const here = beside(0.5, 0);
+    const p = tripProgress(ROUTE, [near, far, fresh], here.lat, here.lng);
+    const known = new Set([near.incident.id, far.incident.id]);
+
+    const first = tripAlerts(p, 5, new Set(), known);
+    expect(first.map((a) => [a.match.incident.id, a.reason])).toEqual([
+      [near.incident.id, "approaching"],
+      [fresh.incident.id, "new"],
+    ]);
+    const warned = new Set(first.map((a) => a.match.incident.id));
+    expect(tripAlerts(p, 5, warned, known)).toEqual([]);
   });
 });

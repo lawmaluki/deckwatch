@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { RouteWatch } from "@/components/route-watch/RouteWatch";
-import { BUFFER_OPTIONS_KM, type RoutePlace } from "@/lib/route-watch";
+import { BUFFER_OPTIONS_KM, TRAVEL_MODES, type RoutePlace, type TravelMode } from "@/lib/route-watch";
 
 export const metadata: Metadata = {
   title: "Route Watch",
@@ -26,12 +26,14 @@ export default async function RouteWatchPage({
 }) {
   const params = await searchParams;
   const buffer = Number(params.buffer);
+  const mode = typeof params.mode === "string" && params.mode in TRAVEL_MODES ? (params.mode as TravelMode) : null;
   return (
     <RouteWatch
       initial={{
         from: parsePlace(params.from),
         to: parsePlace(params.to),
         bufferKm: (BUFFER_OPTIONS_KM as readonly number[]).includes(buffer) ? buffer : null,
+        mode,
       }}
     />
   );

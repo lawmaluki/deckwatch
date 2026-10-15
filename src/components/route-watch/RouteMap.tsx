@@ -75,8 +75,21 @@ function PanToSelected({ match }: { match: RouteMatch | null }) {
   return null;
 }
 
+function positionIcon(): L.DivIcon {
+  return L.divIcon({
+    className: "trip-position",
+    html: `<div style="width:18px;height:18px;border-radius:9999px;background:#38bdf8;
+      border:3px solid #05070a;box-shadow:0 0 0 2px #38bdf8,0 0 14px #38bdf8"></div>`,
+    iconSize: [18, 18],
+    iconAnchor: [9, 9],
+  });
+}
+
 export default function RouteMap({
   coords,
+  alternatives = [],
+  onPickRoute,
+  position = null,
   from,
   to,
   matches,
@@ -84,13 +97,18 @@ export default function RouteMap({
   onSelect,
 }: {
   coords: LatLng[] | null;
+  /** Every route option by index, null at the one shown as `coords`. */
+  alternatives?: (LatLng[] | null)[];
+  onPickRoute?: (index: number) => void;
+  /** The traveller, during a trip. */
+  position?: { lat: number; lng: number } | null;
   from: RoutePlace | null;
   to: RoutePlace | null;
   matches: RouteMatch[];
   selectedId: string | null;
   onSelect: (id: string) => void;
 }) {
-  const icons = useMemo(() => ({ a: endpointIcon("A"), b: endpointIcon("B") }), []);
+  const icons = useMemo(() => ({ a: endpointIcon("A"), b: endpointIcon("B"), me: positionIcon() }), []);
   const selected = matches.find((m) => m.incident.id === selectedId) ?? null;
 
   return (
@@ -106,6 +124,18 @@ export default function RouteMap({
       {/* No basemap, as on the live map: county outlines, the route and the
           incidents are all that's drawn. */}
       <CountyBoundaries interactive={false} />
+      {alternatives.map(
+        (alt, i) =>
+          alt && (
+            // Unchosen options, drawn faint underneath; a tap picks one.
+            <Polyline
+              key={`alt-${i}`}
+              positions={alt}
+              pathOptions={{ color: "#8993a4", weight: 5, opacity: 0.55, dashArray: "6 8" }}
+              eventHandlers={{ click: () => onPickRoute?.(i) }}
+            />
+          )
+      )}
       {coords && (
         <>
           {/* A wide faint band under the line reads as "the corridor" without
@@ -116,6 +146,9 @@ export default function RouteMap({
       )}
       {from && <Marker position={[from.lat, from.lng]} icon={icons.a} title={from.name} />}
       {to && <Marker position={[to.lat, to.lng]} icon={icons.b} title={to.name} />}
+      {position && (
+        <Marker position={[position.lat, position.lng]} icon={icons.me} title="You" zIndexOffset={2000} />
+      )}
       {matches.map((m) => (
         <Marker
           key={m.incident.id}

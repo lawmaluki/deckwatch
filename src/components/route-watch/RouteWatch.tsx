@@ -3,19 +3,33 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import type { FeatureCollection } from "geojson";
-import { ArrowUpDown, Bell, BellOff, Bookmark, Info, Maximize2, Minimize2, Pencil, Trash2 } from "lucide-react";
+import {
+  ArrowUpDown,
+  Bell,
+  BellOff,
+  Bookmark,
+  Car,
+  Footprints,
+  Info,
+  Maximize2,
+  Minimize2,
+  Navigation,
+  Pencil,
+  Square,
+  Trash2,
+} from "lucide-react";
 import clsx from "clsx";
 import { PlacePicker } from "@/components/route-watch/PlacePicker";
 import { RouteIncidentCard } from "@/components/route-watch/RouteIncidentCard";
 import { IncidentListItem } from "@/components/incidents/IncidentListItem";
 import { useIncidents } from "@/hooks/useIncidents";
 import { useMapFocus } from "@/hooks/useMapFocus";
+import { useRouteTrip } from "@/hooks/useRouteTrip";
 import { USE_API } from "@/lib/incidents-source";
 import { useAppStore } from "@/store/useAppStore";
 import {
   BUFFER_OPTIONS_KM,
   countiesAlongRoute,
-  DEFAULT_BUFFER_KM,
   DEFAULT_WINDOW_HOURS,
   formatKm,
   matchRoute,
@@ -25,11 +39,13 @@ import {
   routeName,
   SAVED_ROUTE_TOLERANCE_KM,
   simplifyRoute,
+  TRAVEL_MODES,
   WINDOW_OPTIONS_HOURS,
   type RouteGeometry,
   type RouteIncidentGroup,
   type RoutePlace,
   type SavedRoute,
+  type TravelMode,
 } from "@/lib/route-watch";
 
 const RouteMap = dynamic(() => import("@/components/route-watch/RouteMap"), {
@@ -46,23 +62,26 @@ const COUNTY_LEVEL_PREVIEW = 5;
 type RouteState =
   | { status: "idle" }
   | { status: "loading" }
-  | { status: "ready"; geometry: RouteGeometry }
+  | { status: "ready"; routes: RouteGeometry[] }
   | { status: "error"; message: string };
 
 /** A finished request, tagged with what was asked: the state shown is derived
- * from whether it answers the current from/to, so nothing has to be reset
- * when the ends change. */
-type RouteResult = { query: string } & ({ geometry: RouteGeometry } | { error: string });
+ * from whether it answers the current from/to/mode, so nothing has to be
+ * reset when they change. */
+type RouteResult = { query: string } & ({ routes: RouteGeometry[] } | { error: string });
 
-function routeQuery(from: RoutePlace | null, to: RoutePlace | null): string | null {
+function routeQuery(from: RoutePlace | null, to: RoutePlace | null, mode: TravelMode): string | null {
   if (!from || !to) return null;
-  return `from=${from.lat.toFixed(4)},${from.lng.toFixed(4)}&to=${to.lat.toFixed(4)},${to.lng.toFixed(4)}`;
+  // mode is always sent: responses are cached at the edge for a day, and
+  // URLs without it still hold the older single-route answer.
+  return `from=${from.lat.toFixed(4)},${from.lng.toFixed(4)}&to=${to.lat.toFixed(4)},${to.lng.toFixed(4)}&mode=${mode}`;
 }
 
 export interface RouteWatchInitial {
   from: RoutePlace | null;
   to: RoutePlace | null;
   bufferKm: number | null;
+  mode: TravelMode | null;
 }
 
 /** Shared form for "Name@lat,lng" in the URL, so a route can be linked to. */
@@ -70,8 +89,11 @@ export function encodePlace(p: RoutePlace): string {
   return `${p.name}@${p.lat.toFixed(4)},${p.lng.toFixed(4)}`;
 }
 
-function routeId(from: RoutePlace, to: RoutePlace): string {
-  return `${from.lat.toFixed(3)},${from.lng.toFixed(3)}>${to.lat.toFixed(3)},${to.lng.toFixed(3)}`;
+function routeId(from: RoutePlace, to: RoutePlace, mode: TravelMode): string {
+  // Driving ids keep their original form, so routes saved before walking was
+  // offered are still recognised.
+  const id = `${from.lat.toFixed(3)},${from.lng.toFixed(3)}>${to.lat.toFixed(3)},${to.lng.toFixed(3)}`;
+  return mode === "driving" ? id : `${mode}:${id}`;
 }
 
 const noopSubscribe = () => () => {};
@@ -98,7 +120,12 @@ function loadCounties(): Promise<FeatureCollection | null> {
 export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
   const [from, setFrom] = useState<RoutePlace | null>(initial.from);
   const [to, setTo] = useState<RoutePlace | null>(initial.to);
-  const [bufferKm, setBufferKm] = useState<number>(initial.bufferKm ?? DEFAULT_BUFFER_KM);
+  const [mode, setMode] = useState<TravelMode>(initial.mode ?? "driving");
+  const [bufferKm, setBufferKm] = useState<number>(
+    initial.bufferKm ?? TRAVEL_MODES[initial.mode ?? "driving"].defaultBufferKm
+  );
+  // Which of the route options is shown, for the query it was picked on.
+  const [picked, setPicked] = useState<{ query: string; index: number } | null>(null);
   const [windowHours, setWindowHours] = useState<number>(DEFAULT_WINDOW_HOURS);
   const [group, setGroup] = useState<RouteIncidentGroup>("all");
   const [result, setResult] = useState<RouteResult | null>(null);
@@ -128,7 +155,7 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
   }, []);
 
   // Fetch the route whenever both ends are set.
-  const query = routeQuery(from, to);
+  const query = routeQuery(from, to, mode);
   useEffect(() => {
     if (!query) return;
     const controller = new AbortController();
@@ -136,7 +163,7 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
       .then(async (res) => {
         const body = await res.json();
         if (!res.ok) throw new Error(body.error ?? "Couldn't find a route.");
-        setResult({ query, geometry: body as RouteGeometry });
+        setResult({ query, routes: (body as { routes: RouteGeometry[] }).routes });
       })
       .catch((err: Error) => {
         if (err.name !== "AbortError") setResult({ query, error: err.message });
@@ -151,8 +178,8 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
       ? { status: "idle" }
       : result?.query !== query
         ? { status: "loading" }
-        : "geometry" in result
-          ? { status: "ready", geometry: result.geometry }
+        : "routes" in result
+          ? { status: "ready", routes: result.routes }
           : { status: "error", message: result.error };
 
   // Keep the URL shareable. history.replaceState, not router.replace: the page
@@ -161,12 +188,15 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
     const params = new URLSearchParams();
     if (from) params.set("from", encodePlace(from));
     if (to) params.set("to", encodePlace(to));
-    if (bufferKm !== DEFAULT_BUFFER_KM) params.set("buffer", String(bufferKm));
+    if (mode !== "driving") params.set("mode", mode);
+    if (bufferKm !== TRAVEL_MODES[mode].defaultBufferKm) params.set("buffer", String(bufferKm));
     const qs = params.toString();
     window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
-  }, [from, to, bufferKm]);
+  }, [from, to, bufferKm, mode]);
 
-  const geometry = route.status === "ready" ? route.geometry : null;
+  const routes = route.status === "ready" ? route.routes : null;
+  const routeIndex = picked && picked.query === query && routes && picked.index < routes.length ? picked.index : 0;
+  const geometry = routes ? routes[routeIndex] : null;
   const prepared = useMemo(() => (geometry ? prepareRoute(geometry.coords) : null), [geometry]);
   const routeCounties = useMemo(
     () => (geometry && counties ? countiesAlongRoute(geometry.coords, counties) : []),
@@ -186,7 +216,36 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
     [prepared, ready, snapshot, bufferKm, windowHours, group, routeCounties]
   );
 
-  const savedId = from && to ? routeId(from, to) : null;
+  // Incidents along each option, to compare them by. Counties aren't needed:
+  // only incidents placed on the road are counted.
+  const optionCounts = useMemo(
+    () =>
+      routes && routes.length > 1 && ready
+        ? routes.map(
+            (r) =>
+              matchRoute(prepareRoute(r.coords), snapshot.incidents, {
+                bufferKm,
+                windowHours,
+                group,
+                nowMs: snapshot.referenceTime.getTime(),
+                counties: [],
+              }).along.length
+          )
+        : null,
+    [routes, ready, snapshot, bufferKm, windowHours, group]
+  );
+
+  const trip = useRouteTrip(prepared, query && `${query}#${routeIndex}`, matches.along, mode);
+  const shownAlong = trip.progress ? trip.progress.ahead : matches.along;
+
+  const changeMode = (next: TravelMode) => {
+    if (next === mode) return;
+    // Follow the new mode's default corridor unless the reader chose one.
+    if (bufferKm === TRAVEL_MODES[mode].defaultBufferKm) setBufferKm(TRAVEL_MODES[next].defaultBufferKm);
+    setMode(next);
+  };
+
+  const savedId = from && to ? routeId(from, to, mode) : null;
   const saved = mounted ? savedRoutes.find((r) => r.id === savedId) : undefined;
 
   const onSave = () => {
@@ -200,6 +259,7 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
       bufferKm,
       group,
       alerts: true,
+      mode,
     };
     saveRoute(route);
   };
@@ -221,6 +281,9 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
       >
         <RouteMap
           coords={geometry?.coords ?? null}
+          alternatives={routes ? routes.map((r, i) => (i === routeIndex ? null : r.coords)) : []}
+          onPickRoute={(i) => query && setPicked({ query, index: i })}
+          position={trip.position}
           from={from}
           to={to}
           matches={matches.along}
@@ -252,6 +315,11 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
 
         {compact && from && to && (
           <div className="flex items-center gap-2 rounded-lg border border-border bg-surface py-1 pl-3 pr-1 md:hidden">
+            {mode === "walking" ? (
+              <Footprints className="h-4 w-4 shrink-0 text-muted" aria-label="Walking" />
+            ) : (
+              <Car className="h-4 w-4 shrink-0 text-muted" aria-label="Driving" />
+            )}
             <p className="min-w-0 flex-1 truncate text-sm text-foreground">
               {from.name} <span className="text-muted">&rarr;</span> {to.name}
             </p>
@@ -265,6 +333,26 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
         )}
 
         <div className={clsx("mt-4 space-y-2", compact && "hidden md:block")}>
+          <div role="radiogroup" aria-label="Travel mode" className="flex gap-1.5">
+            {(Object.keys(TRAVEL_MODES) as TravelMode[]).map((m) => {
+              const Icon = m === "driving" ? Car : Footprints;
+              return (
+                <button
+                  key={m}
+                  role="radio"
+                  aria-checked={mode === m}
+                  onClick={() => changeMode(m)}
+                  className={clsx(
+                    "flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border text-xs font-medium md:h-8",
+                    mode === m ? "border-brand/60 bg-brand/10 text-brand" : "border-border bg-surface text-muted hover:text-foreground"
+                  )}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {TRAVEL_MODES[m].label}
+                </button>
+              );
+            })}
+          </div>
           <PlacePicker label="Starting point" value={from} onChange={setFrom} allowMyLocation />
           <div className="flex justify-end">
             <button
@@ -311,12 +399,14 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
                     onClick={() => {
                       setFrom(r.from);
                       setTo(r.to);
+                      setMode(r.mode ?? "driving");
                       setBufferKm(r.bufferKm);
                       setGroup(r.group);
                     }}
                     className="min-h-10 min-w-0 flex-1 truncate text-left text-sm text-foreground hover:text-brand md:min-h-0 md:text-xs"
                   >
                     {routeName(r)}
+                    {r.mode === "walking" && <span className="text-muted"> · walking</span>}
                   </button>
                   <button
                     onClick={() => setRouteAlerts(r.id, !r.alerts)}
@@ -382,7 +472,8 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-sm text-foreground">
-                  {formatKm(geometry.distanceKm)} by road · about {formatDuration(geometry.durationMin)}
+                  {formatKm(geometry.distanceKm)} {mode === "walking" ? "on foot" : "by road"} · about{" "}
+                  {formatDuration(geometry.durationMin)}
                 </p>
                 {routeCounties.length > 0 && (
                   <p className="mt-0.5 text-[11px] text-muted">Through {routeCounties.join(", ")}</p>
@@ -404,8 +495,91 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
             {saved?.alerts && (
               <p className="mt-1.5 text-[11px] text-muted">
                 You&apos;ll get an alert when a new incident is reported along this route while Deckwatch is open
-                in a tab, and a browser notification if you&apos;ve allowed them.
+                in a tab. Allow browser notifications in Alerts to hear about it when you&apos;re on another tab
+                too.
               </p>
+            )}
+
+            {routes && routes.length > 1 && (
+              <div className="mt-3">
+                <p className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-muted">
+                  {routes.length} ways to go
+                </p>
+                <div role="radiogroup" aria-label="Route options" className="space-y-1.5">
+                  {routes.map((r, i) => (
+                    <button
+                      key={i}
+                      role="radio"
+                      aria-checked={i === routeIndex}
+                      onClick={() => query && setPicked({ query, index: i })}
+                      className={clsx(
+                        "flex min-h-10 w-full items-center justify-between gap-3 rounded-lg border px-3 py-1.5 text-left text-xs",
+                        i === routeIndex ? "border-brand/60 bg-brand/10" : "border-border bg-surface hover:border-brand/40"
+                      )}
+                    >
+                      <span className="text-foreground">
+                        {i === 0 ? "Suggested" : `Option ${i + 1}`} · {formatKm(r.distanceKm)} · {formatDuration(r.durationMin)}
+                      </span>
+                      {optionCounts && (
+                        <span className={clsx("shrink-0", optionCounts[i] > 0 ? "text-high" : "text-muted")}>
+                          {optionCounts[i] === 0
+                            ? "none reported"
+                            : `${optionCounts[i]} incident${optionCounts[i] === 1 ? "" : "s"}`}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <p className="mt-1 text-[11px] text-muted">
+                  Counts only incidents placed on each road. Fewer reports isn&apos;t the same as safer.
+                </p>
+              </div>
+            )}
+
+            {ready && (
+              <div className="mt-4 rounded-lg border border-border bg-surface px-3 py-2.5">
+                {!trip.active ? (
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-[11px] leading-relaxed text-muted">
+                      Travelling now? Follow your trip to see what&apos;s still ahead and get a warning before you
+                      reach it. Keep this page open; your location stays on your device.
+                    </p>
+                    <button
+                      onClick={trip.start}
+                      className="flex h-10 shrink-0 items-center gap-1.5 rounded-md bg-brand px-3 text-xs font-semibold text-black md:h-8"
+                    >
+                      <Navigation className="h-3.5 w-3.5" /> Start trip
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-sm font-medium text-foreground">
+                        {!trip.position
+                          ? "Finding your location…"
+                          : !trip.progress?.onRoute
+                            ? `You're ${formatKm(trip.progress?.offRouteKm ?? 0)} off this route`
+                            : `km ${Math.round(trip.progress.alongKm)} of ${Math.round(geometry.distanceKm)}`}
+                      </p>
+                      <button
+                        onClick={trip.stop}
+                        className="flex h-10 shrink-0 items-center gap-1.5 rounded-md border border-border px-3 text-xs font-medium text-foreground md:h-8"
+                      >
+                        <Square className="h-3 w-3" /> End trip
+                      </button>
+                    </div>
+                    {trip.progress?.onRoute && (
+                      <p className="mt-1 text-[11px] text-muted">
+                        {trip.progress.ahead.length === 0
+                          ? "Nothing reported on the road ahead."
+                          : `Next: ${formatKm(Math.max(0, trip.progress.ahead[0].alongKm - trip.progress.alongKm))} ahead. You'll be warned ${formatKm(TRAVEL_MODES[mode].approachKm)} before each incident.`}
+                      </p>
+                    )}
+                    {trip.error && <p className="mt-1 text-[11px] text-high">{trip.error}</p>}
+                  </div>
+                )}
+                {trip.error && !trip.active && <p className="mt-1 text-[11px] text-high">{trip.error}</p>}
+              </div>
             )}
 
             {!ready ? (
@@ -413,22 +587,26 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
             ) : (
               <>
                 <h2 className="mt-5 text-sm font-semibold text-foreground">
-                  Along your route{" "}
+                  {trip.progress ? "Ahead of you" : "Along your route"}{" "}
                   <span className="font-normal text-muted">
-                    · {matches.along.length} in the last {windowLabel}
+                    · {shownAlong.length} in the last {windowLabel}
+                    {trip.progress && trip.progress.passed.length > 0 && `, ${trip.progress.passed.length} passed`}
                   </span>
                 </h2>
-                {matches.along.length === 0 ? (
+                {shownAlong.length === 0 ? (
                   <p className="mt-2 rounded-lg bg-surface px-3 py-3 text-xs text-muted">
-                    No incidents have been placed within {bufferKm} km of this route in the last {windowLabel}.
+                    {trip.progress && matches.along.length > 0
+                      ? "You've passed everything reported along this route."
+                      : `No incidents have been placed within ${bufferKm} km of this route in the last ${windowLabel}.`}
                   </p>
                 ) : (
                   <ol className="mt-2 space-y-2">
-                    {matches.along.map((m) => (
+                    {shownAlong.map((m) => (
                       <li key={m.incident.id} id={`route-incident-${m.incident.id}`}>
                         <RouteIncidentCard
                           match={m}
                           routeKm={geometry.distanceKm}
+                          aheadKm={trip.progress?.onRoute ? m.alongKm - trip.progress.alongKm : null}
                           active={m.incident.id === selectedId}
                           onSelect={() => setSelectedId(m.incident.id === selectedId ? null : m.incident.id)}
                         />
@@ -480,7 +658,8 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
         )}
 
         <p className="mt-6 text-[10px] text-muted/80">
-          Driving routes by OSRM, © OpenStreetMap contributors. Place names © GeoNames (CC BY 4.0).
+          Routes by OSRM and FOSSGIS, © OpenStreetMap contributors. Place names © GeoNames (CC BY 4.0).
+          Public transport routes aren&apos;t available.
         </p>
       </section>
     </div>
