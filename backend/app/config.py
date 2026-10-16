@@ -46,6 +46,10 @@ class Settings(BaseSettings):
     # 0 disables the cache.
     incident_cache_seconds: int = 300
 
+    # Media Cloud (search.mediacloud.org): only for finding new feeds
+    # (python -m app.ingest.discover_feeds). Ingestion doesn't use it.
+    mediacloud_api_key: str = ""
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     @field_validator("database_url")

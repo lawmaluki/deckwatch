@@ -53,11 +53,15 @@ def _strip_html(raw: str) -> str:
 
 
 class Feed:
-    def __init__(self, name: str, url: str, source_type: str, homepage: str):
+    def __init__(self, name: str, url: str, source_type: str, homepage: str,
+                 timeout_s: float = FETCH_TIMEOUT_S):
         self.name = name
         self.url = url
         self.source_type = source_type  # matches Source.type ("news", ...)
         self.homepage = homepage
+        # For a feed known to be slow but worth waiting for. Feeds are
+        # fetched in parallel, so one slow feed doesn't delay the rest.
+        self.timeout_s = timeout_s
 
 
 # Curated Kenyan outlet feeds. `source_type` feeds verification scoring; the
@@ -75,7 +79,8 @@ FEEDS: List[Feed] = [
          "https://www.kenyans.co.ke"),
     Feed("Citizen Digital", "https://www.citizen.digital/feed.xml", "news",
          "https://www.citizen.digital"),
-    Feed("Nation Africa", "https://nation.africa/kenya/rss.xml", "news",
+    # www. since Oct 2026: the bare domain's feed started returning 404.
+    Feed("Nation Africa", "https://www.nation.africa/kenya/rss.xml", "news",
          "https://nation.africa/kenya"),
     Feed("NTV Kenya", "https://ntvkenya.co.ke/feed/", "news",
          "https://ntvkenya.co.ke"),
@@ -105,10 +110,16 @@ FEEDS: List[Feed] = [
          "https://www.health.go.ke"),
     Feed("National Police Service", "https://www.kenyapolice.go.ke/rss.xml", "police",
          "https://www.kenyapolice.go.ke"),
+    # The government news agency: answers in 20-30 s, so it gets longer.
+    Feed("Kenya News Agency", "https://www.kenyanews.go.ke/feed/", "government",
+         "https://www.kenyanews.go.ke", timeout_s=45),
+    # From Media Cloud's Kenyan collections (Oct 2026, app.ingest.discover_feeds):
+    # 164 outlets not already read, 45 with a working dated feed, and these two
+    # the credible general-news ones among them.
+    Feed("Ebru TV", "https://ebru.co.ke/feed/", "news", "https://ebru.co.ke"),
+    Feed("Radio Kaya", "https://radiokaya.co.ke/feed/", "news", "https://radiokaya.co.ke"),
     # The Star: no working RSS feed as of 2026-08 (Next.js SPA, no discoverable feed URL).
     # TV47: dropped Oct 2026, its feed errors or serves items weeks old.
-    # Kenya News Agency (kenyanews.go.ke/feed): times out; worth retrying, as
-    # a government source it would weigh more in verification.
     # Mwakilishi: its feed carries no publish dates, so every item would read
     # as happening at ingest time.
     # Left out on purpose (Oct 2026): gossip, tabloid and partisan blogs with
@@ -116,6 +127,11 @@ FEEDS: List[Feed] = [
     # Verification counts every outlet as independent corroboration, so they
     # would make rumours look confirmed. Also Google News search feeds: mostly
     # foreign outlets, and links point at Google, not the article.
+    # Also from the Media Cloud check: allAfrica (republishes other outlets,
+    # so it would double-count one article as two sources), Swahili outlets
+    # such as Taifa Leo (the keyword classifier reads English only; worth
+    # adding once ingestion uses Claude), The EastAfrican (mostly other
+    # countries), and tech, business, sport and lifestyle sites.
 ]
 
 
@@ -159,7 +175,7 @@ def _fetch_one(feed: Feed) -> Tuple[List[Dict[str, str]], Optional[str]]:
     """One feed's items, and why it gave none if it failed."""
     try:
         req = urllib.request.Request(feed.url, headers=REQUEST_HEADERS)
-        with urllib.request.urlopen(req, timeout=FETCH_TIMEOUT_S) as res:
+        with urllib.request.urlopen(req, timeout=feed.timeout_s) as res:
             body = res.read()
             encoding = (res.headers.get("Content-Encoding") or "").lower()
         if encoding == "gzip":
