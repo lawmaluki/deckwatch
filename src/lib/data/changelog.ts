@@ -42,8 +42,8 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     date: "2026-10-16",
     kind: "improved",
-    title: "More news sources, checked more reliably",
-    body: "Deckwatch now also reads The Kenya Times and Kahawa Tungu, and The Standard's coverage is fresh again after its old feed stopped updating. A news site that stops responding no longer holds up the others.",
+    title: "21 news sources, including the police and Kenya News Agency",
+    body: "Deckwatch now reads 21 Kenyan sources, up from 14. New are The Eastleigh Voice, The Kenya Times, Kahawa Tungu, Business Today, Ebru TV and Radio Kaya, plus three official ones: Kenya News Agency, the National Police Service and the Ministry of Health. When an official source reports the same incident as the newsrooms, its verification score rises further than another newsroom would lift it. Nation's coverage is back after its feed moved, and The Standard's is fresh again after its old feed stopped updating. We left out gossip and partisan sites on purpose: every source counts as independent confirmation, so they would make rumours look verified.",
   },
   {
     date: "2026-10-13",
