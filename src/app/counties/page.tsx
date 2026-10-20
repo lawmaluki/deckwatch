@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { COUNTIES } from "@/lib/data/counties";
-import { connection } from "next/server";
-import { readIncidents, USE_API } from "@/lib/incidents-source";
+import { readIncidents } from "@/lib/incidents-source";
 import { DataUnavailableNotice } from "@/components/layout/DataUnavailableNotice";
 import { summarizeByCounty, riskLabel } from "@/lib/stats";
 
@@ -12,8 +11,12 @@ export const metadata: Metadata = {
     "All 47 Kenyan counties ranked by current risk score, with incident totals and 24-hour activity for each.",
 };
 
+/** Cached for a minute rather than rebuilt per request: 47 county summaries
+ * off one backend read took ~2.8s in production on every view, for figures
+ * that only change when ingestion runs, hourly. */
+export const revalidate = 60;
+
 export default async function CountiesIndexPage() {
-  if (USE_API) await connection();
   const { incidents, unavailable } = await readIncidents();
   const summaries = summarizeByCounty(incidents);
   const summaryByName = new Map(summaries.map((s) => [s.county, s]));

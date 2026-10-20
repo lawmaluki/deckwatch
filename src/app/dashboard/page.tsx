@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { AlertTriangle, Flame, MapPinned, TrendingUp } from "lucide-react";
-import { connection } from "next/server";
-import { readIncidents, getReferenceTime, USE_API } from "@/lib/incidents-source";
+import { readIncidents, getReferenceTime } from "@/lib/incidents-source";
 import { DataUnavailableNotice } from "@/components/layout/DataUnavailableNotice";
 import { withinHours, summarizeByCounty, categoryBreakdown, dailyTrend, riskLabel } from "@/lib/stats";
 import { CATEGORIES } from "@/lib/data/categories";
@@ -24,10 +23,20 @@ export const metadata: Metadata = {
     "Kenya-wide incident intelligence: severity breakdown, 14-day trend, category mix and the counties carrying the most risk right now.",
 };
 
+/** Rebuilt on demand at most once a minute, rather than per request.
+ *
+ * Rendering this page costs a backend read and every statistic derived from
+ * it — four seconds, measured in production, on every single view. Caching it
+ * loses nothing: ingestion writes hourly, so a minute-old dashboard is newer
+ * than the data behind it.
+ *
+ * LiveRefresh still belongs here. It calls router.refresh() every five
+ * minutes, which now re-reads a cache that has already revalidated several
+ * times over, so a tab left open keeps pace exactly as before.
+ */
+export const revalidate = 60;
+
 export default async function NationalDashboardPage() {
-  // Live data must be re-anchored per request; mock builds inline USE_API to
-  // false and stay fully static.
-  if (USE_API) await connection();
   const [{ incidents, unavailable }, reports] = await Promise.all([readIncidents(), listMonthlyReports()]);
   const last24h = incidents.filter((i) => withinHours(i, 24));
   const critical24h = last24h.filter((i) => i.severity === "critical");
