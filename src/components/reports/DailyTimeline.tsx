@@ -28,6 +28,11 @@ export function DailyTimeline({
   const peak = days.reduce((a, b) => (b.incidents > a.incidents ? b : a));
   const ticks = Array.from({ length: yMax / 2 + 1 }, (_, i) => i * 2);
 
+  function show(d: DayRow, clientX: number, clientY: number) {
+    const r = box.current?.getBoundingClientRect();
+    if (r) setHover({ day: d, x: clientX - r.left, y: clientY - r.top, w: r.width });
+  }
+
   return (
     <div ref={box} className="relative rounded-2xl border border-border bg-surface px-4 pb-2 pt-4">
       <svg
@@ -59,11 +64,31 @@ export function DailyTimeline({
           return (
             <g
               key={d.day}
-              className="cursor-default"
-              onMouseMove={(ev) => {
-                const r = box.current!.getBoundingClientRect();
-                setHover({ day: d, x: ev.clientX - r.left, y: ev.clientY - r.top, w: r.width });
+              className="cursor-pointer"
+              // Hover alone left this chart's detail unreachable on a phone,
+              // where the report is most likely to be read: a tap produced
+              // nothing at all. Pointer events cover mouse, touch and pen in
+              // one handler, and the bar is focusable so a keyboard reaches
+              // it too.
+              tabIndex={d.incidents > 0 ? 0 : -1}
+              role={d.incidents > 0 ? "button" : undefined}
+              aria-label={
+                d.incidents > 0
+                  ? `${monthShort} ${d.day}: ${d.incidents} incident${d.incidents === 1 ? "" : "s"}`
+                  : undefined
+              }
+              onPointerDown={(ev) => show(d, ev.clientX, ev.clientY)}
+              onPointerMove={(ev) => {
+                // Dragging a finger across the chart should not re-anchor the
+                // card under it; only a mouse tracks continuously.
+                if (ev.pointerType === "mouse") show(d, ev.clientX, ev.clientY);
               }}
+              onFocus={() => {
+                const r = box.current?.getBoundingClientRect();
+                if (r) setHover({ day: d, x: x + bw / 2, y: y(d.incidents), w: r.width });
+              }}
+              // Tabbing away leaves no mouseleave behind to clear the card.
+              onBlur={() => setHover((h) => (h?.day.day === d.day ? null : h))}
             >
               <rect x={x} y={PT} width={bw} height={H - PT - PB} fill="transparent" />
               {d.incidents > 0 && (
@@ -98,9 +123,13 @@ export function DailyTimeline({
       </svg>
       {hover && (
         <div
-          className="pointer-events-none absolute z-10 w-[250px] rounded-lg border border-border bg-surface-raised px-2.5 py-2 text-xs leading-snug shadow-xl"
+          className="pointer-events-none absolute z-10 w-[250px] max-w-[calc(100%-1rem)] rounded-lg border border-border bg-surface-raised px-2.5 py-2 text-xs leading-snug shadow-xl"
           style={{
-            left: Math.min(hover.x + 14, hover.w - 260),
+            // Clamped at both ends: on a narrow screen the old
+            // `hover.w - 260` went negative and pushed the card off the left
+            // edge, because the container is narrower than the card's own
+            // fixed width.
+            left: Math.max(8, Math.min(hover.x + 14, hover.w - 258)),
             top: Math.max(8, hover.y - 90),
           }}
         >

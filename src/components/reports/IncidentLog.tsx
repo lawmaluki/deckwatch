@@ -46,7 +46,9 @@ export function IncidentLog({ events, categories }: { events: ReportEvent[]; cat
               <tr className="border-b border-border font-mono text-[11px] uppercase tracking-wider text-muted">
                 <th className="px-2.5 py-2 text-left font-medium">Date</th>
                 <th className="px-2.5 py-2 text-left font-medium">Incident</th>
-                <th className="px-2.5 py-2 text-left font-medium">County</th>
+                {/* Folded into the incident cell on phones, where five
+                    columns push the table into a sideways scroll. */}
+                <th className="hidden px-2.5 py-2 text-left font-medium sm:table-cell">County</th>
                 <th className="px-2.5 py-2 text-right font-medium">Deaths</th>
                 <th className="px-2.5 py-2 text-right font-medium">Outlets</th>
               </tr>
@@ -61,9 +63,10 @@ export function IncidentLog({ events, categories }: { events: ReportEvent[]; cat
                     </a>
                     <div className="mt-0.5 font-mono text-[10.5px] uppercase tracking-wider text-muted">
                       {REPORT_CATEGORY_LABELS[e.category]}
+                      <span className="sm:hidden"> · {e.county}</span>
                     </div>
                   </td>
-                  <td className="whitespace-nowrap px-2.5 py-2">{e.county}</td>
+                  <td className="hidden whitespace-nowrap px-2.5 py-2 sm:table-cell">{e.county}</td>
                   <td className="px-2.5 py-2 text-right font-mono tabular-nums">{e.deaths || "–"}</td>
                   <td className="px-2.5 py-2 text-right font-mono tabular-nums">{e.outlets.length}</td>
                 </tr>
