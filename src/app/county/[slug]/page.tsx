@@ -4,8 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, AlertTriangle, Clock } from "lucide-react";
 import { COUNTIES, COUNTY_BY_SLUG } from "@/lib/data/counties";
-import { connection } from "next/server";
-import { readIncidents, USE_API } from "@/lib/incidents-source";
+import { readIncidents } from "@/lib/incidents-source";
 import { DataUnavailableNotice } from "@/components/layout/DataUnavailableNotice";
 import {
   withinHours,
@@ -60,12 +59,30 @@ export async function generateMetadata({
 // a 200, which tells a crawler every mistyped county is a real page.
 export const dynamicParams = false;
 
+/** Rebuilt on demand at most once a minute, rather than rendered per request.
+ *
+ * The per-request render existed to re-anchor seeded timestamps to now. The
+ * seed is gone — ingested incidents carry the article's own publish time and
+ * are never shifted — so it was buying nothing and costing two things.
+ *
+ * It made the route dynamic, which left dynamicParams with no static set to
+ * check, so an unknown county rendered the not-found body under a 200 and
+ * invited crawlers to treat every mistyped slug as a page. And it put a
+ * backend round trip in front of every view: ~2.2s in production, against
+ * ~5ms from the cache here.
+ *
+ * A minute is well inside the app's own cadence — the client polls every five
+ * and ingestion writes every fifteen — so nothing on the page is fresher
+ * without it. The dashboard keeps its per-request render: LiveRefresh calls
+ * router.refresh() on a timer there, which a cached response would blunt.
+ */
+export const revalidate = 60;
+
 export default async function CountyDashboardPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  if (USE_API) await connection();
   const { slug } = await params;
   const county = COUNTY_BY_SLUG[slug];
   if (!county) notFound();
