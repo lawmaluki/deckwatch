@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     seed_on_start: bool = True
 
     # Seconds the API serves incident lists from memory before re-reading the
-    # database (app/cache.py). Data only moves when ingest runs (every 15 min),
+    # database (app/cache.py). Data only moves when ingest runs (hourly),
     # so a few minutes of staleness is invisible but saves most of the egress.
     # 0 disables the cache.
     incident_cache_seconds: int = 300

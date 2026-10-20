@@ -72,8 +72,7 @@ export const dynamicParams = false;
  * ~5ms from the cache here.
  *
  * A minute is well inside the app's own cadence — the client polls every five
- * and ingestion writes every fifteen — so nothing on the page is fresher
- * without it. The dashboard keeps its per-request render: LiveRefresh calls
+ * and ingestion writes hourly — so nothing on the page is fresher without it. The dashboard keeps its per-request render: LiveRefresh calls
  * router.refresh() on a timer there, which a cached response would blunt.
  */
 export const revalidate = 60;

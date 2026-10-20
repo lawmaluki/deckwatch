@@ -84,8 +84,8 @@ export default function WhyDeckwatchPage() {
             Current status
           </h2>
           <p className="mb-3 text-sm leading-relaxed text-muted">
-            Live news ingestion is running. Deckwatch reads 13 Kenyan newsrooms
-            every 15 minutes, classifies what it finds, locates it, and puts it
+            Live news ingestion is running. Deckwatch reads 21 Kenyan newsrooms
+            every hour, classifies what it finds, locates it, and puts it
             on the map. Incidents marked{" "}
             <span className="font-medium text-brand">LIVE</span> are real
             reporting, gathered automatically.

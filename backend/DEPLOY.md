@@ -9,7 +9,7 @@ automatically on push to `main`.
 Ingestion runs on GitHub Actions rather than a Render Cron Job because Render
 has no free tier for Cron Jobs — it requires payment info on file even for
 the smallest plan. Actions' free scheduled workflows cover a
-`python -m app.ingest` call every 15 minutes at no cost.
+`python -m app.ingest` call every hour at no cost.
 
 > Platform UIs change. The **requirements** are stable even if the exact
 > clicks aren't: (a) a Postgres with the **PostGIS** extension, (b) the API
@@ -59,7 +59,7 @@ Render's free plan spins the API down after ~15 minutes idle, so the first
 request after a quiet spell is slow to wake it — expected, not a bug.
 
 ## 3. GitHub Actions: scheduled ingestion
-`.github/workflows/ingest.yml` runs `python -m app.ingest` every 15 minutes
+`.github/workflows/ingest.yml` runs `python -m app.ingest` every hour
 via `workflow_dispatch`-enabled cron, independent of Render.
 
 - In the GitHub repo: **Settings → Secrets and variables → Actions**.
@@ -98,7 +98,7 @@ untouched by anything below.
 | Database | Supabase project (prod) | a second Supabase project |
 | API | Render `deckwatch-api` | Render `deckwatch-api-dev` |
 | Frontend | Vercel production | Vercel preview for branch `dev` |
-| Ingestion | scheduled, every 15 min | manual, "Dev ingestion (manual)" workflow |
+| Ingestion | scheduled, hourly | manual, "Dev ingestion (manual)" workflow |
 
 1. **Supabase.** Create a second project and repeat step 1 (enable `postgis`,
    copy the Transaction pooler string). Never reuse the production string.
@@ -141,7 +141,7 @@ Claude.
   fatal. Feed URLs live in `app/ingest/sources.py`.
 - **Cost.** The rule-based path is free. Supabase's and Render's free tiers
   and GitHub Actions' free scheduled-workflow minutes all cover this
-  workload at $0. Claude Haiku 4.5 is ~$1/$5 per M tokens; a 15-minute
+  workload at $0. Claude Haiku 4.5 is ~$1/$5 per M tokens; an hourly
   cadence over the tracked feeds is a few cents a day at most.
 - **Seed vs real.** Ingested incidents (`ing-*` ids) coexist with the seed.
   For a pure real-data site, set `SEED_ON_START=false` and let ingestion

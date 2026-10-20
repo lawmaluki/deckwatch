@@ -1,13 +1,13 @@
 // Caching for the public API. Responses that succeed are cached at the edge
 // (Vercel's CDN) for a short while, so outside callers hitting the API don't
-// each wake the Render backend: the data only moves when the ingest cron runs
-// every 15 minutes, so a few minutes of staleness costs nothing. Errors are never
+// each wake the Render backend: the data only moves when the ingest cron runs,
+// hourly, so a few minutes of staleness costs nothing. Errors are never
 // cached, so a bad request or a backend hiccup isn't served to everyone after.
 
 /** Seconds a successful response may be served from the edge cache. */
 export const API_CACHE_SECONDS = {
-  /** Incident lists and county figures: move with every ingest run (every
-   * 15 minutes), and the backend caches them for 5 minutes anyway. */
+  /** Incident lists and county figures: move with every ingest run (hourly),
+   * and the backend caches them for 5 minutes anyway. */
   live: 300,
   /** Monthly report archive: a new entry at most once a month. */
   reportList: 600,

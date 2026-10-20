@@ -3,7 +3,7 @@
 Every /incidents poll, county page and county summary used to read the
 incidents table from Supabase, and every byte read leaves Supabase as billed
 egress (5 GB a month on the free plan). The data only changes when the ingest
-cron runs, every 15 minutes, so the API keeps one copy for
+cron runs, hourly, so the API keeps one copy for
 INCIDENT_CACHE_SECONDS and serves every request from it: a thousand page views
 in that window cost one database read instead of a thousand.
 

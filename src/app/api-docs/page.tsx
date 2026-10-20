@@ -41,7 +41,7 @@ const FACTS = [
   { icon: KeyRound, label: "No API key", detail: "Call it straight away" },
   { icon: Globe, label: "Any website", detail: "CORS open for reads" },
   { icon: FileJson, label: "JSON", detail: "OpenAPI 3.1 spec" },
-  { icon: Timer, label: "Fresh", detail: "Ingested every 15 min" },
+  { icon: Timer, label: "Fresh", detail: "Ingested hourly" },
 ];
 
 export default function ApiDocsPage() {
@@ -110,7 +110,7 @@ export default function ApiDocsPage() {
               sit at its centre. Check <Code>verificationStatus</Code> and the sources before acting on any one report.
             </Note>
             <Note title="Freshness and caching">
-              New articles are ingested every 15 minutes. Responses are cached for up to a minute (an hour for monthly
+              New articles are ingested hourly. Responses are cached for up to a minute (an hour for monthly
               reports), so polling more often than that only returns the same data.
             </Note>
             <Note title="Fair use">

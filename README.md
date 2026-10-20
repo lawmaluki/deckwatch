@@ -21,7 +21,7 @@ Kenyans deciding whether it is safe to travel, commute or attend an event mostly
 ## Features
 
 - **Live incident map.** Every incident on a map of Kenya's 47 counties, with marker clustering, a heat map, and a timeline to replay how a day or week unfolded.
-- **News ingestion every 15 minutes.** RSS feeds from 13 Kenyan outlets are filtered, classified into 11 incident categories, placed in a county, and merged with earlier coverage of the same event.
+- **Hourly news ingestion.** RSS feeds from 21 Kenyan outlets are filtered, classified into 11 incident categories, placed in a county, and merged with earlier coverage of the same event.
 - **Verification scoring.** Each incident carries a status (verified, likely true, unconfirmed) based on how many independent outlets reported it, with links to every source.
 - **National and county dashboards.** A 24-hour picture, 14-day trends, category mix, and a risk score for each county. Every figure links through to the incidents behind it.
 - **Monthly safety report.** Published on the last day of each month. The month's coverage is consolidated into distinct incidents, so the same crash reported 20 times counts once, and the report covers hotspots, county briefs, what changed, and what remains uncertain.
