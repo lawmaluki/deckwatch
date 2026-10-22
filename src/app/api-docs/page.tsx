@@ -4,6 +4,7 @@ import { API_ENDPOINTS, SITE_URL, type ApiEndpoint } from "@/lib/api-spec";
 import { CodeTabs } from "@/components/api/CodeTabs";
 import { CopyButton } from "@/components/api/CopyButton";
 import { TryIt } from "@/components/api/TryIt";
+import { NEWS_SOURCE_COUNT } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "API",
@@ -52,7 +53,7 @@ export default function ApiDocsPage() {
         <h1 className="mb-3 text-2xl font-semibold text-foreground sm:text-3xl">Deckwatch Kenya API</h1>
         <p className="mb-6 max-w-2xl text-sm leading-relaxed text-muted sm:text-base">
           The same data behind this site, free to use in your own apps, maps, dashboards and research: real safety incidents
-          from 13 Kenyan newsrooms, county figures and the monthly safety reports. Every endpoint below is live; press{" "}
+          from {NEWS_SOURCE_COUNT} Kenyan news and official sources, county figures and the monthly safety reports. Every endpoint below is live; press{" "}
           <span className="font-medium text-foreground">Try it</span> to send a real request.
         </p>
 

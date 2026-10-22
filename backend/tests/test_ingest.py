@@ -863,3 +863,18 @@ def test_ingestion_reads_only_what_dedup_needs():
         assert got == {"ing-2", "ing-3"}
         # summaries: the detail text never leaves the database on these reads
         assert all("aiSummary" not in i for i in repository.get_all_incidents(session))
+
+
+def test_site_quotes_the_real_number_of_sources():
+    """The site says how many sources it reads (share image, description, API
+    and Why pages) from one constant; it went stale at 13 once already."""
+    import re
+
+    constants = Path(__file__).resolve().parents[2] / "src" / "lib" / "constants.ts"
+    if not constants.exists():
+        pytest.skip("frontend not checked out alongside the backend")
+    quoted = re.search(r"NEWS_SOURCE_COUNT = (\d+)", constants.read_text(encoding="utf-8"))
+    assert quoted, "NEWS_SOURCE_COUNT not found in src/lib/constants.ts"
+    assert int(quoted.group(1)) == len(sources.FEEDS), (
+        f"src/lib/constants.ts says {quoted.group(1)} sources, sources.FEEDS has {len(sources.FEEDS)}"
+    )

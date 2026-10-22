@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { NEWS_SOURCE_COUNT } from "@/lib/constants";
 
 /** The card that appears when a Deckwatch link is pasted into WhatsApp, X or
  * Slack. Generated rather than committed as a PNG so it stays in step with
@@ -65,8 +66,7 @@ export default function OpengraphImage() {
             marginTop: "24px",
           }}
         >
-          Live incident map, verification scoring and county risk — ingested
-          from 13 Kenyan newsrooms.
+          {`Live incident map, Route Watch, verification scoring and county risk — from ${NEWS_SOURCE_COUNT} Kenyan news and official sources.`}
         </div>
 
         <div style={{ display: "flex", gap: "12px", marginTop: "44px" }}>

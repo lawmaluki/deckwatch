@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import { AppShell } from "@/components/layout/AppShell";
+import { NEWS_SOURCE_COUNT } from "@/lib/constants";
 
 // A measurement ID is public by design (it ships in every page's source), so
 // it lives here rather than in an env var that would have to be set on Vercel
@@ -22,7 +23,7 @@ const geistMono = Geist_Mono({
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://deckwatch.vercel.app";
 const TITLE = "Deckwatch Kenya — Public Safety Intelligence";
 const DESCRIPTION =
-  "Live public safety and incident intelligence for Kenya. Incident map, verification scoring, and county risk intelligence, ingested from 13 Kenyan newsrooms.";
+  `Live public safety and incident intelligence for Kenya. Incident map, Route Watch, verification scoring and county risk, from ${NEWS_SOURCE_COUNT} Kenyan news and official sources.`;
 
 export const metadata: Metadata = {
   // Absolute URLs for social cards are resolved against this; without it
