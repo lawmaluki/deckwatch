@@ -120,7 +120,7 @@ const fetchBackendIncidents = cache(async (): Promise<Incident[] | null> => {
     // Shared across requests for the length of one poll. Every navigation used
     // to block on an uncached round trip to the API — which on a free instance
     // that has spun down is the better part of a minute — to recompute
-    // aggregates over data the cron only moves every 15 minutes. Caching past
+    // aggregates over data the cron only moves hourly. Caching past
     // the poll would be pointless: nothing here can be fresher than that.
     const res = await fetch(`${BACKEND_URL}/incidents`, {
       next: { revalidate: POLL_INTERVAL_MS / 1000 },

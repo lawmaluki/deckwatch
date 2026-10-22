@@ -10,7 +10,7 @@
 # Scheduled ingestion runs on GitHub Actions instead of a Render Cron Job —
 # Render has no free tier for Cron Jobs (it requires payment info on file
 # even for the smallest plan), and Actions' free scheduled workflows cover a
-# `python -m app.ingest` call every 15 minutes at no cost. See
+# `python -m app.ingest` call every hour at no cost. See
 # .github/workflows/ingest.yml.
 #
 # Platform UIs and the Blueprint schema change over time; if a field below is

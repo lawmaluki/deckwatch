@@ -110,7 +110,11 @@ export function Header() {
             alertsConfigured ? "Alert subscriptions active" : "Alert subscriptions"
           }
           onClick={() => setNotificationsOpen(true)}
-          className="relative flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-muted transition-colors hover:text-foreground"
+          // Hidden where the bottom nav carries its own Alerts button
+          // (MobileNav is md:hidden), so the two never show at once. Below
+          // md this was a second bell opening the same modal, costing header
+          // room on the screens with least of it.
+          className="relative hidden h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-muted transition-colors hover:text-foreground md:flex"
         >
           <Bell className={clsx("h-4 w-4", alertsConfigured && "text-brand")} />
           {alertsConfigured && (

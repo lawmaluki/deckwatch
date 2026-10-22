@@ -95,10 +95,10 @@ article is counted under `errors` and left for the next run rather than dropped
 as "not an incident". Three failures in a row abort the run with a non-zero
 exit, so the scheduled job shows as failed.
 
-Run it on a schedule with cron (every 15 minutes):
+Run it on a schedule with cron (hourly):
 
 ```cron
-*/15 * * * * cd /path/to/deckwatch/backend && ANTHROPIC_API_KEY=sk-ant-... \
+0 * * * * cd /path/to/deckwatch/backend && ANTHROPIC_API_KEY=sk-ant-... \
   DATABASE_URL=postgresql+psycopg://deckwatch:deckwatch@localhost:5432/deckwatch \
   .venv/bin/python -m app.ingest >> /var/log/deckwatch-ingest.log 2>&1
 ```

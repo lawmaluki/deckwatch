@@ -404,7 +404,7 @@ export default async function MonthlyReportPage({ params }: { params: Promise<{ 
 
           <Section n="10" eyebrow="Sources and method" title={`From ${report.articles} articles to ${plural(events.length, "incident")}`}>
             <p className="max-w-3xl text-muted">
-              Deckwatch reads Kenyan news feeds every 15 minutes, classifies each article and places it on the map.{" "}
+              Deckwatch reads Kenyan news feeds every hour, classifies each article and places it on the map.{" "}
               {report.method === "editorial"
                 ? "For this report every article was reviewed by hand."
                 : report.method === "claude"

@@ -149,7 +149,7 @@ def get_live_incidents_by_county(
 
 # --- ingestion reads -------------------------------------------------------------
 #
-# Ingestion runs every 15 minutes. It used to download the whole table each run
+# Ingestion runs hourly. It used to download the whole table each run
 # to answer two questions that need a sliver of it; these answer them directly.
 
 def find_ingested(

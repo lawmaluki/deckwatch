@@ -82,8 +82,34 @@ _PAST = (
     "court", "trial", "sentenced", "sentencing", "sentence", "convicted", "jailed", "charged",
     "charge", "arraigned", "bail", "acquitted", "pleads", "prosecution", "inquest", "anniversary",
     "years after", "years ago", "years later", "a year later", "months later",
-    "arrested", "arrests", "arrest", "persons of interest", "report on",
+    "report on",
 )
+# Held apart from _PAST because an arrest cuts both ways: "suspects arrested
+# over the Mbobu murder" is coverage of an earlier crime, while "journalist
+# arrested in Nairobi CBD" is the thing that just happened. Treating every
+# arrest as past dropped three real incidents in twelve; reading the two
+# apart dropped none.
+_ARREST = ("arrested", "arrests", "arrest", "persons of interest")
+# What marks an arrest as follow-up: it points back at an offence already
+# committed, rather than reporting the arrest itself as the event.
+_PRIOR_OFFENCE = re.compile(
+    r"\b(?:over|in connection with|linked to|suspect(?:ed)? in|accused of|for the)\b[^.]{0,40}"
+    r"\b(?:murder|killing|death|deaths|rape|robbery|theft|fraud|assault|attack|massacre|crime|case)\b"
+)
+
+
+def is_past_coverage(text: str) -> bool:
+    """True when the article covers something that already happened — a
+    verdict, an inquest, an anniversary, an arrest over an earlier crime.
+
+    The event itself was news when it occurred, and if it was in range the
+    pipeline already carries it. Re-admitting the follow-up puts a 2023
+    massacre on today's map under the county where the trial sits, not where
+    the killings were.
+    """
+    if _has_any(text, _PAST):
+        return True
+    return _has_any(text, _ARREST) and _PRIOR_OFFENCE.search(text) is not None
 # A death that is about animals: "1,470 pigs die", "killing of 415 goats".
 _ANIMALS = (
     "livestock", "cattle", "goats", "goat", "pigs", "pig", "donkeys", "animals",
@@ -147,7 +173,7 @@ def severity_of(text: str, category: Optional[str]) -> str:
     from 8 (digits like "17 killed" never counted, nor "dies" or "kills").
     Court and follow-up coverage is rated low 89% of the time. Tuned on that
     same month, so re-check on fresh labels."""
-    if _has_any(text, _PAST):
+    if is_past_coverage(text):
         return "low"
     # "claimed five", "losing 5 members": a toll phrase is itself a death.
     if _human_death(text) or _COUNT_AFTER.search(text):
@@ -204,6 +230,11 @@ def _text(item: Mapping[str, str]) -> str:
 def _classify(item: Mapping[str, str], text: str, categories: List[str]) -> Optional[Dict[str, Any]]:
     title = _straight_quotes(item.get("title", ""))
     if not categories:
+        return None
+    # Coverage of something already over is not a new incident. This used only
+    # to set severity low, which still put verdicts and anniversaries on the
+    # map — dated today, and placed wherever the court sits.
+    if is_past_coverage(text):
         return None
     category = categories[0]
 

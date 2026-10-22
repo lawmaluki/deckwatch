@@ -55,11 +55,14 @@ def test_score_with_rule_classifier():
     assert rep["prefilter"]["noise_passed"] == pytest.approx(1 / 2)
 
     inc = rep["incident"]
-    assert (inc["tp"], inc["fp"], inc["fn"]) == (3, 1, 2)
+    # No false positives: the court-case row is labelled "no" here, and the
+    # classifier now agrees — it rejects coverage of an event already over
+    # rather than admitting it at low severity.
+    assert (inc["tp"], inc["fp"], inc["fn"]) == (3, 0, 2)
 
     problems = {e["problem"] for e in rep["errors"]}
-    assert {"false_positive", "dropped_by_prefilter", "classifier_rejected",
-            "wrong_category"} <= problems
+    assert {"dropped_by_prefilter", "classifier_rejected", "wrong_category"} <= problems
+    assert "false_positive" not in problems
     assert rep["location"]["incidents_dropped_by_classifier"] == 1
     assert rep["category"]["accuracy"] == pytest.approx(2 / 3)
 

@@ -86,9 +86,9 @@ export default function WhyDeckwatchPage() {
           </h2>
           <p className="mb-3 text-sm leading-relaxed text-muted">
             Live news ingestion is running. Deckwatch reads {NEWS_SOURCE_COUNT} Kenyan
-            sources every 15 minutes (newsrooms, plus the National Police Service,
-            the Ministry of Health and Kenya News Agency), classifies what it
-            finds, locates it, and puts it on the map. Incidents marked{" "}
+            sources every hour (newsrooms, plus the National Police Service, the
+            Ministry of Health and Kenya News Agency), classifies what it finds,
+            locates it, and puts it on the map. Incidents marked{" "}
             <span className="font-medium text-brand">LIVE</span> are real
             reporting, gathered automatically.
           </p>
