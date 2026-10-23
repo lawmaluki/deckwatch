@@ -86,6 +86,15 @@ describe("matchRoute", () => {
     expect(inCounties.map((i) => i.id)).toEqual([vague.id]);
   });
 
+  it("never pins a road incident by its point, which is only one end of the road", () => {
+    // The Kikopey crash on the Nairobi-Nakuru highway, filed under Nairobi,
+    // sits at the Nairobi end: it must not read as on a Nairobi-Thika route.
+    const kikopey = makeIncident({ ...beside(0, 0.1), county: "Nairobi", locationPrecision: "road" });
+    const { along, inCounties } = matchRoute(ROUTE, [kikopey], OPTS);
+    expect(along).toEqual([]);
+    expect(inCounties.map((i) => i.id)).toEqual([kikopey.id]);
+  });
+
   it("treats an incident at its county centre with no stored precision as county-level", () => {
     const centre = COUNTY_BY_NAME["Nairobi"].center;
     expect(precisionOf(makeIncident({ lat: centre[0], lng: centre[1] }))).toBe("county");

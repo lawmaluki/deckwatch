@@ -622,7 +622,8 @@ export function RouteWatch({ initial }: { initial: RouteWatchInitial }) {
                       <span className="font-normal text-muted">· {matches.inCounties.length}</span>
                     </h2>
                     <p className="mt-0.5 text-[11px] text-muted">
-                      These reports name only the county, so they may be nowhere near your road.
+                      These reports name only the county, or a road somewhere in it, so they may be nowhere
+                      near your route.
                     </p>
                     <ul className="mt-2 space-y-1">
                       {countyList.map((incident) => (

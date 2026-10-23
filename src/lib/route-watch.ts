@@ -260,7 +260,8 @@ export interface RouteMatchOptions {
 export interface RouteMatches {
   /** Placed within the corridor, in the order the route meets them. */
   along: RouteMatch[];
-  /** Only the county is known, and the route crosses it. Newest first. */
+  /** Only the county, or a road somewhere in it, is known, and the route
+   * crosses that county. Newest first. */
   inCounties: Incident[];
 }
 
@@ -275,9 +276,15 @@ function recent(incident: Incident, nowMs: number, windowHours: number): boolean
 }
 
 /** Where one incident sits relative to a route, or null if it isn't on it. */
+/** Precisions whose point says nothing about where on the ground it was.
+ * A road incident's point is one end of the road, the end in the county it
+ * was filed under: the Kikopey crash on the Nairobi-Nakuru highway sits at
+ * the Nairobi end, and would read as "on your route" from Nairobi to Thika. */
+const NOT_PINNABLE: ReadonlySet<LocationPrecision> = new Set(["county", "road"]);
+
 export function matchIncident(route: PreparedRoute, incident: Incident, bufferKm: number): RouteMatch | null {
   const precision = precisionOf(incident);
-  if (precision === "county") return null;
+  if (precision === "county" || precision === "road") return null;
   const reach = bufferKm + PRECISION_SLACK_KM[precision];
   // Cheap reject before walking every segment: a degree is ~111 km.
   const pad = reach / KM_PER_DEG;
@@ -302,7 +309,7 @@ export function matchRoute(route: PreparedRoute, incidents: Incident[], opts: Ro
     if (!inGroup(incident, opts.group) || !recent(incident, opts.nowMs, opts.windowHours)) continue;
     const match = matchIncident(route, incident, opts.bufferKm);
     if (match) along.push(match);
-    else if (precisionOf(incident) === "county" && counties.has(incident.county)) inCounties.push(incident);
+    else if (NOT_PINNABLE.has(precisionOf(incident)) && counties.has(incident.county)) inCounties.push(incident);
   }
   along.sort((a, b) => a.alongKm - b.alongKm);
   inCounties.sort((a, b) => Date.parse(b.reportedAt) - Date.parse(a.reportedAt));
