@@ -3,6 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import { AppShell } from "@/components/layout/AppShell";
+import { IncidentsBootstrap } from "@/components/data/IncidentsBootstrap";
+import { BACKEND_URL } from "@/lib/backend";
+import { readIncidents, USE_API } from "@/lib/incidents-source";
 import { NEWS_SOURCE_COUNT } from "@/lib/constants";
 
 // A measurement ID is public by design (it ships in every page's source), so
@@ -59,18 +62,34 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Live mode: start every page from real incidents, not the sample set. The
+  // backend read is cached for one poll (incidents-source), so this costs a
+  // round trip at most every five minutes, not on every visit.
+  const live = USE_API && BACKEND_URL ? await readIncidents() : null;
+  const app = <AppShell>{children}</AppShell>;
+
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="h-full flex flex-col bg-background text-foreground">
-        <AppShell>{children}</AppShell>
+        {live ? (
+          <IncidentsBootstrap
+            incidents={live.incidents}
+            asOf={new Date().toISOString()}
+            available={!live.unavailable}
+          >
+            {app}
+          </IncidentsBootstrap>
+        ) : (
+          app
+        )}
       </body>
       {/* Production only: dev-server and local hits would otherwise count as
           real visitors and quietly inflate every number in the report. */}

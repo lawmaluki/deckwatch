@@ -91,6 +91,13 @@ export function getDataSnapshot(): DataSnapshot {
 }
 
 // Called only by the useIncidents poll (client, api mode).
+/** Seeds the browser's store with the real snapshot a page was rendered
+ * with (components/data/IncidentsBootstrap), before anything reads it. Only
+ * the first call counts: later ones would undo polls. */
+export function primeClientSnapshot(snapshot: DataSnapshot): void {
+  if (!IS_SERVER) clientSnapshot ??= snapshot;
+}
+
 export function replaceClientSnapshot(next: DataSnapshot): void {
   clientSnapshot = next;
 }

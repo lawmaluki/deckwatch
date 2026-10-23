@@ -1,6 +1,7 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useContext, useSyncExternalStore } from "react";
+import { IncidentsBootstrapContext } from "@/components/data/IncidentsBootstrap";
 import {
   getDataSnapshot,
   replaceClientSnapshot,
@@ -103,5 +104,8 @@ export interface IncidentsResult {
 // initial client snapshot is time-shift-invariant with the server render, so
 // hydration is safe with no flash.
 export function useIncidents(): IncidentsResult {
-  return useSyncExternalStore(subscribe, getDataSnapshot, getDataSnapshot);
+  // In live mode the server rendered with real data (IncidentsBootstrap); the
+  // browser's store was primed with the same object, so both sides agree.
+  const bootstrap = useContext(IncidentsBootstrapContext);
+  return useSyncExternalStore(subscribe, getDataSnapshot, () => bootstrap ?? getDataSnapshot());
 }
