@@ -878,3 +878,54 @@ def test_site_quotes_the_real_number_of_sources():
     assert int(quoted.group(1)) == len(sources.FEEDS), (
         f"src/lib/constants.ts says {quoted.group(1)} sources, sources.FEEDS has {len(sources.FEEDS)}"
     )
+
+
+# --- foreign stories, generic places, mixed merges (Oct 2026) -----------------
+
+def test_foreign_stories_are_not_kenyan_incidents():
+    """A South African killing was filed under Nairobi, pinned to its CBD."""
+    for title in [
+        "South Africa xenophobia: Police launch probe after foreign national is beaten to death by mob",
+        "Two mass shootings in South Africa leave 27 dead",
+        "Ruto mourns 'dear friend' Chivayo after Zimbabwe helicopter crash",
+    ]:
+        assert rules.is_foreign(title), title
+        assert rules.classify({"title": title, "summary": ""}) is None, title
+
+
+def test_kenyan_angle_keeps_a_story_with_a_foreign_place():
+    for title in [
+        "Kenya launches emergency aid efforts as hundreds flee deadly clashes in Ethiopia",
+        "Stray bullet injures woman, hits cop as Ethiopian clashes spill tension into Moyale",
+        "Muthomi Njuki elected Council of Governors chairperson, Lusaka named deputy",
+        "Heavy Traffic Along Thika Road as Lorry Overturns Near China Square",
+        "DCI arrests Ugandan national over Eastleigh robbery",
+    ]:
+        assert not rules.is_foreign(title), title
+
+
+def test_a_generic_hotspot_needs_its_own_county_named():
+    """Durban has a central business district too."""
+    durban = rules.classify({"title": "Foreign national beaten to death by mob",
+                             "summary": "Police in Durban's central business district launched a probe"})
+    assert durban is None or durban["county"] != "Nairobi"
+    loc = geocode.locate("Nairobi", "Nairobi", "Mob attack", "in Durban's central business district")
+    assert loc.precision == "county"
+    nairobi = geocode.locate("Nairobi", "Nairobi", "Protest in Nairobi CBD", "Nairobi central business district shops shut")
+    assert nairobi.name == "Central Business District"
+
+
+def test_location_rule_needs_the_same_category():
+    """A fire and a protest pinned to one spot in one week are two events."""
+    fire = {**_inc(-1.29, 36.82, "fire", "2026-07-02T09:00:00.000Z"), "locationPrecision": "local"}
+    protest = {**_inc(-1.29, 36.82, "unrest", "2026-07-02T08:00:00.000Z"), "locationPrecision": "local"}
+    assert not dedup.is_same_event(fire, protest)
+    other_fire = {**fire, "reportedAt": "2026-07-02T08:00:00.000Z"}
+    assert dedup.is_same_event(fire, other_fire)
+
+
+def test_location_rule_keeps_events_a_few_km_apart_separate():
+    """Two robberies in different estates of one city are two incidents."""
+    a = {**_inc(-1.2739, 36.8442, "crime", "2026-07-02T09:00:00.000Z"), "locationPrecision": "local"}  # Eastleigh
+    b = {**_inc(-1.2740, 36.9020, "crime", "2026-07-02T08:00:00.000Z"), "locationPrecision": "local"}  # Kayole, ~6 km
+    assert not dedup.is_same_event(a, b)

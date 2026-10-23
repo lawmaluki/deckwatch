@@ -18,7 +18,10 @@ from ..domain import Incident, parse_iso_ms
 from .geocode import is_county_centroid
 
 EARTH_RADIUS_KM = 6371
-SIMILAR_MAX_DISTANCE_KM = 8.0
+# Two pinned reports this close, in the same category and window, are one
+# event. Was 8 km when almost nothing had a point; with estates and villages
+# geocoded (Oct 2026) that welded separate robberies across a city into one.
+SIMILAR_MAX_DISTANCE_KM = 2.0
 SIMILAR_MAX_HOURS_APART = 72.0
 MS_PER_HOUR = 3_600_000
 
@@ -71,6 +74,14 @@ def is_same_event(
     corroborated.
     """
     if not _pinned(candidate) or not _pinned(existing):
+        return False
+
+    # A fire and a protest at one spot in one week are two events. Without
+    # this, everything pinned to Nairobi's CBD in three days became one
+    # incident (Oct 2026: a Durban killing, a journalist's arrest and an
+    # MP's threat of protests). Stories the classifier filed differently but
+    # that are one event are still joined by the story rule, on headlines.
+    if candidate.get("category") != existing.get("category"):
         return False
 
     distance = haversine_km(

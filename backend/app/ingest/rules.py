@@ -11,11 +11,37 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional
 
+from .geocode import hotspot_applies, names_kenyan_town
+
 FIXTURES = Path(__file__).resolve().parent.parent.parent / "fixtures"
 _COUNTIES: List[str] = [
     c["name"] for c in json.loads((FIXTURES / "counties.json").read_text())
 ]
 _HOTSPOTS: List[dict] = json.loads((FIXTURES / "hotspots.json").read_text())
+
+# Places outside Kenya that Kenyan outlets report on. Not Lusaka: in Kenyan
+# headlines that is usually Kenneth Lusaka, Bungoma's governor. A headline naming one
+# and nothing Kenyan is a foreign story, not an incident on this map: two
+# South African shootings and a Zimbabwe crash were once filed under
+# Nairobi. "Kenya"/"Kenyan" or a Kenyan place in the headline keeps it
+# ("Kenya launches aid as hundreds flee clashes in Ethiopia").
+_FOREIGN = re.compile(
+    r"\b(south africa|south african|durban|johannesburg|pretoria|cape town|uganda|ugandan|kampala|"
+    r"tanzania|tanzanian|dar es salaam|arusha|ethiopia|ethiopian|addis ababa|somalia|"
+    r"mogadishu|puntland|jubaland|sudan|sudanese|khartoum|juba|rwanda|kigali|burundi|congo|drc|"
+    r"goma|kinshasa|nigeria|lagos|abuja|ghana|accra|zambia|zimbabwe|harare|malawi|"
+    r"mozambique|egypt|cairo|libya|israel|gaza|lebanon|iran|iraq|syria|ukraine|kyiv|russia|"
+    r"moscow|india|pakistan|china|beijing|haiti|brazil|mexico|united states|washington|"
+    r"new york|britain|london|france|paris|germany|saudi|dubai|qatar)\b"
+)
+# "Kenya"/"Kenyan", border towns the GeoNames gazetteer lacks, where a
+# foreign conflict is often reported from ("clashes spill into Moyale"), and
+# Kenyan agencies (the DCI, KDF, Kenya Wildlife Service...).
+_KENYAN = re.compile(
+    r"\bkenya|\b(moyale|namanga|lokichogio|lokichoggio|lunga lunga|liboi|el ?wak|"
+    r"todonyang|nadapal|oloitokitok|loitokitok|suam|lwakhakha|sio port|"
+    r"dci|kdf|kws|ipoa|ntsa|kenha|kura|kfs)\b"
+)
 
 # Ordered most-specific-first so a headline maps to its best-fitting category.
 # Matched on word boundaries (see _has), so short tokens don't hit inside longer
@@ -236,6 +262,8 @@ def _classify(item: Mapping[str, str], text: str, categories: List[str]) -> Opti
     # map — dated today, and placed wherever the court sits.
     if is_past_coverage(text):
         return None
+    if is_foreign(title):
+        return None
     category = categories[0]
 
     county: Optional[str] = None
@@ -248,7 +276,7 @@ def _classify(item: Mapping[str, str], text: str, categories: List[str]) -> Opti
         location = county
     else:
         for h in _HOTSPOTS:  # prefer a specific place
-            if h["name"].lower() in text:
+            if h["name"].lower() in text and hotspot_applies(h["name"], h["county"], text):
                 county, location = h["county"], h["name"]
                 break
     if county is None:
@@ -269,6 +297,17 @@ def _classify(item: Mapping[str, str], text: str, categories: List[str]) -> Opti
         "summary": (item.get("summary") or item.get("title") or "").strip()[:400],
         "recommended_actions": ACTIONS.get(category, DEFAULT_ACTIONS),
     }
+
+
+def is_foreign(title: str) -> bool:
+    """A headline about somewhere else: it names a foreign place and nothing
+    Kenyan (Kenya, a county, a curated hotspot, or a town in the gazetteer)."""
+    low = title.lower()
+    if not _FOREIGN.search(low) or _KENYAN.search(low) or _explicit_counties(title):
+        return False
+    if any(h["name"].lower() in low for h in _HOTSPOTS):
+        return False
+    return not names_kenyan_town(title)
 
 
 def matched_categories(text: str) -> List[str]:

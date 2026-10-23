@@ -80,14 +80,28 @@ def test_dedup_pairs_and_split_events():
 
 
 def test_dedup_flags_wrongly_merged_events():
+    # Two different crimes at one hotspot within the window: the location
+    # rule still merges these, and the evaluator must catch it.
+    rows = [
+        _row("Gunmen rob M-Pesa shop in Eastleigh", "http://a/1", "yes",
+             "crime", "high", "Nairobi", "Eastleigh", "e1"),
+        _row("Man stabbed in Eastleigh street fight", "http://b/9", "yes",
+             "crime", "high", "Nairobi", "Eastleigh", "e9"),
+    ]
+    d = evaluate.score(rows, rules.classify)["dedup"]
+    assert d["fp"] == 1  # different events, merged by the location+time rule
+
+
+def test_dedup_keeps_different_kinds_of_event_apart():
+    """A crash and a robbery at one spot are two events (Oct 2026: a fire, a
+    protest and a journalist's arrest were merged at one Nairobi point)."""
     rows = [
         _row("Two killed in matatu crash in Eastleigh", "http://a/1", "yes",
              "traffic_accident", "high", "Nairobi", "Eastleigh", "e1"),
         _row("Gunmen robbed shop in Eastleigh", "http://b/9", "yes",
              "crime", "high", "Nairobi", "Eastleigh", "e9"),
     ]
-    d = evaluate.score(rows, rules.classify)["dedup"]
-    assert d["fp"] == 1  # different events, merged by the location+time rule
+    assert evaluate.score(rows, rules.classify)["dedup"]["fp"] == 0
 
 
 def test_load_labels_skips_unlabelled(tmp_path):

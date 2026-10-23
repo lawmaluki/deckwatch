@@ -67,6 +67,18 @@ HOTSPOT_PRECISION: Dict[str, str] = {
     )},
 }
 
+# Curated hotspots whose names every city has: they only count when their
+# own county is named too. "Durban's central business district" is not
+# Nairobi's (Oct 2026: a South African killing was filed under Nairobi).
+GENERIC_HOTSPOTS = frozenset({"Central Business District", "Old Town"})
+
+
+def hotspot_applies(name: str, county: str, text: str) -> bool:
+    """Whether a curated hotspot found in `text` can be trusted to be the one
+    in `county`."""
+    return name not in GENERIC_HOTSPOTS or county.lower() in text.lower()
+
+
 # Gazetteer names that read as something else far more often than as the
 # place. Lower case. Add to it when the relocate dry run shows a false match.
 NOT_PLACES = frozenset({
@@ -194,10 +206,18 @@ def _usable(key: str) -> bool:
     return len(key) >= 4 and key not in _COUNTY_KEYS and key not in NOT_PLACES
 
 
+def names_kenyan_town(text: str) -> bool:
+    """Whether the text names a Kenyan town from the gazetteer. Towns only:
+    village names such as "London" or "Juba" would let foreign stories pass."""
+    return any(
+        any(listing.kind == "town" for listing in _INDEX[key]) for key, _ in _names_in(_norm(text))
+    )
+
+
 def _hotspot(county: str, text: str) -> Optional[Location]:
     low = text.lower()
     for h in _HOTSPOTS:
-        if h["county"] == county and h["name"].lower() in low:
+        if h["county"] == county and h["name"].lower() in low and hotspot_applies(h["name"], county, text):
             return Location(county, h["name"], h["lat"], h["lng"], HOTSPOT_PRECISION.get(h["name"], "town"))
     return None
 

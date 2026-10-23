@@ -9,7 +9,7 @@ from typing import Mapping
 # matched as substrings against the item's title + summary.
 SAFETY_KEYWORDS = (
     # crime
-    "robbery", "robbed", "mugging", "carjack", "gunman", "gang", "stabbed",
+    "robbery", "robbed", "robbers", "rob ", "mugging", "carjack", "gunman", "gunmen", "gang", "stabbed",
     "shot", "shooting", "killed", "murder", "assault", "theft", "burglary",
     "kidnap", "abduct", "rape", "attack", "police", "arrest", "crime",
     # traffic
