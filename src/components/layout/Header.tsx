@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Bell, Map, LayoutDashboard, Building2, ShieldAlert, Radio, Route } from "lucide-react";
 import clsx from "clsx";
 import { useUiStore } from "@/store/useUiStore";
@@ -24,6 +24,8 @@ export function Header() {
   const pathname = usePathname();
   const setNotificationsOpen = useUiStore((s) => s.setNotificationsOpen);
   const setIntelFeedOpen = useUiStore((s) => s.setIntelFeedOpen);
+  const setTodayMode = useAppStore((s) => s.setTodayMode);
+  const router = useRouter();
   const alertsConfigured = useAppStore((s) => hasActiveSubscription(s.notifications));
   const { incidents } = useIncidents();
   const activeToday = incidents.filter((i) => withinHours(i, 24)).length;
@@ -66,7 +68,13 @@ export function Header() {
       <div className="flex items-center gap-3">
         <div className="hidden items-center gap-3 rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted lg:flex">
           <button
-            onClick={() => setIntelFeedOpen(true)}
+            onClick={() => {
+              // Today's incidents as breathing dots on the map, with the
+              // feed listing them beside it.
+              setTodayMode(true);
+              setIntelFeedOpen(true);
+              if (pathname !== "/") router.push("/");
+            }}
             className="flex items-center gap-1.5 hover:text-foreground"
           >
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand" />

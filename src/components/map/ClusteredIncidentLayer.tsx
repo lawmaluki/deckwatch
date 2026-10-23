@@ -1,12 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Marker, Tooltip, useMap, useMapEvents } from "react-leaflet";
+import { Marker, useMap, useMapEvents } from "react-leaflet";
 import Supercluster from "supercluster";
 import type { Incident, Severity } from "@/lib/types";
-import { CATEGORIES, SEVERITY_CONFIG } from "@/lib/data/categories";
-import { clusterDivIcon, incidentDivIcon } from "@/components/map/markerIcons";
-import { useAppStore } from "@/store/useAppStore";
+import { SEVERITY_CONFIG } from "@/lib/data/categories";
+import { clusterDivIcon } from "@/components/map/markerIcons";
+import { IncidentMarker } from "@/components/map/IncidentMarker";
 
 interface ClusterProps {
   incidentId: string;
@@ -30,7 +30,6 @@ function dominantSeverityColor(severityCounts: Record<Severity, number>): string
 
 export function ClusteredIncidentLayer({ incidents }: { incidents: Incident[] }) {
   const map = useMap();
-  const selectIncident = useAppStore((s) => s.selectIncident);
   const [bounds, setBounds] = useState(() => map.getBounds());
   const [zoom, setZoom] = useState(() => map.getZoom());
 
@@ -117,35 +116,7 @@ export function ClusteredIncidentLayer({ incidents }: { incidents: Incident[] })
         const incidentId = (cluster.properties as ClusterProps).incidentId;
         const incident = incidentById.get(incidentId);
         if (!incident) return null;
-        const category = CATEGORIES[incident.category];
-
-        return (
-          <Marker
-            key={incident.id}
-            position={[lat, lng]}
-            icon={incidentDivIcon(incident.severity)}
-            alt={`${category.label}, ${incident.severity} severity, ${incident.county} County: ${incident.title}`}
-            eventHandlers={{
-              click: () => selectIncident(incident.id),
-              // Leaflet focuses markers but only forwards clicks; without
-              // this a keyboard user can reach a marker and not open it.
-              keypress: (e) => {
-                const key = (e.originalEvent as KeyboardEvent).key;
-                if (key === "Enter" || key === " ") selectIncident(incident.id);
-              },
-            }}
-          >
-            <Tooltip direction="top" offset={[0, -10]} opacity={1} className="incident-tooltip">
-              <p className="text-xs font-bold leading-snug" style={{ color: category.color }}>
-                {category.label}
-              </p>
-              <p className="text-xs leading-snug text-white/90">{incident.title}</p>
-              <p className="mt-1 text-[10px] leading-snug text-white/50">
-                {incident.reportedAt.slice(0, 10)}
-              </p>
-            </Tooltip>
-          </Marker>
-        );
+        return <IncidentMarker key={incident.id} incident={incident} position={[lat, lng]} />;
       })}
     </>
   );

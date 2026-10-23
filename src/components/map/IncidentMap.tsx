@@ -7,6 +7,7 @@ import type { Incident } from "@/lib/types";
 import { CountyBoundaries } from "@/components/map/CountyBoundaries";
 import { ClusteredIncidentLayer } from "@/components/map/ClusteredIncidentLayer";
 import { HeatmapLayer } from "@/components/map/HeatmapLayer";
+import { TodayIncidentLayer } from "@/components/map/TodayIncidentLayer";
 import { useAppStore } from "@/store/useAppStore";
 import { useIncidents } from "@/hooks/useIncidents";
 
@@ -138,6 +139,7 @@ function FlyToIncident() {
 
 export default function IncidentMap({ incidents }: { incidents: Incident[] }) {
   const showHeatmap = useAppStore((s) => s.showHeatmap);
+  const todayMode = useAppStore((s) => s.todayMode);
 
   return (
     <MapContainer
@@ -159,7 +161,9 @@ export default function IncidentMap({ incidents }: { incidents: Incident[] }) {
           lakes, vegetation and roads don't compete with the incident markers. */}
       <FitCountry />
       <CountyBoundaries />
-      {showHeatmap ? (
+      {todayMode ? (
+        <TodayIncidentLayer incidents={incidents} />
+      ) : showHeatmap ? (
         <HeatmapLayer incidents={incidents} />
       ) : (
         <ClusteredIncidentLayer incidents={incidents} />

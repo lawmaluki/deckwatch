@@ -2,9 +2,11 @@ import L from "leaflet";
 import { SEVERITY_CONFIG } from "@/lib/data/categories";
 import type { Severity } from "@/lib/types";
 
-export function incidentDivIcon(severity: Severity): L.DivIcon {
+/** `pulse` forces the breathing ring on any severity (the today view);
+ * otherwise only critical and high pulse. */
+export function incidentDivIcon(severity: Severity, opts: { pulse?: boolean } = {}): L.DivIcon {
   const color = SEVERITY_CONFIG[severity].color;
-  const pulse = severity === "critical" || severity === "high";
+  const pulse = opts.pulse ?? (severity === "critical" || severity === "high");
   return L.divIcon({
     className: "incident-marker",
     html: `

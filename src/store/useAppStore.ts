@@ -59,6 +59,12 @@ interface AppState {
   showHeatmap: boolean;
   toggleHeatmap: () => void;
 
+  /** "Incidents today": the map shows only the last 24 hours, one breathing
+   * dot per incident and no clusters. Not persisted: a returning reader
+   * starts on the full map. */
+  todayMode: boolean;
+  setTodayMode: (on: boolean) => void;
+
 
   notifications: NotificationSubscription;
   updateNotifications: (partial: Partial<NotificationSubscription>) => void;
@@ -110,6 +116,7 @@ export const useAppStore = create<AppState>()(
           activeVerification: [],
           countyFilter: null,
           searchQuery: "",
+          todayMode: false,
         }),
 
       selectedIncidentId: null,
@@ -127,6 +134,9 @@ export const useAppStore = create<AppState>()(
 
       showHeatmap: false,
       toggleHeatmap: () => set((s) => ({ showHeatmap: !s.showHeatmap })),
+
+      todayMode: false,
+      setTodayMode: (on) => set({ todayMode: on }),
 
 
       notifications: DEFAULT_NOTIFICATIONS,

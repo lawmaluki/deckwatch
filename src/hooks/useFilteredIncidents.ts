@@ -18,6 +18,7 @@ export function useFilteredIncidents(opts?: { ignoreCategoryFilter?: boolean }):
   const timelineMode = useAppStore((s) => s.timelineMode);
   const timelineRange = useAppStore((s) => s.timelineRange);
   const timelineCursor = useAppStore((s) => s.timelineCursor);
+  const todayMode = useAppStore((s) => s.todayMode);
   const { incidents, referenceTime } = useIncidents();
 
   return useMemo(() => {
@@ -45,7 +46,9 @@ export function useFilteredIncidents(opts?: { ignoreCategoryFilter?: boolean }):
       severities: activeSeverities,
       verification: activeVerification,
       county: countyFilter ?? parsed?.county ?? null,
-      withinHours: parsed?.hours ?? null,
+      // Today mode is the header's "incidents today": the same 24 hours it
+      // counts, narrowed further by any shorter window the search asked for.
+      withinHours: todayMode ? Math.min(24, parsed?.hours ?? 24) : parsed?.hours ?? null,
       freeText: parsed && !parsedToStructured ? parsed.freeText : "",
       timeWindow,
     });
@@ -59,6 +62,7 @@ export function useFilteredIncidents(opts?: { ignoreCategoryFilter?: boolean }):
     timelineMode,
     timelineRange,
     timelineCursor,
+    todayMode,
     incidents,
     referenceTime,
   ]);

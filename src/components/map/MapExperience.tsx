@@ -14,6 +14,8 @@ export function MapExperience() {
   const incidents = useFilteredIncidents();
   const countyFilter = useAppStore((s) => s.countyFilter);
   const setCountyFilter = useAppStore((s) => s.setCountyFilter);
+  const todayMode = useAppStore((s) => s.todayMode);
+  const setTodayMode = useAppStore((s) => s.setTodayMode);
 
   return (
     <div className="relative h-full w-full">
@@ -28,14 +30,26 @@ export function MapExperience() {
           </div>
         </div>
 
-        {countyFilter && (
-          <div className="flex justify-start">
+        {(todayMode || countyFilter) && (
+          <div className="flex justify-start gap-2">
+            {todayMode && (
+              <button
+                onClick={() => setTodayMode(false)}
+                aria-label="Show all incidents again"
+                className="glass-panel pointer-events-auto flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-brand"
+              >
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand" />
+                Today ✕
+              </button>
+            )}
+            {countyFilter && (
             <button
               onClick={() => setCountyFilter(null)}
               className="glass-panel pointer-events-auto rounded-full px-3 py-1.5 text-xs font-medium text-brand"
             >
               {countyFilter} County ✕
             </button>
+            )}
           </div>
         )}
 
