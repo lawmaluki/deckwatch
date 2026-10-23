@@ -26,6 +26,16 @@ export function Header() {
   const setIntelFeedOpen = useUiStore((s) => s.setIntelFeedOpen);
   const setTodayMode = useAppStore((s) => s.setTodayMode);
   const router = useRouter();
+
+  // Today's incidents as breathing dots on the map. On a wide screen the feed
+  // opens beside the map listing them; on a phone the feed is full-width and
+  // would cover the very dots this is for, so the map comes first and the
+  // map's "List" button opens the feed.
+  const openToday = () => {
+    setTodayMode(true);
+    if (window.matchMedia("(min-width: 640px)").matches) setIntelFeedOpen(true);
+    if (pathname !== "/") router.push("/");
+  };
   const alertsConfigured = useAppStore((s) => hasActiveSubscription(s.notifications));
   const { incidents } = useIncidents();
   const activeToday = incidents.filter((i) => withinHours(i, 24)).length;
@@ -68,13 +78,7 @@ export function Header() {
       <div className="flex items-center gap-3">
         <div className="hidden items-center gap-3 rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted lg:flex">
           <button
-            onClick={() => {
-              // Today's incidents as breathing dots on the map, with the
-              // feed listing them beside it.
-              setTodayMode(true);
-              setIntelFeedOpen(true);
-              if (pathname !== "/") router.push("/");
-            }}
+            onClick={openToday}
             className="flex items-center gap-1.5 hover:text-foreground"
           >
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand" />
@@ -102,8 +106,8 @@ export function Header() {
         </div>
         <LiveClock />
         <button
-          aria-label="Intel feed"
-          onClick={() => setIntelFeedOpen(true)}
+          aria-label={`${activeToday} incidents today: show them on the map`}
+          onClick={openToday}
           className="relative flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface text-muted transition-colors hover:text-foreground lg:hidden"
         >
           <Radio className="h-4 w-4" />

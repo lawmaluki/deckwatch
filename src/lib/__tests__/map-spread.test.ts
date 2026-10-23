@@ -30,6 +30,13 @@ describe("ringOffsets", () => {
   });
 });
 
+describe("touch spacing", () => {
+  it("spreads dots wider on phones, for fingers", () => {
+    const [a, b] = ringOffsets(2, 30);
+    expect(Math.hypot(a[0] - b[0], a[1] - b[1])).toBeGreaterThanOrEqual(28);
+  });
+});
+
 describe("today mode", () => {
   it("is left whenever the filters are reset, e.g. from a dashboard click", () => {
     useAppStore.getState().setTodayMode(true);

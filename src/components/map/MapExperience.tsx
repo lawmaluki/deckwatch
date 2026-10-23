@@ -9,6 +9,7 @@ import { SearchBar } from "@/components/search/SearchBar";
 import { IncidentDetailPanel } from "@/components/incidents/IncidentDetailPanel";
 import { useFilteredIncidents } from "@/hooks/useFilteredIncidents";
 import { useAppStore } from "@/store/useAppStore";
+import { useUiStore } from "@/store/useUiStore";
 
 export function MapExperience() {
   const incidents = useFilteredIncidents();
@@ -16,6 +17,8 @@ export function MapExperience() {
   const setCountyFilter = useAppStore((s) => s.setCountyFilter);
   const todayMode = useAppStore((s) => s.todayMode);
   const setTodayMode = useAppStore((s) => s.setTodayMode);
+  const intelFeedOpen = useUiStore((s) => s.intelFeedOpen);
+  const setIntelFeedOpen = useUiStore((s) => s.setIntelFeedOpen);
 
   return (
     <div className="relative h-full w-full">
@@ -31,21 +34,31 @@ export function MapExperience() {
         </div>
 
         {(todayMode || countyFilter) && (
-          <div className="flex justify-start gap-2">
+          <div className="flex flex-wrap justify-start gap-2">
             {todayMode && (
               <button
                 onClick={() => setTodayMode(false)}
                 aria-label="Show all incidents again"
-                className="glass-panel pointer-events-auto flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-brand"
+                className="glass-panel pointer-events-auto flex h-10 items-center gap-1.5 rounded-full px-4 text-xs font-medium text-brand sm:h-auto sm:px-3 sm:py-1.5"
               >
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand" />
                 Today ✕
               </button>
             )}
+            {todayMode && !intelFeedOpen && (
+              // The feed is closed on a phone (it would cover the map) or
+              // when the reader shut it: one tap brings the list back.
+              <button
+                onClick={() => setIntelFeedOpen(true)}
+                className="glass-panel pointer-events-auto flex h-10 items-center rounded-full px-4 text-xs font-medium text-foreground sm:h-auto sm:px-3 sm:py-1.5"
+              >
+                List ({incidents.length})
+              </button>
+            )}
             {countyFilter && (
             <button
               onClick={() => setCountyFilter(null)}
-              className="glass-panel pointer-events-auto rounded-full px-3 py-1.5 text-xs font-medium text-brand"
+              className="glass-panel pointer-events-auto flex h-10 items-center rounded-full px-4 text-xs font-medium text-brand sm:h-auto sm:px-3 sm:py-1.5"
             >
               {countyFilter} County ✕
             </button>
