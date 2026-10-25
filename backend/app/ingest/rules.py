@@ -58,7 +58,15 @@ CATEGORY_KEYWORDS = [
     # Vehicles alone ("bus", "truck") only after the specific categories above,
     # and never "motorcycle": "armed motorcycle gang" is a crime, not a crash.
     ("traffic_accident", ["crash", "collision", "collided", "accident", "matatu", "lorry", "bus", "truck", "trailer", "overturned", "hit-and-run", "pedestrian", "knocked down", "ploughs into", "ploughed into", "head-on", "aircraft", "chopper", "helicopter", "capsize", "capsized"]),
-    ("crime", ["robbery", "robbed", "mugging", "stabbed", "shot", "shooting", "killed", "murder", "murdered", "gang", "burglary", "rape", "raped", "assault", "carjacking", "gunman", "gunmen"]),
+    # "arrest" earns its place where the other active-voice verbs did not.
+    # Every crime word here is past or passive — robbed, stabbed, killed — so
+    # "Police Arrest Citizen TV Journalist" matched nothing and was dropped
+    # while "Journalist Arrested" was kept. It costs no precision: an arrest
+    # over an earlier offence is already caught by is_past_coverage, which is
+    # what "traders seek arrest of M-Pesa agent over fraud" trips on.
+    # Last in the list, so anything with a more specific category still wins
+    # it — the same arrest during a protest is still unrest.
+    ("crime", ["robbery", "robbed", "mugging", "stabbed", "shot", "shooting", "killed", "murder", "murdered", "gang", "burglary", "rape", "raped", "assault", "carjacking", "gunman", "gunmen", "arrest"]),
 ]
 
 ACTIONS = {
@@ -136,6 +144,45 @@ def is_past_coverage(text: str) -> bool:
     if _has_any(text, _PAST):
         return True
     return _has_any(text, _ARREST) and _PRIOR_OFFENCE.search(text) is not None
+
+
+# Someone responding to an event, rather than the event: a warning, a demand,
+# a condemnation, an award. The response is not a second incident, and the
+# event it answers to is either already on the map or was never ours.
+_REACTION = re.compile(
+    r"\b(warns?|warning|cautions?|demands?|demanding|condemns?|condemnation|"
+    r"decr(?:y|ies|ied)|criticis\w*|slams?|summons|summoned|honours?|honors?|"
+    r"heroes award|linked to|blames?|blamed on|calls? for|urges?|appeals? for)\b"
+)
+
+
+def is_reaction_coverage(title: str) -> bool:
+    """True when the headline reports a response to an event, not the event.
+
+    Read from the headline alone, deliberately. A real incident's summary
+    often mentions the demands or warnings around it — "Youth take protest to
+    church over viral bullying video" is a protest whose summary speaks of
+    demands — and matching on the body threw those away. The headline is the
+    article's own claim about what happened.
+    """
+    return _REACTION.search(_straight_quotes(title).lower()) is not None
+
+
+# "Governor fires Mosiria from his duties", "under fire over stalled
+# tenders", "fires back at critics": a dismissal or a row, not a blaze.
+_FIRE_FIGURATIVE = re.compile(
+    r"\b(?:fires?\s+(?:\w+\s+){1,4}(?:from|over)\b|under fire|fires?\s+back|"
+    r"ceasefire|firearms?|fire(?:s|d)?\s+up)\b"
+)
+# Words that only describe something actually burning. One of these present,
+# and "fire" is meant literally however the rest of the sentence reads.
+_REAL_FIRE = ("blaze", "gutted", "inferno", "razed", "burnt", "burned", "explosion")
+
+
+def fire_is_figurative(text: str) -> bool:
+    if _has_any(text, _REAL_FIRE):
+        return False
+    return _FIRE_FIGURATIVE.search(text) is not None
 # A death that is about animals: "1,470 pigs die", "killing of 415 goats".
 _ANIMALS = (
     "livestock", "cattle", "goats", "goat", "pigs", "pig", "donkeys", "animals",
@@ -262,6 +309,10 @@ def _classify(item: Mapping[str, str], text: str, categories: List[str]) -> Opti
     # map — dated today, and placed wherever the court sits.
     if is_past_coverage(text):
         return None
+    # A warning, demand, condemnation or award is a response to an event, not
+    # one. Judged on the headline alone — see is_reaction_coverage.
+    if is_reaction_coverage(title):
+        return None
     if is_foreign(title):
         return None
     category = categories[0]
@@ -314,7 +365,13 @@ def matched_categories(text: str) -> List[str]:
     """Every category with a keyword in the (lower-cased) text, in priority
     order. classify() takes the first; the hybrid classifier treats more than
     one as a sign the rules can't be trusted on this article."""
-    return [cat for cat, kws in CATEGORY_KEYWORDS if _has_any(text, kws)]
+    cats = [cat for cat, kws in CATEGORY_KEYWORDS if _has_any(text, kws)]
+    # Drop a "fire" that is a sacking or a row. Removed from the list rather
+    # than rejecting the article, so a headline that is also about something
+    # real still reaches that category.
+    if "fire" in cats and fire_is_figurative(text):
+        cats.remove("fire")
+    return cats
 
 
 def analyse(item: Mapping[str, str]) -> Dict[str, Any]:

@@ -37,7 +37,10 @@ def test_rules_decide_a_clear_road_crash_without_calling_rag():
 @pytest.mark.parametrize(
     "title, reason",
     [
-        ("Kindiki under fire as Gachagua links Embu violence to Mt Kenya politics", "risky category: fire"),
+        # "under fire" is a row, not a blaze. The rules drop that match
+        # themselves now (rules.fire_is_figurative), so this still reaches
+        # RAG — as an article they cannot answer rather than a risky fire.
+        ("Kindiki under fire as Gachagua links Embu violence to Mt Kenya politics", "no rule answer"),
         ("Orengo missing as Linda Mwananchi endorses Sifuna in Siaya", "risky category: missing_person"),
         ("Court hears robbery case against Nairobi trader", "follow-up cue: court"),
         ("Police say one killed, six vehicles torched in violence at Kindiki rally in Embu", "follow-up cue: rally"),
