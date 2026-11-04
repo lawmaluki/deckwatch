@@ -159,3 +159,37 @@ body {
 .pulse-ring {
   animation: pulse-ring 1.8s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
 }
+
+/* Printing (or saving as PDF) a long page such as a monthly report: every page
+   scrolls inside a fixed-height <main>, which would print as one screenful.
+   Let the document grow instead, and keep the dark theme's colours edge to
+   edge: page margins would print white, so the padding repeats at every page
+   break instead. */
+@page {
+  margin: 0;
+}
+@media print {
+  html,
+  body {
+    height: auto;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  main,
+  main > * {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  main > * {
+    padding: 12mm 14mm !important;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+  .skip-link {
+    display: none;
+  }
+  li,
+  tr {
+    break-inside: avoid;
+  }
+}

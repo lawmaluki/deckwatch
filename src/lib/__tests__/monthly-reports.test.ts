@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import sept from "@/lib/data/monthly-reports/2026-09.json";
+import oct from "@/lib/data/monthly-reports/2026-10.json";
 import {
   byCategory,
   byCounty,
@@ -88,6 +89,23 @@ describe("September 2026 report", () => {
   });
 });
 
+describe("October 2026 report", () => {
+  const october = oct as unknown as MonthlyReport;
+
+  it("matches the published headline figures", () => {
+    expect(summarizeReport(october)).toMatchObject({ incidents: 192, counties: 41, deaths: 191, articles: 537 });
+    expect(october.eventArticles + october.contextArticles + october.offTopic).toBe(october.articles);
+    expect(october.coverageFrom).toBeNull();
+  });
+
+  it("puts the two Makueni crashes on the Mombasa road hotspot", () => {
+    const a109 = october.events.filter((e) => e.hotspot === "a109");
+    expect(a109.find((e) => e.key === "mtito")?.deaths).toBe(22);
+    expect(totalDeaths(a109.filter((e) => e.county === "Makueni"))).toBe(39);
+    expect(byDay(october)).toHaveLength(31);
+  });
+});
+
 describe("changeFromPrevious", () => {
   it("reports percentage change per category and marks new ones", () => {
     const prev: MonthlyReport = {
@@ -106,6 +124,6 @@ describe("report source (no backend)", () => {
     expect((await getMonthlyReport("2026-09"))?.events).toHaveLength(105);
     expect(await getMonthlyReport("2026-08")).toBeNull();
     expect(await getMonthlyReport("not-a-month")).toBeNull();
-    expect((await listMonthlyReports()).map((r) => r.month)).toContain("2026-09");
+    expect((await listMonthlyReports()).map((r) => r.month)).toEqual(expect.arrayContaining(["2026-09", "2026-10"]));
   });
 });

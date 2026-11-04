@@ -2,6 +2,7 @@ import { BACKEND_URL } from "@/lib/backend";
 import { USE_API } from "@/lib/incidents-source";
 import { COUNTY_BY_NAME } from "@/lib/data/counties";
 import september2026 from "@/lib/data/monthly-reports/2026-09.json";
+import october2026 from "@/lib/data/monthly-reports/2026-10.json";
 
 // Monthly safety reports. The backend generates one per month on the last
 // day (python -m app.monthly, scheduled in .github/workflows/monthly-report.yml)
@@ -107,6 +108,7 @@ const LOCAL_REPORTS: Record<string, MonthlyReport> = {
   // JSON imports widen tuples and unions, so the shape is asserted here; the
   // file is written by the backend builder, which is what guarantees it.
   "2026-09": september2026 as unknown as MonthlyReport,
+  "2026-10": october2026 as unknown as MonthlyReport,
 };
 
 // Same rule as getIncidents(): the backend is only consulted in api mode.

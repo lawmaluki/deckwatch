@@ -21,7 +21,7 @@ export function MobileNav() {
   const alertsConfigured = useAppStore((s) => hasActiveSubscription(s.notifications));
 
   return (
-    <nav className="glass-panel fixed inset-x-0 bottom-0 z-[1000] flex h-14 items-center justify-around md:hidden">
+    <nav className="glass-panel fixed inset-x-0 bottom-0 z-[1000] flex h-14 items-center justify-around md:hidden print:hidden">
       {LINKS.map((link) => {
         const active = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
         return (

@@ -84,7 +84,7 @@ export default async function MonthlyReportPage({ params }: { params: Promise<{ 
     <div className="h-full overflow-y-auto px-4 pb-16 pt-5 sm:px-8">
       <ReportSelectionProvider initialCounty={counties[0]?.county ?? ""}>
         <article className="mx-auto max-w-5xl">
-          <nav className="mb-4 flex flex-wrap items-center justify-between gap-3 text-xs text-muted">
+          <nav className="mb-4 flex flex-wrap items-center justify-between gap-3 text-xs text-muted print:hidden">
             <Link href="/dashboard/reports" className="inline-flex items-center gap-1.5 hover:text-foreground">
               <ArrowLeft className="h-3.5 w-3.5" /> All monthly reports
             </Link>

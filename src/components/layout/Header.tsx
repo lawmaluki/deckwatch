@@ -44,7 +44,7 @@ export function Header() {
   ).length;
 
   return (
-    <header className="glass-panel sticky top-0 z-[1000] flex h-14 shrink-0 items-center justify-between px-3 sm:px-5">
+    <header className="glass-panel sticky top-0 z-[1000] flex h-14 print:hidden shrink-0 items-center justify-between px-3 sm:px-5">
       <div className="flex items-center gap-6">
         <Link href="/" className="flex items-center gap-2">
           <ShieldAlert className="h-6 w-6 text-brand" strokeWidth={2.2} />
