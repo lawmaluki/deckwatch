@@ -111,7 +111,7 @@ export default function ApiDocsPage() {
               sit at its centre. Check <Code>verificationStatus</Code> and the sources before acting on any one report.
             </Note>
             <Note title="Freshness and caching">
-              New articles are ingested hourly. Responses are cached for up to a minute (an hour for monthly
+              New articles are ingested hourly. Responses are cached for up to five minutes (an hour for monthly
               reports), so polling more often than that only returns the same data.
             </Note>
             <Note title="Fair use">

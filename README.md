@@ -41,6 +41,17 @@ Deckwatch reports what Kenyan media publishes. That shapes what it can and canno
 
 In an emergency, contact the National Police Service on **999**, **112** or **911**.
 
+## Documentation
+
+| | |
+|---|---|
+| [Technical architecture](docs/architecture.md) | How the pieces fit, the data model and the dependencies |
+| [Public API](docs/api.md) | Endpoints, fields and examples ([live reference](https://deckwatch.vercel.app/api-docs)) |
+| [Deployment](docs/deployment.md) | Running locally and in production |
+| [Data governance](docs/data-governance.md) | How incidents are collected, verified, stored and shared |
+| [Privacy and safety](docs/privacy-and-safety.md) | How personal data and sensitive locations are protected |
+| [Governance](docs/governance.md) | Ownership, principles and accountability |
+
 ## Run it locally
 
 You need Node.js 20 or newer. For the backend, you also need Docker, or Python 3.9+ with a PostgreSQL database that has PostGIS.
