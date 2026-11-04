@@ -4,7 +4,7 @@ import { API_ENDPOINTS, SITE_URL, type ApiEndpoint } from "@/lib/api-spec";
 import { CodeTabs } from "@/components/api/CodeTabs";
 import { CopyButton } from "@/components/api/CopyButton";
 import { TryIt } from "@/components/api/TryIt";
-import { NEWS_SOURCE_COUNT } from "@/lib/constants";
+import { CONTACT_EMAIL, NEWS_SOURCE_COUNT } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "API",
@@ -115,8 +115,15 @@ export default function ApiDocsPage() {
               reports), so polling more often than that only returns the same data.
             </Note>
             <Note title="Fair use">
-              No key and no sign-up. Keep requests reasonable, cache on your side, and get in touch through the project&rsquo;s
-              GitHub if you need heavy or bulk access. Abusive traffic may be blocked.
+              No key and no sign-up. Keep requests reasonable, cache on your side, and email{" "}
+              <a href={`mailto:${CONTACT_EMAIL}?subject=API%20access`} className="text-brand hover:underline">
+                {CONTACT_EMAIL}
+              </a>{" "}
+              if you need heavy or bulk access. Abusive traffic may be blocked. Use is covered by the{" "}
+              <a href="/terms#api" className="text-brand hover:underline">
+                Terms of Use
+              </a>
+              .
             </Note>
           </div>
         </Section>

@@ -116,7 +116,15 @@ export default function WhyDeckwatchPage() {
             <a href="/whats-new" className="text-brand hover:underline">
               What&rsquo;s new
             </a>{" "}
-            for what has shipped since.
+            for what has shipped since. The{" "}
+            <a href="/privacy" className="text-brand hover:underline">
+              Privacy Policy
+            </a>{" "}
+            and{" "}
+            <a href="/terms" className="text-brand hover:underline">
+              Terms of Use
+            </a>{" "}
+            say what Deckwatch collects and how to get an incident corrected or removed.
           </p>
         </div>
       </div>

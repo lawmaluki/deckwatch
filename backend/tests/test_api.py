@@ -127,3 +127,25 @@ def test_reports(client):
         "/reports", content="{oops", headers={"content-type": "application/json"}
     )
     assert malformed.status_code == 400
+
+
+def test_taken_down_links_count_as_ingested(client):
+    from sqlalchemy import text
+    from app import repository
+    from app.db import SessionLocal
+
+    session = SessionLocal()
+    try:
+        incident_id = session.execute(text(
+            "SELECT id FROM incidents WHERE EXISTS "
+            "(SELECT 1 FROM jsonb_array_elements(sources) s WHERE s->>'url' <> '') "
+            "ORDER BY id LIMIT 1"
+        )).scalar()
+        urls = repository.take_down_incident(session, incident_id, "test")
+        session.commit()
+        assert urls
+        # Ingestion now treats them as seen, so the next run won't rebuild it.
+        assert repository.find_ingested(session, [], urls)[1] == set(urls)
+        assert client.get(f"/incidents/{incident_id}").status_code == 404
+    finally:
+        session.close()

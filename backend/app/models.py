@@ -47,6 +47,19 @@ class Incident(Base):
     is_citizen_report: Mapped[bool] = mapped_column(Boolean, nullable=False)
 
 
+class RemovedArticle(Base):
+    """A source article taken down by request (app.takedown). Ingestion treats
+    these links as already seen, so a removed incident is not rebuilt from the
+    same article while it is still in its outlet's feed."""
+
+    __tablename__ = "removed_articles"
+
+    url: Mapped[str] = mapped_column(Text, primary_key=True)
+    incident_id: Mapped[str] = mapped_column(Text, nullable=False)
+    reason: Mapped[str] = mapped_column(Text, nullable=False)
+    removed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
 class MonthlyReport(Base):
     """One generated monthly safety report per calendar month ("2026-09").
 

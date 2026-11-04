@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Code2, Info, MoreHorizontal, Sparkles } from "lucide-react";
+import { Code2, FileText, Info, MoreHorizontal, ShieldCheck, Sparkles } from "lucide-react";
 import clsx from "clsx";
 import { useDismissible } from "@/hooks/useDismissible";
 
@@ -15,8 +15,14 @@ export const ABOUT_LINKS = [
   { href: "/api-docs", label: "API", description: "Use the incident data in your own work", icon: Code2 },
 ];
 
-/** Header menu for screens too narrow for the inline about links (below lg,
- * which covers phones and tablets alike). */
+/** The policies. Rarely visited, so they live only in this menu, never inline. */
+export const LEGAL_LINKS = [
+  { href: "/privacy", label: "Privacy Policy", description: "What we collect, and your rights", icon: ShieldCheck },
+  { href: "/terms", label: "Terms of Use", description: "Using Deckwatch, and corrections", icon: FileText },
+];
+
+/** Header menu. Below lg it carries the about links, which have no room
+ * inline there; at every width it carries the policies. */
 export function MoreMenu() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -34,9 +40,10 @@ export function MoreMenu() {
   }, [open]);
 
   const onAboutPage = ABOUT_LINKS.some((l) => pathname.startsWith(l.href));
+  const onLegalPage = LEGAL_LINKS.some((l) => pathname.startsWith(l.href));
 
   return (
-    <div ref={wrapper} className="relative lg:hidden">
+    <div ref={wrapper} className="relative">
       <button
         type="button"
         aria-label="More"
@@ -45,7 +52,8 @@ export function MoreMenu() {
         onClick={() => setOpen((v) => !v)}
         className={clsx(
           "flex h-9 w-9 items-center justify-center rounded-md border border-border bg-surface transition-colors hover:text-foreground",
-          open || onAboutPage ? "text-foreground" : "text-muted"
+          // About pages light the inline header links from lg up, not this.
+          open || onLegalPage ? "text-foreground" : onAboutPage ? "text-foreground lg:text-muted" : "text-muted"
         )}
       >
         <MoreHorizontal className="h-4 w-4" />
@@ -54,11 +62,12 @@ export function MoreMenu() {
         <div
           ref={panel}
           role="menu"
-          aria-label="About Deckwatch"
+          aria-label="More about Deckwatch"
           className="absolute right-0 top-full z-[1500] mt-2 w-64 rounded-xl border border-border bg-surface-raised p-1.5 shadow-2xl"
         >
-          {ABOUT_LINKS.map((link) => {
+          {[...ABOUT_LINKS, ...LEGAL_LINKS].map((link) => {
             const active = pathname.startsWith(link.href);
+            const about = ABOUT_LINKS.includes(link);
             return (
               <Link
                 key={link.href}
@@ -67,7 +76,10 @@ export function MoreMenu() {
                 onClick={() => setOpen(false)}
                 className={clsx(
                   "flex items-start gap-3 rounded-lg px-3 py-2.5 transition-colors hover:bg-surface",
-                  active && "bg-surface"
+                  active && "bg-surface",
+                  // Inline in the header from lg up, so not repeated here.
+                  about && "lg:hidden",
+                  link === LEGAL_LINKS[0] && "max-lg:mt-1.5 max-lg:rounded-t-none max-lg:border-t max-lg:border-border max-lg:pt-3"
                 )}
               >
                 <link.icon className={clsx("mt-0.5 h-4 w-4 shrink-0", active ? "text-brand" : "text-muted")} />

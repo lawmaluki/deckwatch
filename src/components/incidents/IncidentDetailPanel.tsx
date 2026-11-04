@@ -26,6 +26,7 @@ import { useIncidentDetail } from "@/hooks/useIncidentDetail";
 import { formatDateTime, relativeTime, stripHtml } from "@/lib/format";
 import { findSimilarIncidents } from "@/lib/geo";
 import { showsLiveTag } from "@/lib/stats";
+import { reportProblemHref } from "@/lib/legal";
 
 const SOURCE_TYPE_LABEL: Record<string, string> = {
   news: "News",
@@ -251,6 +252,13 @@ export function IncidentDetailPanel() {
 
           <p className="mt-4 text-center text-[10px] text-muted/70">
             Category: {CATEGORIES[incident.category].label}
+          </p>
+          {/* The Terms promise a reply to these within CORRECTION_RESPONSE_HOURS. */}
+          <p className="mt-2 text-center text-[11px] text-muted">
+            Wrong, or puts someone at risk?{" "}
+            <a href={reportProblemHref(incident)} className="font-medium text-brand hover:underline">
+              Report a problem
+            </a>
           </p>
         </motion.aside>
       )}

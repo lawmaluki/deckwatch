@@ -21,6 +21,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/why`, changeFrequency: "monthly", priority: 0.5 },
     { url: `${SITE_URL}/whats-new`, changeFrequency: "weekly", priority: 0.4 },
     { url: `${SITE_URL}/api-docs`, changeFrequency: "monthly", priority: 0.3 },
+    { url: `${SITE_URL}/privacy`, changeFrequency: "yearly", priority: 0.2 },
+    { url: `${SITE_URL}/terms`, changeFrequency: "yearly", priority: 0.2 },
   ];
 
   // Enumerated rather than hardcoded: a new issue appears every month, and a

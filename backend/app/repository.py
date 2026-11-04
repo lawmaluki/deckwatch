@@ -1,7 +1,7 @@
 """Thin SQLAlchemy read layer. Returns plain camelCase dicts (matching
 src/lib/types.ts) so the pure domain layer can operate on them uniformly."""
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
 from sqlalchemy import ARRAY, Text, bindparam, func, or_, select, text
@@ -9,7 +9,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from . import domain
-from .models import County, Incident, MonthlyReport
+from .models import County, Incident, MonthlyReport, RemovedArticle
 
 
 def _to_dict(inc: Incident, lat: float, lng: float, detail: bool = True) -> domain.Incident:
@@ -173,6 +173,12 @@ def find_ingested(
             "WHERE s->>'url' = ANY(:links)"
         ).bindparams(bindparam("links", type_=ARRAY(Text)))
         found_links = set(session.execute(stmt, {"links": list(links)}).scalars())
+        # A taken-down article counts as seen, or the next run would rebuild it.
+        found_links |= set(
+            session.execute(
+                select(RemovedArticle.url).where(RemovedArticle.url.in_(list(links)))
+            ).scalars()
+        )
     return found_ids, found_links
 
 
@@ -283,6 +289,20 @@ def relocate_incident(
     obj.location_name = location_name
     obj.geom = func.ST_SetSRID(func.ST_MakePoint(lng, lat), 4326)
     obj.location_precision = precision
+
+
+def take_down_incident(session: Session, incident_id: str, reason: str) -> List[str]:
+    """Delete an incident at someone's request and record its source links in
+    removed_articles, so ingestion won't rebuild it. Returns those links."""
+    obj = session.get(Incident, incident_id)
+    if obj is None:
+        return []
+    urls = list(dict.fromkeys(s["url"] for s in obj.sources or [] if s.get("url")))
+    now = datetime.now(timezone.utc)
+    for url in urls:
+        session.merge(RemovedArticle(url=url, incident_id=incident_id, reason=reason, removed_at=now))
+    session.delete(obj)
+    return urls
 
 
 def delete_incident(session: Session, incident_id: str) -> None:

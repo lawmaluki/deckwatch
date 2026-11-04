@@ -16,3 +16,8 @@ export const POLL_INTERVAL_MS = 5 * MS_PER_MINUTE;
  * site description, on the API page and on Why Deckwatch. A backend test
  * (tests/test_ingest.py) fails if the two disagree. */
 export const NEWS_SOURCE_COUNT = 21;
+
+/** Where privacy requests, corrections and takedowns go. Published on the
+ * Privacy and Terms pages, the API page and every incident's "Report a
+ * problem" link, so it changes here or nowhere. */
+export const CONTACT_EMAIL = "lukip2019@gmail.com";
