@@ -138,6 +138,14 @@ function localList(): ReportSummary[] {
     .sort((a, b) => b.month.localeCompare(a.month));
 }
 
+// A hand-reviewed report bundled with the app beats one the backend built
+// without review (e.g. October 2026, whose scheduled run fell back to the
+// automatic method), so a reviewed issue shows as soon as it is deployed,
+// before anyone imports it.
+function bundledWins(bundled: { method: string } | undefined, backend: { method: string }): boolean {
+  return bundled?.method === "editorial" && backend.method !== "editorial";
+}
+
 export async function listMonthlyReports(): Promise<ReportSummary[]> {
   if (!FROM_BACKEND) return localList();
   try {
@@ -149,7 +157,9 @@ export async function listMonthlyReports(): Promise<ReportSummary[]> {
     // A bundled report the backend doesn't have yet (e.g. before the first
     // import) still gets listed.
     const byMonth = new Map(localList().map((s) => [s.month, s]));
-    for (const s of body.results) byMonth.set(s.month, s);
+    for (const s of body.results) {
+      if (!bundledWins(byMonth.get(s.month), s)) byMonth.set(s.month, s);
+    }
     return [...byMonth.values()].sort((a, b) => b.month.localeCompare(a.month));
   } catch (err) {
     console.error("listMonthlyReports: backend fetch failed, using bundled reports", err);
@@ -165,7 +175,8 @@ export async function getMonthlyReport(month: string): Promise<MonthlyReport | n
       next: { revalidate: REPORT_REVALIDATE_S },
     });
     if (!res.ok) return LOCAL_REPORTS[month] ?? null;
-    return (await res.json()) as MonthlyReport;
+    const report = (await res.json()) as MonthlyReport;
+    return bundledWins(LOCAL_REPORTS[month], report) ? LOCAL_REPORTS[month] : report;
   } catch (err) {
     console.error(`getMonthlyReport(${month}): backend fetch failed`, err);
     return LOCAL_REPORTS[month] ?? null;
