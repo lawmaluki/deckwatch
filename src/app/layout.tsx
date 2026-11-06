@@ -24,9 +24,12 @@ const geistMono = Geist_Mono({
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://deckwatch.vercel.app";
-// Server-only: the tag is rendered into the HTML here, so the browser never
-// needs the value and it does not belong in the NEXT_PUBLIC_ namespace.
-const GOOGLE_VERIFICATION = process.env.GOOGLE_SITE_VERIFICATION;
+// Public by design, like the measurement ID above: Google reads it out of
+// this page's source, so it lives here rather than in an env var that would
+// have to be set on Vercel before verification could succeed. The env var
+// still wins, for a second property or a custom domain later.
+const GOOGLE_VERIFICATION =
+  process.env.GOOGLE_SITE_VERIFICATION ?? "KHhkLC-KphbLCdRSUvGqWA-p2lBM7_CKZ_hzE89v0l4";
 const TITLE = "Deckwatch Kenya — Public Safety Intelligence";
 const DESCRIPTION =
   `Live public safety and incident intelligence for Kenya. Incident map, Route Watch, verification scoring and county risk, from ${NEWS_SOURCE_COUNT} Kenyan news and official sources.`;
