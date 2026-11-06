@@ -24,6 +24,9 @@ const geistMono = Geist_Mono({
 });
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://deckwatch.vercel.app";
+// Server-only: the tag is rendered into the HTML here, so the browser never
+// needs the value and it does not belong in the NEXT_PUBLIC_ namespace.
+const GOOGLE_VERIFICATION = process.env.GOOGLE_SITE_VERIFICATION;
 const TITLE = "Deckwatch Kenya — Public Safety Intelligence";
 const DESCRIPTION =
   `Live public safety and incident intelligence for Kenya. Incident map, Route Watch, verification scoring and county risk, from ${NEWS_SOURCE_COUNT} Kenyan news and official sources.`;
@@ -54,6 +57,15 @@ export const metadata: Metadata = {
   // falls back to og:image for the picture.
   twitter: { card: "summary_large_image" },
   robots: { index: true, follow: true },
+  // Proves ownership to Google Search Console, which is the only way to see
+  // what Google has actually indexed, submit the sitemap and read crawl
+  // errors. Set GOOGLE_SITE_VERIFICATION to the token Search Console gives
+  // you; until then the tag is simply absent, which costs nothing.
+  //
+  // A *.vercel.app subdomain can't be verified by DNS — that record belongs
+  // to Vercel — so the meta tag is the route, and a URL-prefix property is
+  // the kind to create.
+  ...(GOOGLE_VERIFICATION ? { verification: { google: GOOGLE_VERIFICATION } } : {}),
 };
 
 export const viewport: Viewport = {
