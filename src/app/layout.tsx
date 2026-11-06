@@ -28,8 +28,20 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://deckwatch.vercel.a
 // this page's source, so it lives here rather than in an env var that would
 // have to be set on Vercel before verification could succeed. The env var
 // still wins, for a second property or a custom domain later.
-const GOOGLE_VERIFICATION =
-  process.env.GOOGLE_SITE_VERIFICATION ?? "KHhkLC-KphbLCdRSUvGqWA-p2lBM7_CKZ_hzE89v0l4";
+const GOOGLE_VERIFICATION = verificationToken(
+  process.env.GOOGLE_SITE_VERIFICATION ?? "KHhkLC-KphbLCdRSUvGqWA-p2lBM7_CKZ_hzE89v0l4"
+);
+
+/** The token out of whatever was pasted.
+ *
+ * Search Console shows the whole `<meta ... content="TOKEN" />`, so that is
+ * what gets copied — and Next escapes it into the content attribute of the
+ * tag it builds, nesting the tag inside itself. Google then reads a token
+ * that is a tag and verification fails, which is what happened here. Taking
+ * the inner value costs nothing when a bare token was pasted. */
+function verificationToken(value: string): string {
+  return value.match(/content=["']([^"']+)["']/)?.[1] ?? value.trim();
+}
 const TITLE = "Deckwatch Kenya — Public Safety Intelligence";
 const DESCRIPTION =
   `Live public safety and incident intelligence for Kenya. Incident map, Route Watch, verification scoring and county risk, from ${NEWS_SOURCE_COUNT} Kenyan news and official sources.`;
