@@ -9,8 +9,9 @@ export const POLICIES_UPDATED = "5 November 2026";
 export const CORRECTION_RESPONSE_HOURS = 72;
 
 /** A mailto link that arrives with the incident already identified, so a
- * report needs no back-and-forth to find what it is about. Incidents have no
- * page of their own, so it points at the incident's public API record. */
+ * report needs no back-and-forth to find what it is about. It points at the
+ * public API record rather than the incident's shared page: the record is the
+ * raw data the takedown acts on, unchanged by how the page presents it. */
 export function reportProblemHref(incident: { id: string; title: string }): string {
   const subject = `Problem with incident ${incident.id}`;
   const body = [

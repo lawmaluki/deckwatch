@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { MapView } from "@/components/map/MapView";
 import { MapLegend } from "@/components/map/MapLegend";
 import { TimelineControl, TimelineToggle } from "@/components/map/TimelineControl";
@@ -10,8 +11,10 @@ import { IncidentDetailPanel } from "@/components/incidents/IncidentDetailPanel"
 import { useFilteredIncidents } from "@/hooks/useFilteredIncidents";
 import { useAppStore } from "@/store/useAppStore";
 import { useUiStore } from "@/store/useUiStore";
+import type { Incident } from "@/lib/types";
 
-export function MapExperience() {
+/** `initialIncident` is set on a shared incident's page: the map opens on it. */
+export function MapExperience({ initialIncident = null }: { initialIncident?: Incident | null } = {}) {
   const incidents = useFilteredIncidents();
   const countyFilter = useAppStore((s) => s.countyFilter);
   const setCountyFilter = useAppStore((s) => s.setCountyFilter);
@@ -19,6 +22,14 @@ export function MapExperience() {
   const setTodayMode = useAppStore((s) => s.setTodayMode);
   const intelFeedOpen = useUiStore((s) => s.intelFeedOpen);
   const setIntelFeedOpen = useUiStore((s) => s.setIntelFeedOpen);
+  const selectIncident = useAppStore((s) => s.selectIncident);
+  const initialId = initialIncident?.id ?? null;
+
+  // Once per link opened, not on every render: after this the reader is free
+  // to close the panel or move on to another incident.
+  useEffect(() => {
+    if (initialId) selectIncident(initialId);
+  }, [initialId, selectIncident]);
 
   return (
     <div className="relative h-full w-full">
@@ -79,7 +90,7 @@ export function MapExperience() {
         <TimelineControl />
       </div>
 
-      <IncidentDetailPanel />
+      <IncidentDetailPanel fallback={initialIncident} />
     </div>
   );
 }

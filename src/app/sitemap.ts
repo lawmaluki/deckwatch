@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 import { COUNTIES } from "@/lib/data/counties";
 import { listMonthlyReports } from "@/lib/monthly-reports";
+import { getIncidents } from "@/lib/incidents-source";
+import { incidentShareUrl } from "@/lib/share";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://deckwatch.vercel.app";
 
@@ -31,6 +33,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // build never drops the months it already ships with.
   const reports = await listMonthlyReports();
 
+  // The live set only: an incident that has aged out still has a working
+  // page, but nothing new to say, so it is left for crawlers to keep or drop.
+  // An unreachable backend yields none here rather than failing the sitemap.
+  const incidents = await getIncidents();
+
   return [
     ...pages,
     ...COUNTIES.map((c) => ({
@@ -45,6 +52,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(r.generatedAt),
       changeFrequency: "monthly" as const,
       priority: 0.6,
+    })),
+    ...incidents.map((i) => ({
+      url: incidentShareUrl(i.id, SITE_URL),
+      lastModified: new Date(i.reportedAt),
+      changeFrequency: "daily" as const,
+      priority: 0.5,
     })),
   ].map((entry) => ({ lastModified: now, ...entry }));
 }
