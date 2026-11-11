@@ -22,6 +22,8 @@ import { CategoryBadge } from "@/components/incidents/CategoryBadge";
 import { SeverityBadge } from "@/components/incidents/SeverityBadge";
 import { VerificationBadge } from "@/components/incidents/VerificationBadge";
 import { IncidentListItem } from "@/components/incidents/IncidentListItem";
+import { ShareIncidentButton } from "@/components/incidents/ShareIncidentButton";
+import type { Incident } from "@/lib/types";
 import { useIncidentDetail } from "@/hooks/useIncidentDetail";
 import { formatDateTime, relativeTime, stripHtml } from "@/lib/format";
 import { findSimilarIncidents } from "@/lib/geo";
@@ -41,12 +43,17 @@ const SOURCE_TYPE_LABEL: Record<string, string> = {
 // corroboration is real; the rest stay one tap away.
 const SOURCES_SHOWN = 3;
 
-export function IncidentDetailPanel() {
+/** `fallback` is the incident a shared link opened, read on the server. It
+ * stands in when that incident is no longer in the live list the map polls —
+ * links are opened days after they are sent. */
+export function IncidentDetailPanel({ fallback = null }: { fallback?: Incident | null }) {
   const selectedId = useAppStore((s) => s.selectedIncidentId);
   const selectIncident = useAppStore((s) => s.selectIncident);
   const intelFeedOpen = useUiStore((s) => s.intelFeedOpen);
   const { incidents } = useIncidents();
-  const listed = incidents.find((i) => i.id === selectedId) ?? null;
+  const listed =
+    incidents.find((i) => i.id === selectedId) ??
+    (fallback && fallback.id === selectedId ? fallback : null);
   // The list omits aiSummary/recommendedActions to stay small, so they are
   // fetched for the one incident actually opened. Mock data carries them
   // inline, and then this never fires.
@@ -99,12 +106,16 @@ export function IncidentDetailPanel() {
                 </span>
               )}
             </div>
-            <button
-              onClick={() => selectIncident(null)}
-              className="shrink-0 rounded-md p-1 text-muted hover:text-foreground"
-            >
-              <X className="h-4 w-4" />
-            </button>
+            <div className="flex shrink-0 items-center gap-1">
+              <ShareIncidentButton incident={incident} />
+              <button
+                onClick={() => selectIncident(null)}
+                aria-label="Close"
+                className="shrink-0 rounded-md p-1 text-muted hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
           <h2 className="mb-2 text-base font-semibold leading-snug text-foreground">
